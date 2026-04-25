@@ -116,7 +116,7 @@ return [
         'mongodb' => [
             'driver' => 'mongodb',
             'dsn' => env('MONGODB_URI', 'mongodb://localhost:27017'),
-            'database' => env('MONGODB_DATABASE', 'flashtech_project'),
+            'database' => env('MONGODB_DATABASE', 'flashtech_product'),
         ],
 
     ],
