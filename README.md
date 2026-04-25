@@ -32,8 +32,8 @@
 ## 🛠️ Công nghệ sử dụng
 | Lớp (Layer) | Công nghệ cốt lõi | Chi tiết & Mục đích |
 |-------------|--------------------|---------------------|
-| **Backend** | Laravel 11 | API & Logic cốt lõi của hệ thống |
-| **Frontend**| React 18 + Inertia | Client-side rendering, SPA routing không cần reload |
+| **Backend** | Laravel 13 | API & Logic cốt lõi của hệ thống |
+| **Frontend**| React 19 + Inertia | Client-side rendering, SPA routing không cần reload |
 | **Admin**   | Filament V5 | Xây dựng Dashboard quản trị nhanh chóng (TALL stack framework) |
 | **Auth**    | Laravel Breeze | Xác thực người dùng cơ bản (Login, Register) |
 | **DB 1**    | MySQL | Quản lý quan hệ dữ liệu khắt khe: Users, Roles, Auth, Orders |
