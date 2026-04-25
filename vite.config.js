@@ -10,4 +10,11 @@ export default defineConfig({
         }),
         react(),
     ],
+
+    // Tối ưu dev mode
+    server: {
+        watch: {
+            ignored: ['**/node_modules/**', '**/.git/**'],
+        },
+    },
 });
