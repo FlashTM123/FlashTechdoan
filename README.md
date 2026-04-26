@@ -63,7 +63,7 @@ Chịu trách nhiệm cho dữ liệu sản phẩm linh hoạt, không đồng n
 ## 🚀 Tiến độ Dự án
 
 ### ✅ Các module đã hoàn thiện
-- [x] **Core System**: Khởi tạo Laravel 11, thiết lập kiến trúc cơ bản.
+- [x] **Core System**: Khởi tạo Laravel 13, thiết lập kiến trúc cơ bản.
 - [x] **Database Setup**: Tích hợp và cấu hình thành công MySQL & MongoDB.
 - [x] **Frontend Foundation**: Tích hợp Laravel Breeze với React + Inertia. Build thành công Vite cho môi trường production.
 - [x] **Admin Framework**: Cài đặt Filament V5, tối ưu giao diện Admin Panel.
