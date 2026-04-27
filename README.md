@@ -36,8 +36,8 @@
 | **Frontend**| [React 19](https://react.dev) + [Inertia](https://inertiajs.com) | Client-side rendering, SPA routing không cần reload |
 | **Admin**   | [Filament V5](https://filamentphp.com) | Xây dựng Dashboard quản trị nhanh chóng (TALL stack framework) |
 | **Auth**    | [Laravel Breeze](https://laravel.com/docs/starter-kits#laravel-breeze) | Xác thực người dùng cơ bản (Login, Register) |
-| **DB 1**    | [MySQL](https://www.mysql.com) | Quản lý quan hệ dữ liệu khắt khe: Users, Roles, Auth, Orders |
-| **DB 2**    | [MongoDB](https://www.mongodb.com) | Quản lý cấu trúc dữ liệu linh hoạt: Products, Specs, Categories |
+| **DB 1**    | [MySQL](https://www.mysql.com) | Quản lý quan hệ dữ liệu khắt khe: Users, Products, Variants, Orders |
+| **DB 2**    | [MongoDB](https://www.mongodb.com) | Quản lý cấu trúc dữ liệu mở rộng: Dynamic Specs, Logs, Reviews |
 | **Build**   | [Vite](https://vitejs.dev) | Trình đóng gói module siêu tốc cho Frontend |
 
 ---
@@ -46,17 +46,15 @@
 Hệ thống sử dụng đồng thời 2 hệ quản trị cơ sở dữ liệu để tận dụng tối đa thế mạnh của từng loại:
 
 ### 1. Relational DB (MySQL)
-Chịu trách nhiệm cho dữ liệu cần tính nhất quán (ACID) cao:
+Chịu trách nhiệm cho dữ liệu cần tính nhất quán (ACID) cao, xử lý tính toán cấu hình sản phẩm:
 - Bảng `users` (Thông tin nhân viên nội bộ)
-- Bảng `customers` (Thông tin khách hàng mua hàng - Tách biệt hoàn toàn)
-- Quản lý phân quyền (Roles/Permissions)
-- Quản lý phiên làm việc (`sessions` & `customer_sessions`)
+- Bảng `customers` (Thông tin khách hàng mua hàng)
+- Bảng `products` (Thông tin sản phẩm chính)
+- Bảng `product_variants` (Cấu hình chi tiết của từng biến thể máy như CPU/RAM/SSD/Giá/Màu sắc/Mã SKU)
+- Bảng `categories` & `brands` (Danh mục và thương hiệu liên kết)
 
 ### 2. NoSQL DB (MongoDB)
-Chịu trách nhiệm cho dữ liệu sản phẩm linh hoạt, không đồng nhất:
-- `products` collection (Thông tin sản phẩm)
-- Thông số kỹ thuật động (Dynamic Specifications)
-- Danh mục sản phẩm đa cấp (Hierarchical Categories)
+Chịu trách nhiệm lưu trữ các thông tin động linh hoạt (Bảo lưu kiến trúc sẵn sàng mở rộng cho Reviews, Logs, Hành vi khách hàng).
 
 ---
 
@@ -72,17 +70,18 @@ Chịu trách nhiệm cho dữ liệu sản phẩm linh hoạt, không đồng n
   - Thiết kế bảng `customers` (MySQL) độc lập với bảng `users`.
   - Cấu hình **CustomerResource** theo chuẩn Filament V5.
   - Thiết lập nghiệp vụ thực tế: Chặn Admin tạo mới khách hàng; các trường thông tin cá nhân ở chế độ **Read-only**; Admin chỉ được phép **Đổi trạng thái (is_active)** và **Xóa**.
-  - Tạo Seeder đổ dữ liệu mẫu 5 khách hàng thành công.
 - [x] **Authentication Security (Multi-auth)**:
   - Phân tách Authentication Guards (`web` & `customer`) và User Providers tương ứng trong `config/auth.php`.
   - Cấu hình hệ thống lưu trữ Session riêng biệt cho khách hàng (`customer_sessions`) tránh xung đột ID.
-- [x] **Brand Management**:
-  - Thiết kế bảng `brands` (MySQL).
-  - Tích hợp tính năng sinh Real-time Slug tự động khi gõ Tên thương hiệu.
-  - CRUD Thương hiệu mượt mà trên Modal.
+- [x] **Brand & Category Management**:
+  - Thiết kế bảng `brands` & `categories` (MySQL).
+  - Tích hợp tính năng sinh Real-time Slug tự động khi gõ Tên thương hiệu/Danh mục.
+- [x] **Product & Variant Management**:
+  - Cấu hình quản lý sản phẩm thông minh dạng Tabs.
+  - Hỗ trợ lưu trữ không giới hạn biến thể kèm thuộc tính riêng biệt (CPU, GPU, RAM, Ổ cứng, Giá gốc, Giá bán, Tồn kho, SKU...).
+  - Tích hợp Validation Closure đếm từ thông minh hỗ trợ Unicode tiếng Việt cho mô tả sản phẩm.
 
 ### 🚧 Lộ trình tiếp theo (Roadmap)
-- [ ] **Sản phẩm (Product Management)**: Xây dựng CRUD cho Products & Categories (MongoDB).
 - [ ] **Khách hàng (Storefront)**: Giao diện hiển thị sản phẩm trên React.
 - [ ] **Giỏ hàng & Đơn hàng**: Tích hợp luồng giỏ hàng và thanh toán.
 
@@ -125,9 +124,7 @@ MONGODB_DATABASE=flashtech_project
 ### 4. Khởi chạy
 ```bash
 # Terminal 1: Chạy migrate dữ liệu và Seeder
-php artisan migrate:fresh
-php artisan db:seed --class=UserSeeder
-php artisan db:seed --class=CustomerSeeder
+php artisan migrate:fresh --seed
 
 # Terminal 1: Khởi động Server PHP
 php artisan serve
