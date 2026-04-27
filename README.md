@@ -50,7 +50,7 @@ Chịu trách nhiệm cho dữ liệu cần tính nhất quán (ACID) cao:
 - Bảng `users` (Thông tin nhân viên nội bộ)
 - Bảng `customers` (Thông tin khách hàng mua hàng - Tách biệt hoàn toàn)
 - Quản lý phân quyền (Roles/Permissions)
-- Quản lý phiên làm việc (Sessions)
+- Quản lý phiên làm việc (`sessions` & `customer_sessions`)
 
 ### 2. NoSQL DB (MongoDB)
 Chịu trách nhiệm cho dữ liệu sản phẩm linh hoạt, không đồng nhất:
@@ -73,6 +73,13 @@ Chịu trách nhiệm cho dữ liệu sản phẩm linh hoạt, không đồng n
   - Cấu hình **CustomerResource** theo chuẩn Filament V5.
   - Thiết lập nghiệp vụ thực tế: Chặn Admin tạo mới khách hàng; các trường thông tin cá nhân ở chế độ **Read-only**; Admin chỉ được phép **Đổi trạng thái (is_active)** và **Xóa**.
   - Tạo Seeder đổ dữ liệu mẫu 5 khách hàng thành công.
+- [x] **Authentication Security (Multi-auth)**:
+  - Phân tách Authentication Guards (`web` & `customer`) và User Providers tương ứng trong `config/auth.php`.
+  - Cấu hình hệ thống lưu trữ Session riêng biệt cho khách hàng (`customer_sessions`) tránh xung đột ID.
+- [x] **Brand Management**:
+  - Thiết kế bảng `brands` (MySQL).
+  - Tích hợp tính năng sinh Real-time Slug tự động khi gõ Tên thương hiệu.
+  - CRUD Thương hiệu mượt mà trên Modal.
 
 ### 🚧 Lộ trình tiếp theo (Roadmap)
 - [ ] **Sản phẩm (Product Management)**: Xây dựng CRUD cho Products & Categories (MongoDB).
