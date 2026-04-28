@@ -28,6 +28,8 @@ class ProductResource extends Resource
     protected static ?string $model = Product::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-computer-desktop';
     protected static ?string $navigationLabel = 'Sản phẩm';
+    protected static \UnitEnum|string|null $navigationGroup = 'Quản lý sản phẩm';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
     {
@@ -73,7 +75,7 @@ class ProductResource extends Resource
                                             $cleanText = strip_tags($value);
                                             // Đếm từ hỗ trợ tiếng Việt chuẩn xác
                                             $wordCount = count(preg_split('/\s+/u', trim($cleanText), -1, PREG_SPLIT_NO_EMPTY));
-                                            
+
                                             if ($wordCount > 1000) {
                                                 $fail("Mô tả không được vượt quá 1000 từ (Hiện tại đang có: {$wordCount} từ).");
                                             }
@@ -129,7 +131,7 @@ class ProductResource extends Resource
 
                 Tables\Columns\TextColumn::make('brand.name')
                     ->label('Thương hiệu'),
-                
+
                 Tables\Columns\TextColumn::make('variants_price')
                     ->label('Giá bán')
                     ->state(function ($record) {

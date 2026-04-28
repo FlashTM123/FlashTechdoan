@@ -19,8 +19,11 @@ class DatabaseSeeder extends Seeder
 
         // Gọi các Seeder còn lại
         $this->call([
+            CustomerSeeder::class,
             CategorySeeder::class,
             ProductSeeder::class,
+            UserSeeder::class,
+            ReviewSeeder::class, // Phải đưa xuống cuối cùng để có Product và Customer lấy dữ liệu
         ]);
     }
 }

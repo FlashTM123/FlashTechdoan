@@ -17,6 +17,8 @@ class UserResource extends Resource
     protected static ?string $navigationLabel = 'Quản lý nhân viên';
     protected static ?string $modelLabel = 'Nhân viên';
     protected static ?string $pluralModelLabel = 'Danh sách nhân viên';
+    protected static \UnitEnum|string|null $navigationGroup = 'Hệ thống';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

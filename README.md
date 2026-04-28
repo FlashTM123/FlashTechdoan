@@ -80,6 +80,12 @@ Chịu trách nhiệm lưu trữ các thông tin động linh hoạt (Bảo lưu
   - Cấu hình quản lý sản phẩm thông minh dạng Tabs.
   - Hỗ trợ lưu trữ không giới hạn biến thể kèm thuộc tính riêng biệt (CPU, GPU, RAM, Ổ cứng, Giá gốc, Giá bán, Tồn kho, SKU...).
   - Tích hợp Validation Closure đếm từ thông minh hỗ trợ Unicode tiếng Việt cho mô tả sản phẩm.
+- [x] **Review & Feedback Management**:
+  - Quản lý các đánh giá sản phẩm (Duyệt/Ẩn nhanh bằng Toggle).
+  - Tích hợp sẵn dữ liệu Seeder mẫu chuẩn chỉnh.
+- [x] **UX/UI & Dashboard Optimization**:
+  - Sắp xếp nhóm Menu (`Quản lý sản phẩm`, `Kinh doanh`, `Hệ thống`).
+  - Thiết kế Widget phân tích tự động: Biểu đồ cơ cấu hàng, Bảng dữ liệu nhanh và Thống kê tổng quan tự động reload sau 30 giây.
 
 ### 🚧 Lộ trình tiếp theo (Roadmap)
 - [ ] **Khách hàng (Storefront)**: Giao diện hiển thị sản phẩm trên React.

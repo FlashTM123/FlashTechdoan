@@ -18,11 +18,20 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Widgets\StatsOverview;
+use App\Filament\Widgets\ProductByCategoryChart;
+use App\Filament\Widgets\LatestProducts;
+use App\Filament\Widgets\PendingReview;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        \Filament\Support\Facades\FilamentView::registerRenderHook(
+            'panels::body.end',
+            fn (): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('<style>.fi-sidebar-footer { display: none !important; }</style>'),
+        );
+
         return $panel
             ->default()
             ->id('admin')
@@ -39,7 +48,6 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
-                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -54,6 +62,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->widgets([
+            StatsOverview::class,
+            ProductByCategoryChart::class,
+            LatestProducts::class,
+            PendingReview::class,
+        ]);
     }
 }

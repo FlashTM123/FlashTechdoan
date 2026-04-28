@@ -16,6 +16,11 @@ class CustomerResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
 
+    protected static \UnitEnum|string|null $navigationGroup = 'Kinh doanh';
+    protected static ?int $navigationSort = 1;
+    
+
+
     protected static ?string $navigationLabel = 'Khách hàng';
 
     protected static ?string $modelLabel = 'Khách hàng';

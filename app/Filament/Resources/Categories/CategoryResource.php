@@ -15,9 +15,14 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static \UnitEnum|string|null $navigationGroup = 'Quản lý sản phẩm';
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $navigationLabel = 'Danh mục sản phẩm';
+
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
+
 
     public static function form(Schema $schema): Schema
     {

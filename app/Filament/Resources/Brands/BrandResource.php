@@ -14,8 +14,11 @@ use Illuminate\Support\Str;
 class BrandResource extends Resource
 {
     protected static ?string $model = Brand::class;
+    protected static \UnitEnum|string|null $navigationGroup = 'Quản lý sản phẩm';
+    protected static ?int $navigationSort = 2;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-bookmark-square';
     protected static ?string $navigationLabel = 'Thương hiệu';
+    
 
     public static function form(Schema $schema): Schema
     {
