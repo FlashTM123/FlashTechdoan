@@ -31,8 +31,24 @@ class AdminPanelProvider extends PanelProvider
             'panels::body.end',
             fn (): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('
                 <style>
-                    body { background-color: #f3f4f6 !important; }
-                    .fi-section { border-radius: 1rem !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important; border: none !important; }
+                    /* Chỉ áp dụng nền xám sáng khi KHÔNG phải dark mode */
+                    html:not(.dark) .fi-main, 
+                    html:not(.dark) .fi-sidebar { 
+                        background-color: #f3f4f6 !important; 
+                    }
+                    
+                    /* Tinh chỉnh bo góc và bóng cho Section */
+                    .fi-section { 
+                        border-radius: 1.25rem !important; 
+                        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important; 
+                        border: 1px solid rgb(0 0 0 / 0.05) !important;
+                    }
+
+                    .dark .fi-section {
+                        border: 1px solid rgb(255 255 255 / 0.1) !important;
+                        background-color: rgb(24 24 27) !important;
+                    }
+
                     .fi-sidebar-footer { display: none !important; }
                 </style>
             '),

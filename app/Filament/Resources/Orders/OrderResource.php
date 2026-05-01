@@ -223,111 +223,138 @@ class OrderResource extends Resource
     {
         return $schema
             ->components([
-                Grid::make(3)
+                // HEADER: Mã đơn + trạng thái
+                Section::make()
                     ->schema([
-                        // CỘT CHÍNH (2/3)
-                        Group::make()
+                        Flex::make([
+                            Group::make([
+                                Text::make(fn ($record) => '#' . ($record->order_code ?? $record->id))
+                                    ->weight('bold')
+                                    ->size('xl'),
+                                Text::make(fn ($record) => $record->created_at?->format('d/m/Y H:i'))
+                                    ->color('gray')
+                                    ->size('sm'),
+                            ])->grow(),
+                            Text::make(fn ($record) => match($record->status ?? 'pending') {
+                                'pending'    => 'Chờ xử lý',
+                                'processing' => 'Đang xử lý',
+                                'shipped'    => 'Đang giao',
+                                'delivered'  => 'Đã giao',
+                                'cancelled'  => 'Đã hủy',
+                                default      => ucfirst($record->status ?? 'pending'),
+                            })
+                                ->badge()
+                                ->color(fn ($record): string => match($record->status ?? 'pending') {
+                                    'pending'    => 'warning',
+                                    'processing' => 'info',
+                                    'shipped'    => 'primary',
+                                    'delivered'  => 'success',
+                                    'cancelled'  => 'danger',
+                                    default      => 'gray',
+                                })
+                                ->grow(false),
+                        ])->alignCenter(),
+                    ]),
+
+                // MẶT HÀNG ĐÃ ĐẶT
+                Section::make('Mặt hàng đã đặt')
+                    ->icon('heroicon-o-shopping-bag')
+                    ->schema(fn ($record) => $record->items->map(fn ($item) =>
+                        Flex::make([
+                            Image::make(
+                                fn () => (str_starts_with($item->product?->thumbnail_url ?? '', 'http'))
+                                    ? $item->product->thumbnail_url
+                                    : asset('storage/' . ($item->product?->thumbnail_url ?? 'placeholder.png')),
+                                'Product Image'
+                            )
+                                ->extraAttributes(['class' => 'rounded-lg object-cover'])
+                                ->imageSize(56)
+                                ->grow(false),
+                            Group::make([
+                                Text::make($item->product?->name ?? 'Sản phẩm không tồn tại')
+                                    ->weight('semibold'),
+                                Text::make($item->variant?->sku ?? 'N/A')
+                                    ->color('gray')
+                                    ->size('sm'),
+                            ])->grow()->gap(0),
+                            Group::make([
+                                Text::make(number_format($item->unit_price, 0, ',', '.') . ' ₫')
+                                    ->weight('bold')
+                                    ->color('primary'),
+                                Text::make('x' . $item->quantity)
+                                    ->size('sm')
+                                    ->color('gray'),
+                            ])->grow(false)->gap(0),
+                        ])->alignCenter()->extraAttributes(['class' => 'py-3 border-b last:border-0 gap-4'])
+                    )->toArray()),
+
+                // TÓM TẮT TÀI CHÍNH
+                Section::make('Tóm tắt tài chính')
+                    ->icon('heroicon-o-credit-card')
+                    ->schema([
+                        Flex::make([
+                            Text::make('Tạm tính')->color('gray'),
+                            Text::make(fn ($record) => number_format($record->total_amount, 0, ',', '.') . ' ₫'),
+                        ])->alignBetween(),
+
+                        Flex::make([
+                            Text::make('Phí vận chuyển')->color('gray'),
+                            Text::make('Miễn phí')->color('success')->weight('medium'),
+                        ])->alignBetween(),
+
+                        Flex::make([
+                            Text::make('Tổng cộng')->weight('bold'),
+                            Text::make(fn ($record) => number_format($record->total_amount, 0, ',', '.') . ' ₫')
+                                ->weight('bold')
+                                ->color('primary'),
+                        ])->alignBetween()->extraAttributes(['class' => 'border-t pt-3 mt-1']),
+
+                        Flex::make([
+                            Text::make('Thanh toán')->color('gray'),
+                            Text::make(fn ($record) => match(strtolower($record->payment_status ?? 'pending')) {
+                                'paid'    => 'Đã thanh toán',
+                                'pending' => 'Chờ thanh toán',
+                                'failed'  => 'Thất bại',
+                                default   => strtoupper($record->payment_status ?? 'PENDING'),
+                            })
+                                ->badge()
+                                ->color(fn ($record): string => match(strtolower($record->payment_status ?? 'pending')) {
+                                    'paid'    => 'success',
+                                    'pending' => 'warning',
+                                    'failed'  => 'danger',
+                                    default   => 'gray',
+                                }),
+                        ])->alignBetween()->extraAttributes(['class' => 'mt-2']),
+                    ]),
+
+                // KHÁCH HÀNG + ĐỊA CHỈ
+                Grid::make(2)
+                    ->schema([
+                        Section::make('Khách hàng')
+                            ->icon('heroicon-o-user')
                             ->schema([
-                                Section::make('Mặt hàng đã đặt')
-                                    ->icon('heroicon-o-shopping-bag')
-                                    ->schema(fn ($record) => $record->items->map(fn ($item) => 
-                                        Flex::make([
-                                            Image::make(
-                                                fn () => (str_starts_with($item->product?->thumbnail_url ?? '', 'http')) 
-                                                    ? $item->product->thumbnail_url 
-                                                    : asset('storage/' . ($item->product?->thumbnail_url ?? 'placeholder.png')),
-                                                'Product Image'
-                                            )
-                                                ->extraAttributes(['class' => 'rounded-lg border'])
-                                                ->imageSize(64)
-                                                ->grow(false),
-                                            Group::make([
-                                                Text::make($item->product?->name ?? 'Sản phẩm không tồn tại')
-                                                    ->weight('bold')
-                                                    ->size('lg'),
-                                                Text::make($item->variant?->sku ?? 'N/A')
-                                                    ->color('gray')
-                                                    ->size('sm'),
-                                            ])->grow()->gap(1),
-                                            Group::make([
-                                                Text::make(number_format($item->unit_price, 0, ',', '.') . ' VNĐ')
-                                                    ->weight('bold')
-                                                    ->extraAttributes(['class' => 'text-right']),
-                                                Text::make('x' . $item->quantity)
-                                                    ->size('sm')
-                                                    ->extraAttributes(['class' => 'text-right text-gray-500']),
-                                            ])->grow(false)->gap(1),
-                                        ])->alignCenter()->extraAttributes(['class' => 'py-4 border-b last:border-0'])
-                                    )->toArray()),
+                                Text::make(fn ($record) => $record->customer?->name ?? 'Khách vãng lai')
+                                    ->weight('semibold'),
+                                Text::make(fn ($record) => $record->customer?->email ?? '—')
+                                    ->color('gray')
+                                    ->size('sm'),
+                            ]),
 
-                                Section::make('Tóm tắt tài chính')
-                                    ->icon('heroicon-o-credit-card')
-                                    ->schema([
-                                        Flex::make([
-                                            Text::make('Tạm tính'),
-                                            Text::make(fn ($record) => number_format($record->total_amount, 0, ',', '.') . ' VNĐ'),
-                                        ])->alignBetween(),
-
-                                        Flex::make([
-                                            Text::make('Phí vận chuyển'),
-                                            Text::make('Miễn phí')->color('success'),
-                                        ])->alignBetween(),
-
-                                        Flex::make([
-                                            Text::make('Tổng cộng')
-                                                ->weight('bold')
-                                                ->size('xl'),
-                                            Text::make(fn ($record) => number_format($record->total_amount, 0, ',', '.') . ' VNĐ')
-                                                ->weight('bold')
-                                                ->size('xl')
-                                                ->color('primary'),
-                                        ])->alignBetween()
-                                          ->extraAttributes(['class' => 'border-t pt-4 mt-4']),
-                                        
-                                        Flex::make([
-                                            Text::make('Trạng thái thanh toán'),
-                                            Text::make(fn ($record) => strtoupper($record->payment_status ?? 'PENDING'))
-                                                ->badge()
-                                                ->color(fn ($record): string => match (strtolower($record->payment_status ?? 'pending')) {
-                                                    'paid' => 'success',
-                                                    'pending' => 'warning',
-                                                    'failed' => 'danger',
-                                                    default => 'gray',
-                                                }),
-                                        ])->alignBetween()->extraAttributes(['class' => 'mt-4']),
-                                    ]),
-                            ])
-                            ->columnSpan(2),
-
-                        // CỘT PHỤ (1/3)
-                        Group::make()
+                        Section::make('Địa chỉ nhận hàng')
+                            ->icon('heroicon-o-map-pin')
                             ->schema([
-                                Section::make('Khách hàng')
-                                    ->icon('heroicon-o-user')
-                                    ->schema([
-                                        Text::make(fn ($record) => $record->customer?->name ?? 'Khách vãng lai')
-                                            ->weight('bold')
-                                            ->size('lg'),
-                                        Text::make(fn ($record) => $record->customer?->email ?? 'Không có email')
-                                            ->color('gray')
-                                            ->size('sm'),
-                                    ]),
+                                Text::make(fn ($record) => $record->shipping_address ?? 'Chưa cung cấp')
+                                    ->extraAttributes(['class' => 'leading-relaxed text-sm']),
+                            ]),
+                    ]),
 
-                                Section::make('Địa chỉ nhận hàng')
-                                    ->icon('heroicon-o-map-pin')
-                                    ->schema([
-                                        Text::make(fn ($record) => $record->shipping_address ?? 'Chưa cung cấp địa chỉ')
-                                            ->extraAttributes(['class' => 'leading-relaxed']),
-                                    ]),
-
-                                Section::make('Ghi chú')
-                                    ->icon('heroicon-o-pencil-square')
-                                    ->schema([
-                                        Text::make(fn ($record) => $record->notes ?? 'Không có ghi chú nào.')
-                                            ->extraAttributes(['class' => 'italic text-gray-500']),
-                                    ]),
-                            ])
-                            ->columnSpan(1),
+                // GHI CHÚ
+                Section::make('Ghi chú')
+                    ->icon('heroicon-o-pencil-square')
+                    ->collapsed(fn ($record) => empty($record->notes))
+                    ->schema([
+                        Text::make(fn ($record) => $record->notes ?? 'Không có ghi chú nào.')
+                            ->extraAttributes(['class' => 'italic text-gray-500 text-sm']),
                     ]),
             ]);
     }
@@ -378,7 +405,9 @@ class OrderResource extends Resource
                 // Thêm bộ lọc nếu muốn
             ])
             ->actions([
-                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\ViewAction::make()
+                    ->slideOver()
+                    ->modalWidth(\Filament\Support\Enums\Width::FourExtraLarge),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -392,7 +421,6 @@ class OrderResource extends Resource
     {
         return [
             'index' => Pages\ListOrders::route('/'),
-            'view' => Pages\ViewOrder::route('/{record}'),
         ];
     }
 

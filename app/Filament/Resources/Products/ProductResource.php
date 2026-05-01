@@ -117,6 +117,102 @@ class ProductResource extends Resource
         ]);
     }
 
+    public static function infolist(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    {
+        return $schema->components([
+            // HEADER: Ảnh + Tên + Huy hiệu
+            \Filament\Schemas\Components\Section::make()
+                ->schema([
+                    \Filament\Schemas\Components\Flex::make([
+                        \Filament\Schemas\Components\Image::make(
+                            fn ($record) => (str_starts_with($record->thumbnail_url ?? '', 'http'))
+                                ? $record->thumbnail_url
+                                : asset('storage/' . ($record->thumbnail_url ?? 'placeholder.png')),
+                            'Thumbnail'
+                        )
+                            ->extraAttributes(['class' => 'rounded-xl object-cover w-20 h-20'])
+                            ->imageSize(80)
+                            ->grow(false),
+
+                        \Filament\Schemas\Components\Group::make([
+                            \Filament\Schemas\Components\Text::make(fn ($record) => $record->name)
+                                ->weight('bold')
+                                ->size('xl'),
+                            \Filament\Schemas\Components\Flex::make([
+                                \Filament\Schemas\Components\Text::make(fn ($record) => $record->brand?->name ?? '—')
+                                    ->badge()
+                                    ->color('gray'),
+                                \Filament\Schemas\Components\Text::make(fn ($record) => $record->category?->name ?? '—')
+                                    ->badge()
+                                    ->color('info'),
+                                \Filament\Schemas\Components\Text::make(fn ($record) => $record->is_featured ? 'Nổi bật' : null)
+                                    ->badge()
+                                    ->color('warning')
+                                    ->hidden(fn ($record) => !$record->is_featured),
+                                \Filament\Schemas\Components\Text::make(fn ($record) => $record->is_active ? 'Đang bán' : 'Ngừng bán')
+                                    ->badge()
+                                    ->color(fn ($record) => $record->is_active ? 'success' : 'danger'),
+                            ])->gap(2),
+                        ])->grow()->gap(1),
+                    ])->alignCenter()->extraAttributes(['class' => 'gap-4']),
+                ]),
+
+            // GIÁ BÁN (từ variants)
+            \Filament\Schemas\Components\Section::make('Giá bán')
+                ->icon('heroicon-o-currency-dollar')
+                ->schema([
+                    \Filament\Schemas\Components\Flex::make([
+                        \Filament\Schemas\Components\Group::make([
+                            \Filament\Schemas\Components\Text::make('Giá thấp nhất')->color('gray')->size('sm'),
+                            \Filament\Schemas\Components\Text::make(
+                                fn ($record) => number_format($record->variants->min('price') ?? 0, 0, ',', '.') . ' ₫'
+                            )->weight('bold')->color('primary'),
+                        ])->grow()->gap(0),
+                        \Filament\Schemas\Components\Group::make([
+                            \Filament\Schemas\Components\Text::make('Giá cao nhất')->color('gray')->size('sm'),
+                            \Filament\Schemas\Components\Text::make(
+                                fn ($record) => number_format($record->variants->max('price') ?? 0, 0, ',', '.') . ' ₫'
+                            )->weight('bold'),
+                        ])->grow()->gap(0),
+                        \Filament\Schemas\Components\Group::make([
+                            \Filament\Schemas\Components\Text::make('Tổng tồn kho')->color('gray')->size('sm'),
+                            \Filament\Schemas\Components\Text::make(
+                                fn ($record) => $record->variants->sum('stock') . ' sản phẩm'
+                            )->weight('bold')->color('success'),
+                        ])->grow()->gap(0),
+                    ])->alignBetween(),
+                ]),
+
+            // BIẾN THỂ
+            \Filament\Schemas\Components\Section::make('Biến thể sản phẩm')
+                ->icon('heroicon-o-squares-2x2')
+                ->schema(fn ($record) => $record->variants->map(fn ($v) =>
+                    \Filament\Schemas\Components\Flex::make([
+                        \Filament\Schemas\Components\Group::make([
+                            \Filament\Schemas\Components\Text::make($v->variant_name ?? '—')->weight('semibold'),
+                            \Filament\Schemas\Components\Text::make($v->sku ?? '—')->color('gray')->size('sm'),
+                        ])->grow()->gap(0),
+                        \Filament\Schemas\Components\Group::make([
+                            \Filament\Schemas\Components\Text::make(number_format($v->price, 0, ',', '.') . ' ₫')
+                                ->weight('bold')->color('primary'),
+                            \Filament\Schemas\Components\Text::make('Tồn: ' . $v->stock)
+                                ->size('sm')->color($v->stock > 0 ? 'success' : 'danger'),
+                        ])->grow(false)->gap(0),
+                    ])->alignCenter()->extraAttributes(['class' => 'py-3 border-b last:border-0 gap-3'])
+                )->toArray()),
+
+            // MÔ TẢ
+            \Filament\Schemas\Components\Section::make('Mô tả sản phẩm')
+                ->icon('heroicon-o-document-text')
+                ->collapsed()
+                ->schema([
+                    \Filament\Schemas\Components\Text::make(
+                        fn ($record) => strip_tags($record->description ?? 'Chưa có mô tả.')
+                    )->extraAttributes(['class' => 'text-sm leading-relaxed text-gray-600 dark:text-gray-400']),
+                ]),
+        ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -150,7 +246,9 @@ class ProductResource extends Resource
                     ->html(),
             ])
             ->actions([
-                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\ViewAction::make()
+                    ->slideOver()
+                    ->modalWidth(\Filament\Support\Enums\Width::FourExtraLarge),
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])
@@ -166,7 +264,6 @@ class ProductResource extends Resource
         return [
             'index' => ListProducts::route('/'),
             'create' => CreateProduct::route('/create'),
-            'view' => ViewProduct::route('/{record}'),
             'edit' => EditProduct::route('/{record}/edit'),
         ];
     }

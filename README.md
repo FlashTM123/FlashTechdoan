@@ -1,6 +1,6 @@
 <div align="center">
-  <h1>🚀 FlashTech E-Commerce System</h1>
-  <p>Hệ thống quản lý E-Commerce hiện đại phục vụ Đồ án Tốt nghiệp</p>
+  <h1>⚡ FlashTech E-Commerce System</h1>
+  <p>Hệ thống quản lý E-Commerce hiện đại phục vụ Đồ Án Tốt nghiệp</p>
 
   <!-- Badges -->
   <a href="https://laravel.com" target="_blank"><img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" /></a>
@@ -13,16 +13,16 @@
 
 ---
 
-## 📑 Mục lục
+## 📋 Mục lục
 - [Giới thiệu](#-giới-thiệu)
 - [Công nghệ sử dụng](#-công-nghệ-sử-dụng)
 - [Cấu trúc Database](#-cấu-trúc-database-dual-db-architecture)
-- [Tiến độ Dự án](#-tiến-độ-dự-án)
+- [Tiến độ Dự Án](#-tiến-độ-dự-án)
 - [Hướng dẫn Cài đặt](#-hướng-dẫn-cài-đặt)
 
 ---
 
-## 📋 Giới thiệu
+## 🌟 Giới thiệu
 **FlashTech** là nền tảng thương mại điện tử được phát triển với kiến trúc **Dual Database** tiên tiến nhằm tối ưu hóa hiệu suất và khả năng mở rộng. Dự án phân tách rõ ràng giữa:
 - **Client-side (Frontend)**: Cung cấp trải nghiệm mua sắm mượt mà với ReactJS & Inertia (SPA).
 - **Admin Panel (Backend)**: Bảng điều khiển quản trị mạnh mẽ và tốc độ cao bằng Filament V5.
@@ -31,12 +31,12 @@
 
 ## 🛠️ Công nghệ sử dụng
 | Lớp (Layer) | Công nghệ cốt lõi | Chi tiết & Mục đích |
-|-------------|--------------------|---------------------|
+|-------------|-------------------|---------------------|
 | **Backend** | [Laravel 13](https://laravel.com) | API & Logic cốt lõi của hệ thống |
 | **Frontend**| [React 19](https://react.dev) + [Inertia](https://inertiajs.com) | Client-side rendering, SPA routing không cần reload |
-| **Admin**   | [Filament V5](https://filamentphp.com) | Xây dựng Dashboard quản trị nhanh chóng (TALL stack framework) |
+| **Admin**   | [Filament V5](https://filamentphp.com) | Xây dựng Dashboard quản trị nhanh chóng (TALL stack) |
 | **Auth**    | [Laravel Breeze](https://laravel.com/docs/starter-kits#laravel-breeze) | Xác thực người dùng cơ bản (Login, Register) |
-| **DB 1**    | [MySQL](https://www.mysql.com) | Quản lý quan hệ dữ liệu khắt khe: Users, Products, Variants, Orders |
+| **DB 1**    | [MySQL](https://www.mysql.com) | Quản lý quan hệ dữ liệu khắt khe: Users, Products, Orders |
 | **DB 2**    | [MongoDB](https://www.mongodb.com) | Quản lý cấu trúc dữ liệu mở rộng: Dynamic Specs, Logs, Reviews |
 | **Build**   | [Vite](https://vitejs.dev) | Trình đóng gói module siêu tốc cho Frontend |
 
@@ -46,54 +46,82 @@
 Hệ thống sử dụng đồng thời 2 hệ quản trị cơ sở dữ liệu để tận dụng tối đa thế mạnh của từng loại:
 
 ### 1. Relational DB (MySQL)
-Chịu trách nhiệm cho dữ liệu cần tính nhất quán (ACID) cao, xử lý tính toán cấu hình sản phẩm:
+Chịu trách nhiệm cho dữ liệu cần tính nhất quán (ACID) cao:
 - Bảng `users` (Thông tin nhân viên nội bộ)
 - Bảng `customers` (Thông tin khách hàng mua hàng)
 - Bảng `products` (Thông tin sản phẩm chính)
-- Bảng `product_variants` (Cấu hình chi tiết của từng biến thể máy như CPU/RAM/SSD/Giá/Màu sắc/Mã SKU)
+- Bảng `product_variants` (Cấu hình chi tiết của từng biến thể: CPU/RAM/SSD/Giá/Màu/SKU)
 - Bảng `categories` & `brands` (Danh mục và thương hiệu liên kết)
+- Bảng `orders` & `order_items` (Đơn hàng và chi tiết mặt hàng)
 
 ### 2. NoSQL DB (MongoDB)
-Chịu trách nhiệm lưu trữ các thông tin động linh hoạt (Bảo lưu kiến trúc sẵn sàng mở rộng cho Reviews, Logs, Hành vi khách hàng).
+Chịu trách nhiệm lưu trữ các thông tin động linh hoạt:
+- Reviews (Đánh giá sản phẩm)
+- Dynamic Specifications (Thông số kỹ thuật mở rộng)
+- Activity Logs (Nhật ký hành vi)
 
 ---
 
-## 🚀 Tiến độ Dự án
+## 🚀 Tiến độ Dự Án
 
 ### ✅ Các module đã hoàn thiện
+
 - [x] **Core System**: Khởi tạo Laravel 13, thiết lập kiến trúc cơ bản.
 - [x] **Database Setup**: Tích hợp và cấu hình thành công MySQL & MongoDB.
-- [x] **Frontend Foundation**: Tích hợp Laravel Breeze với React + Inertia. Build thành công Vite cho môi trường production.
+- [x] **Frontend Foundation**: Tích hợp Laravel Breeze với React + Inertia.
 - [x] **Admin Framework**: Cài đặt Filament V5, tối ưu giao diện Admin Panel.
-- [x] **User Management**: Hoàn thiện toàn bộ module quản lý nhân viên trên Filament (Modals CRUD, khóa tài khoản).
-- [x] **Customer Management**:
-  - Thiết kế bảng `customers` (MySQL) độc lập với bảng `users`.
-  - Cấu hình **CustomerResource** theo chuẩn Filament V5.
-  - Thiết lập nghiệp vụ thực tế: Chặn Admin tạo mới khách hàng; các trường thông tin cá nhân ở chế độ **Read-only**; Admin chỉ được phép **Đổi trạng thái (is_active)** và **Xóa**.
-- [x] **Authentication Security (Multi-auth)**:
-  - Phân tách Authentication Guards (`web` & `customer`) và User Providers tương ứng trong `config/auth.php`.
-  - Cấu hình hệ thống lưu trữ Session riêng biệt cho khách hàng (`customer_sessions`) tránh xung đột ID.
-- [x] **Brand & Category Management**:
-  - Thiết kế bảng `brands` & `categories` (MySQL).
-  - Tích hợp tính năng sinh Real-time Slug tự động khi gõ Tên thương hiệu/Danh mục.
-- [x] **Product & Variant Management**:
-  - Cấu hình quản lý sản phẩm thông minh dạng Tabs.
-  - Hỗ trợ lưu trữ không giới hạn biến thể kèm thuộc tính riêng biệt (CPU, GPU, RAM, Ổ cứng, Giá gốc, Giá bán, Tồn kho, SKU...).
-  - Tích hợp Validation Closure đếm từ thông minh hỗ trợ Unicode tiếng Việt cho mô tả sản phẩm.
-- [x] **Review & Feedback Management**:
-  - Quản lý các đánh giá sản phẩm (Duyệt/Ẩn nhanh bằng Toggle).
-  - Tích hợp sẵn dữ liệu Seeder mẫu chuẩn chỉnh.
-- [x] **UX/UI & Dashboard Optimization**:
-  - Sắp xếp nhóm Menu (`Quản lý sản phẩm`, `Kinh doanh`, `Hệ thống`).
-  - Thiết kế Widget phân tích tự động: Biểu đồ cơ cấu hàng, Bảng dữ liệu nhanh và Thống kê tổng quan tự động reload sau 30 giây.
-
-### 🚧 Lộ trình tiếp theo (Roadmap)
-- [ ] **Khách hàng (Storefront)**: Giao diện hiển thị sản phẩm trên React.
-- [ ] **Giỏ hàng & Đơn hàng**: Tích hợp luồng giỏ hàng và thanh toán.
+- [x] **User Management**: Hoàn thiện module quản lý nhân viên trên Filament (Modals CRUD, khóa tài khoản).
+- [x] **Customer Management**: Thiết kế bảng `customers` độc lập với `users`. Cấu hình **CustomerResource** chuẩn Filament V5.
+- [x] **Authentication Security (Multi-auth)**: Phân tách Authentication Guards (`web` & `customer`) trong `config/auth.php`. Cấu hình Session riêng biệt tránh xung đột ID.
+- [x] **Brand & Category Management**: Tích hợp tính năng sinh Real-time Slug tự động khi gõ Tên thương hiệu/Danh mục.
+- [x] **Product & Variant Management**: Quản lý sản phẩm dạng Tabs thông minh. Hỗ trợ lưu trữ không giới hạn biến thể kèm thuộc tính riêng.
+- [x] **Review & Feedback Management**: Quản lý đánh giá sản phẩm (Duyệt/ẩn nhanh bằng Toggle). Tích hợp Seeder mẫu chuẩn chỉnh.
+- [x] **Order Management**: Module quản lý đơn hàng hoàn chỉnh với infolist chi tiết. Tự động hoàn kho khi hủy đơn.
+- [x] **UX/UI & Dashboard Optimization**: Sắp xếp nhóm Menu, thiết kế Widget phân tích tự động: Biểu đồ cơ cấu hàng, Bảng dữ liệu nhanh, Thống kê tổng quan tự động reload mỗi 30 giây.
 
 ---
 
-## 💻 Hướng dẫn Cài đặt
+### 📅 Nhật ký thay đổi — 01/05/2026
+
+#### 🔧 Admin Panel — Filament UI/UX
+
+**1. Dark Mode Fix (`AdminPanelProvider.php`)**
+- Sửa lỗi nền trang bị cứng màu trắng khi bật Dark Mode do CSS `body { background-color }` ghi đè toàn bộ.
+- Áp dụng selector `html:not(.dark)` để màu nền xám chỉ hiện ở Light Mode.
+- Thêm `dark .fi-section` để các khối Section tự điều chỉnh viền và màu nền trong Dark Mode.
+
+**2. Order Detail — Chuyển sang Slide-Over (`OrderResource.php`)**
+- Thay thế trang `ViewOrder` riêng biệt bằng **slide-over panel** (bảng chi tiết mở từ phía phải màn hình).
+- Thiết kế lại `infolist()` theo layout phù hợp với slide-over: từng Section xếp dọc thay vì grid 2 cột.
+- **Header đơn hàng**: Mã đơn hàng + Badge trạng thái (Chờ xử lý / Đang xử lý / Đã giao...).
+- **Danh sách mặt hàng**: Ảnh sản phẩm + Tên + SKU + Giá (màu primary) + Số lượng.
+- **Tóm tắt tài chính**: Tạm tính / Phí ship / Tổng cộng + Badge trạng thái thanh toán.
+- **Thông tin phụ**: Khách hàng & Địa chỉ đặt song song 2 cột; Ghi chú tự thu gọn nếu trống.
+- Xóa file `ViewOrder.php` và route `'view'` không còn sử dụng.
+
+**3. Product Detail — Slide-Over mới (`ProductResource.php`)**
+- Thêm phương thức `infolist()` cho ProductResource với thiết kế đồng nhất với Order.
+- **Header sản phẩm**: Ảnh thumbnail + Tên + Badges (Thương hiệu / Danh mục / Nổi bật / Trạng thái bán).
+- **Giá bán**: Hiển thị Giá thấp nhất / Giá cao nhất / Tổng tồn kho dạng 3 cột.
+- **Biến thể**: Danh sách từng variant: Tên cấu hình + SKU + Giá + Tồn kho (màu xanh/đỏ tùy trạng thái).
+- **Mô tả**: Thu gọn mặc định, click để mở.
+- Chuyển `ViewAction` sang `->slideOver()` với độ rộng `4xl`.
+- Xóa route `'view'` riêng, không cần trang `ViewProduct` nữa.
+
+**4. User Management — Giữ nguyên**
+- Đã thử nghiệm layout sidebar kiểu `filament-page-with-sidebar` nhưng gặp vấn đề tương thích namespace.
+- Quyết định **giữ nguyên giao diện Modal mặc định** của Filament cho module User để đảm bảo ổn định.
+
+---
+
+### 📌 Roadmap tiếp theo
+- [ ] **Storefront (React)**: Giao diện hiển thị sản phẩm trên frontend React.
+- [ ] **Giỏ hàng & Thanh toán**: Tích hợp luồng giỏ hàng và payment gateway.
+- [ ] **Xác thực khách hàng**: Login/Register cho khách hàng trên Inertia.
+
+---
+
+## 🔧 Hướng dẫn Cài đặt
 
 ### 1. Yêu cầu hệ thống
 - PHP: `>= 8.2`
@@ -101,7 +129,7 @@ Chịu trách nhiệm lưu trữ các thông tin động linh hoạt (Bảo lưu
 - Composer: `>= 2.x`
 - MySQL & MongoDB đang chạy ở background.
 
-### 2. Khởi tạo Dự án
+### 2. Khởi tạo Dự Án
 ```bash
 # Clone source code và cài dependencies
 composer install --prefer-dist
@@ -141,5 +169,5 @@ npm run dev
 
 ---
 <div align="center">
-  <i>Được phát triển với ❤️ cho Đồ án Tốt nghiệp</i>
+  <i>Được phát triển với ❤️ cho Đồ Án Tốt nghiệp</i>
 </div>
