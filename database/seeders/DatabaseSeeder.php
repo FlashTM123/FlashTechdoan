@@ -23,7 +23,8 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             ProductSeeder::class,
             UserSeeder::class,
-            ReviewSeeder::class, // Phải đưa xuống cuối cùng để có Product và Customer lấy dữ liệu
+            ReviewSeeder::class,
+            OrderSeeder::class,
         ]);
     }
 }

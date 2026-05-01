@@ -29,7 +29,13 @@ class AdminPanelProvider extends PanelProvider
     {
         \Filament\Support\Facades\FilamentView::registerRenderHook(
             'panels::body.end',
-            fn (): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('<style>.fi-sidebar-footer { display: none !important; }</style>'),
+            fn (): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('
+                <style>
+                    body { background-color: #f3f4f6 !important; }
+                    .fi-section { border-radius: 1rem !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important; border: none !important; }
+                    .fi-sidebar-footer { display: none !important; }
+                </style>
+            '),
         );
 
         return $panel
