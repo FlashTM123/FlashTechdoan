@@ -70,38 +70,51 @@ Chịu trách nhiệm lưu trữ các thông tin động linh hoạt:
 - [x] **Database Setup**: Tích hợp và cấu hình thành công MySQL & MongoDB.
 - [x] **Frontend Foundation**: Tích hợp Laravel Breeze với React + Inertia.
 - [x] **Admin Framework**: Cài đặt Filament V5, tối ưu giao diện Admin Panel.
-- [x] **User Management**: Hoàn thiện module quản lý nhân viên trên Filament (Modals CRUD, khóa tài khoản).
-- [x] **Customer Management**: Thiết kế bảng `customers` độc lập với `users`. Cấu hình **CustomerResource** chuẩn Filament V5.
-- [x] **Authentication Security (Multi-auth)**: Phân tách Authentication Guards (`web` & `customer`) trong `config/auth.php`. Cấu hình Session riêng biệt tránh xung đột ID.
-- [x] **Brand & Category Management**: Tích hợp tính năng sinh Real-time Slug tự động khi gõ Tên thương hiệu/Danh mục.
-- [x] **Product & Variant Management**: Quản lý sản phẩm dạng Tabs thông minh. Hỗ trợ lưu trữ không giới hạn biến thể kèm thuộc tính riêng.
-- [x] **Review & Feedback Management**: Quản lý đánh giá sản phẩm (Duyệt/ẩn nhanh bằng Toggle). Tích hợp Seeder mẫu chuẩn chỉnh.
-- [x] **Order Management**: Module quản lý đơn hàng hoàn chỉnh với infolist chi tiết. Tự động hoàn kho khi hủy đơn.
-- [x] **UX/UI & Dashboard Optimization**: Sắp xếp nhóm Menu, thiết kế Widget phân tích tự động: Biểu đồ cơ cấu hàng, Bảng dữ liệu nhanh, Thống kê tổng quan tự động reload mỗi 30 giây.
+- [x] **User Manage- [x] **Product & Variant Management**: Quản lý sản phẩm dạng Tabs thông minh. Hỗ trợ lưu trữ không giới hạn biến thể kèm thuộc tính riêng.
+- [x] **Review & Feedback Management**: Quản lý đánh giá sản phẩm (Duyệt/ẩn nhanh bằng Toggle).
+- [x] **Order Management**: Module quản lý đơn hàng hoàn chỉnh với infolist chi tiết.
+- [x] **Coupon Management**: Hệ thống mã giảm giá (Fixed/Percent) với giới hạn lượt dùng và ngày hết hạn. Tích hợp logic tính toán trực tiếp vào đơn hàng.
+- [x] **UX/UI & Dashboard Optimization**: Sắp xếp nhóm Menu, thiết kế Widget doanh thu và biểu đồ SalesChart trực quan.
 
 ---
 
-### 📅 Nhật ký thay đổi — 01/05/2026
+### 📅 Nhật ký thay đổi — 02/05/2026
 
-#### 🔧 Admin Panel — Filament UI/UX
+#### 🎫 Hệ thống Mã giảm giá (Coupons)
+- **Database**: Tạo bảng `coupons` và thêm cột `coupon_id`, `discount_amount` vào bảng `orders`.
+- **Model Logic**: 
+    - Implement `isValid()`: Tự động kiểm tra trạng thái kích hoạt, ngày hết hạn và giới hạn số lần sử dụng.
+    - Implement `calculateDiscount()`: Tính toán số tiền giảm dựa trên loại mã (Cố định hoặc Phần trăm).
+    - Implement `applyCoupon()` trong Order: Tự động trừ tiền đơn hàng và lưu snapshot số tiền đã giảm.
+- **Admin Interface**: 
+    - Tạo **CouponResource** với giao diện quản lý đầy đủ CRUD.
+    - Tính năng tự động viết hoa mã code khi nhập.
+    - Hiển thị badge màu sắc cho loại giảm giá và cảnh báo đỏ khi mã hết hạn.
+    - Cho phép bật/tắt nhanh mã ngay tại bảng danh sách.
 
-**1. Dark Mode Fix (`AdminPanelProvider.php`)**
-- Sửa lỗi nền trang bị cứng màu trắng khi bật Dark Mode do CSS `body { background-color }` ghi đè toàn bộ.
-- Áp dụng selector `html:not(.dark)` để màu nền xám chỉ hiện ở Light Mode.
-- Thêm `dark .fi-section` để các khối Section tự điều chỉnh viền và màu nền trong Dark Mode.
+#### 📈 Dashboard & Widgets
+- **RevenueWidget**: Hiển thị Tổng doanh thu, Đơn hàng mới (24h) kèm biểu đồ Sparkline mini.
+- **SalesChart**: Biểu đồ đường (Line Chart) hiển thị doanh thu theo Tuần/Tháng/Năm với bộ lọc linh hoạt.
 
-**2. Order Detail — Chuyển sang Slide-Over (`OrderResource.php`)**
-- Thay thế trang `ViewOrder` riêng biệt bằng **slide-over panel** (bảng chi tiết mở từ phía phải màn hình).
-- Thiết kế lại `infolist()` theo layout phù hợp với slide-over: từng Section xếp dọc thay vì grid 2 cột.
-- **Header đơn hàng**: Mã đơn hàng + Badge trạng thái (Chờ xử lý / Đang xử lý / Đã giao...).
-- **Danh sách mặt hàng**: Ảnh sản phẩm + Tên + SKU + Giá (màu primary) + Số lượng.
-- **Tóm tắt tài chính**: Tạm tính / Phí ship / Tổng cộng + Badge trạng thái thanh toán.
-- **Thông tin phụ**: Khách hàng & Địa chỉ đặt song song 2 cột; Ghi chú tự thu gọn nếu trống.
-- Xóa file `ViewOrder.php` và route `'view'` không còn sử dụng.
+---
 
-**3. Product Detail — Slide-Over mới (`ProductResource.php`)**
-- Thêm phương thức `infolist()` cho ProductResource với thiết kế đồng nhất với Order.
-- **Header sản phẩm**: Ảnh thumbnail + Tên + Badges (Thương hiệu / Danh mục / Nổi bật / Trạng thái bán).
+## 🧪 Kiểm thử (Testing)
+Dự án sử dụng PHPUnit để đảm bảo tính ổn định của các logic quan trọng.
+
+### 1. Chạy Unit Test cho Coupon
+Để kiểm tra logic kiểm tra mã giảm giá (hết hạn, active...), chạy lệnh:
+```bash
+php artisan test tests/Unit/CouponTest.php
+```
+
+### 2. Ý nghĩa kết quả
+- **PASS (Xanh)**: Mọi logic chạy đúng như thiết kế.
+- **FAIL (Đỏ)**: Có lỗi logic phát sinh, cần kiểm tra lại code.
+
+---
+
+## 🔧 Hướng dẫn Cài đặt
+ / Danh mục / Nổi bật / Trạng thái bán).
 - **Giá bán**: Hiển thị Giá thấp nhất / Giá cao nhất / Tổng tồn kho dạng 3 cột.
 - **Biến thể**: Danh sách từng variant: Tên cấu hình + SKU + Giá + Tồn kho (màu xanh/đỏ tùy trạng thái).
 - **Mô tả**: Thu gọn mặc định, click để mở.

@@ -97,4 +97,16 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->is_active === true;
     }
+    public function isValid(): bool
+    {
+        if (!$this->is_active) {
+            return false;
+        }
+
+        if ($this->expires_at && $this->expires_at->isPast()) {
+            return false;
+        }
+
+        return true;
+    }
 }

@@ -22,6 +22,9 @@ use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\ProductByCategoryChart;
 use App\Filament\Widgets\LatestProducts;
 use App\Filament\Widgets\PendingReview;
+use App\Filament\Widgets\RevenueWidget;
+use App\Filament\Widgets\SalesChart;
+use App\Filament\Resources\Coupons\CouponResource;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -63,6 +66,9 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->resources([
+                CouponResource::class,
+            ])
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
@@ -87,6 +93,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->widgets([
             StatsOverview::class,
+            RevenueWidget::class,
+            SalesChart::class,
             ProductByCategoryChart::class,
             LatestProducts::class,
             PendingReview::class,
