@@ -250,11 +250,13 @@ class ProductResource extends Resource
                     ->slideOver()
                     ->modalWidth(\Filament\Support\Enums\Width::FourExtraLarge),
                 \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\DeleteAction::make()
+                    ->hidden(fn () => !auth()->user()->isStaff()),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
-                    \Filament\Actions\DeleteBulkAction::make(),
+                    \Filament\Actions\DeleteBulkAction::make()
+                        ->hidden(fn () => !auth()->user()->isStaff()),
                 ]),
             ]);
     }

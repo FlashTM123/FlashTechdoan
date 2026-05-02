@@ -91,4 +91,8 @@ class Customer extends Authenticatable implements MustVerifyEmail, FilamentUser
             }
         });
     }
+    public function isValid(): bool
+    {
+        return !empty($this->name) && strlen($this->name) >= 3;
+    }
 }

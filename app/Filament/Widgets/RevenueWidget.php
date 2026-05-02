@@ -10,6 +10,11 @@ class RevenueWidget extends StatsOverviewWidget
 {
     protected ?string $pollingInterval = '30s';
 
+    public static function canView(): bool
+    {
+        return auth()->user()->isStaff();
+    }
+
     protected function getStats(): array
     {
         // Tổng doanh thu từ các đơn hàng đã hoàn thành

@@ -11,6 +11,11 @@ class SalesChart extends ChartWidget
     protected ?string $heading = 'Doanh thu theo thời gian';
     protected ?string $pollingInterval = '60s';
 
+    public static function canView(): bool
+    {
+        return auth()->user()->isStaff();
+    }
+
     // Mặc định chọn "Tháng này"
     public ?string $filter = 'month';
 

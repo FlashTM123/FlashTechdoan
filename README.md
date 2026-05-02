@@ -81,35 +81,33 @@ Chịu trách nhiệm lưu trữ các thông tin động linh hoạt:
 ### 📅 Nhật ký thay đổi — 02/05/2026
 
 #### 🎫 Hệ thống Mã giảm giá (Coupons)
-- **Database**: Tạo bảng `coupons` và thêm cột `coupon_id`, `discount_amount` vào bảng `orders`.
-- **Model Logic**: 
-    - Implement `isValid()`: Tự động kiểm tra trạng thái kích hoạt, ngày hết hạn và giới hạn số lần sử dụng.
-    - Implement `calculateDiscount()`: Tính toán số tiền giảm dựa trên loại mã (Cố định hoặc Phần trăm).
-    - Implement `applyCoupon()` trong Order: Tự động trừ tiền đơn hàng và lưu snapshot số tiền đã giảm.
-- **Admin Interface**: 
-    - Tạo **CouponResource** với giao diện quản lý đầy đủ CRUD.
-    - Tính năng tự động viết hoa mã code khi nhập.
-    - Hiển thị badge màu sắc cho loại giảm giá và cảnh báo đỏ khi mã hết hạn.
-    - Cho phép bật/tắt nhanh mã ngay tại bảng danh sách.
+- **Database**: Tạo bảng `coupons` và liên kết `coupon_id` vào đơn hàng.
+- **Model Logic**: Tích hợp `isValid()` và `calculateDiscount()`. Đơn hàng tự động áp dụng mã và lưu snapshot số tiền giảm.
+- **Interface**: Quản lý CRUD mã giảm giá với tính năng tự động viết hoa Code và cảnh báo ngày hết hạn.
+- **Testing**: Hoàn thiện bộ Unit Test cho logic Coupon tại `tests/Unit/CouponTest.php`.
 
-#### 📈 Dashboard & Widgets
-- **RevenueWidget**: Hiển thị Tổng doanh thu, Đơn hàng mới (24h) kèm biểu đồ Sparkline mini.
-- **SalesChart**: Biểu đồ đường (Line Chart) hiển thị doanh thu theo Tuần/Tháng/Năm với bộ lọc linh hoạt.
+#### 🛡️ Phân quyền người dùng (RBAC - Role Based Access Control)
+- **Kiến trúc**: Sử dụng hệ thống Policy nội bộ kết hợp với cột `role` có sẵn (`admin`, `moderator`, `employee`).
+- **Phân quyền Module**:
+    - **Admin**: Toàn quyền hệ thống.
+    - **Moderator**: Quản lý Sản phẩm, Đơn hàng, Mã giảm giá và Đánh giá. Không có quyền quản lý Nhân sự.
+    - **Employee**: Chỉ được xem (View-only) hầu hết các module. Riêng module Đơn hàng chỉ được phép cập nhật Trạng thái giao hàng (khóa các trường giá tiền/thông tin khách).
+- **Bảo mật Dashboard**: Ẩn các Widget báo cáo doanh thu nhạy cảm đối với vai trò Employee.
+- **UI Security**: Tự động ẩn các nút "Thêm mới", "Sửa", "Xóa" trên giao diện dựa theo vai trò của người đang đăng nhập.
 
 ---
 
 ## 🧪 Kiểm thử (Testing)
-Dự án sử dụng PHPUnit để đảm bảo tính ổn định của các logic quan trọng.
 
 ### 1. Chạy Unit Test cho Coupon
-Để kiểm tra logic kiểm tra mã giảm giá (hết hạn, active...), chạy lệnh:
 ```bash
 php artisan test tests/Unit/CouponTest.php
 ```
 
-### 2. Ý nghĩa kết quả
-- **PASS (Xanh)**: Mọi logic chạy đúng như thiết kế.
-- **FAIL (Đỏ)**: Có lỗi logic phát sinh, cần kiểm tra lại code.
+### 2. Kiểm tra Phân quyền
+Hãy thử đăng nhập bằng các tài khoản sau để kiểm tra giao diện:
+- **Admin**: `admin@flashtech.com` (Toàn quyền)
+- **Staff**: `staff@flashtech.com` (Chỉ cập nhật trạng thái đơn hàng)
 
 ---
 
