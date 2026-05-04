@@ -11,7 +11,7 @@ class ProductSeeder extends Seeder
     public function run(): void
     {
         $product = Product::create([
-            'category_id' => 1,
+            'category_id' => 7,
             'brand_id' => 1,
             'name' => 'Dell Gaming G15 5530',
             'slug' => 'dell-gaming-g15-5530',
@@ -41,14 +41,7 @@ class ProductSeeder extends Seeder
         ]);
 
         // Tạo Specs MongoDB
-        ProductSpec::create([
-            'product_id' => $product->id,
-            'specifications' => [
-                ['key' => 'Màn hình', 'value' => '15.6 inch FHD 120Hz'],
-                ['key' => 'VGA', 'value' => 'RTX 3050 6GB'],
-                ['key' => 'Trọng lượng', 'value' => '2.81 kg'],
-            ]
-        ]);
+      
     }
 }
 

@@ -11,6 +11,7 @@ use App\Http\Controllers\HomeController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/product/{id}', [HomeController::class, 'show'])->name('product.show');
 Route::get('/products', [HomeController::class, 'product'])->name('products.index');
+Route::get('/api/search', [HomeController::class, 'apiSearch']);
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

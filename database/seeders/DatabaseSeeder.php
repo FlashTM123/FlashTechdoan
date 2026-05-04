@@ -12,17 +12,15 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Tạo Brand mẫu để không bị lỗi khóa ngoại
-        \App\Models\Brand::updateOrCreate(
-            ['slug' => 'dell'],
-            ['name' => 'Dell', 'is_active' => true]
-        );
+
 
         // Gọi các Seeder còn lại
         $this->call([
+            UserSeeder::class,
             CustomerSeeder::class,
             CategorySeeder::class,
+            BrandSeeder::class,
             ProductSeeder::class,
-            UserSeeder::class,
             ReviewSeeder::class,
             OrderSeeder::class,
         ]);

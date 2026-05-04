@@ -48,4 +48,18 @@ class HomeController extends Controller
           'products' => $products
       ]);
     }
+
+    public function apiSearch(Request $request)
+    {
+        $query = $request->input('q');
+        if (empty($query)) return response()->json([]);
+
+        $products = Product::where('name', 'LIKE', "%{$query}%")
+            ->where('is_active', true)
+            ->with('variants')
+            ->take(5)
+            ->get();
+
+        return response()->json($products);
+    }
 }

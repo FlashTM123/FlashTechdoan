@@ -105,6 +105,54 @@ export default function ProductDetail({ product }: { product: any }) {
                             dangerouslySetInnerHTML={{ __html: product.description || "Chưa có nội dung mô tả." }}
                         />
                     </div>
+
+                    {/* THÔNG SỐ KỸ THUẬT */}
+                    <div className="pt-10 border-t border-slate-100">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">Thông số kỹ thuật</h4>
+                        <div className="bg-slate-50 rounded-3xl overflow-hidden border border-slate-100 transition-all duration-500">
+                            <table className="w-full text-sm">
+                                <tbody>
+                                    {selectedVariant?.specifications && (
+                                        Array.isArray(selectedVariant.specifications) 
+                                        ? // Trường hợp dữ liệu là Mảng: [{ name: 'CPU', value: 'i7' }, ...]
+                                          selectedVariant.specifications.map((spec: any, index: number) => (
+                                            <tr key={index} className={index % 2 === 0 ? 'bg-transparent' : 'bg-white/50'}>
+                                                <td className="py-4 pl-6 font-semibold text-slate-500 w-1/3">
+                                                    {spec.name || spec.label || spec.key || `Thông số ${index + 1}`}
+                                                </td>
+                                                <td className="py-4 pr-6 text-slate-900 font-bold">
+                                                    {spec.value || spec.content || spec.val || "—"}
+                                                </td>
+                                            </tr>
+                                          ))
+                                        : // Trường hợp dữ liệu là Đối tượng: { "CPU": "i7", "RAM": "16GB" }
+                                          Object.entries(selectedVariant.specifications).map(([key, value], index) => (
+                                            <tr key={index} className={index % 2 === 0 ? 'bg-transparent' : 'bg-white/50'}>
+                                                <td className="py-4 pl-6 font-semibold text-slate-500 w-1/3">{key}</td>
+                                                <td className="py-4 pr-6 text-slate-900 font-bold">{String(value)}</td>
+                                            </tr>
+                                          ))
+                                    )}
+                                    {(!selectedVariant?.specifications || (typeof selectedVariant.specifications === 'object' && Object.keys(selectedVariant.specifications).length === 0)) && (
+                                        /* Fallback khi không có thông số */
+                                        [
+                                            { label: "CPU", value: "Đang cập nhật" },
+                                            { label: "RAM", value: "Đang cập nhật" },
+                                            { label: "Ổ cứng", value: "Đang cập nhật" },
+                                        ].map((spec, index) => (
+                                            <tr key={index} className={index % 2 === 0 ? 'bg-transparent' : 'bg-white/50'}>
+                                                <td className="py-4 pl-6 font-semibold text-slate-500 w-1/3">{spec.label}</td>
+                                                <td className="py-4 pr-6 text-slate-900 font-bold">{spec.value}</td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button className="w-full mt-4 py-3 text-indigo-600 font-bold text-sm hover:bg-indigo-50 rounded-2xl transition-all">
+                            Xem cấu hình chi tiết ↓
+                        </button>
+                    </div>
                 </div>
             </div>
         </AppLayout>

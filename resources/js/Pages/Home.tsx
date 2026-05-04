@@ -7,7 +7,7 @@ import { Head, Link } from '@inertiajs/react';
 const SectionHeader = ({ title, link }: { title: string, link: string }) => (
     <div className="flex items-end justify-between mb-12">
         <div className="relative">
-            <h2 className="text-3xl md:text-4xl font-black text-slate-900 font-display tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white font-display tracking-tight transition-colors">
                 {title}
             </h2>
             {/* Gạch chân màu tím tinh tế */}
@@ -21,6 +21,10 @@ const SectionHeader = ({ title, link }: { title: string, link: string }) => (
 );
 
 export default function Home({ featured_products, sections }: any) {
+    // --- BƯỚC 1: LOGIC LỌC SẢN PHẨM GAMING ---
+    // Tìm trong mảng danh mục (sections) cái nào có slug là 'laptop-gaming' để lấy sản phẩm của nó
+    const gamingLaptops = sections.find((s: any) => s.slug === 'laptop-gaming')?.products || [];
+
     return (
         <AppLayout>
             <Head title="FlashTech - Hệ thống Laptop & Linh kiện hàng đầu" />
@@ -28,23 +32,47 @@ export default function Home({ featured_products, sections }: any) {
             {/* 1. HERO SECTION */}
             <Hero />
 
-            {/* 2. CATEGORY QUICK LINKS (Dùng dữ liệu từ sections) */}
-            <section className="py-12 border-b border-slate-100">
-                <div className="flex items-center justify-center gap-6 md:gap-12 overflow-x-auto pb-4 no-scrollbar">
-                    {sections.map((cat: any) => (
-                        <Link
-                            key={cat.id}
-                            href={`/products?category=${cat.slug}`}
-                            className="flex flex-col items-center group min-w-[100px]"
-                        >
-                            <div className="w-20 h-20 bg-white shadow-sm rounded-[1.5rem] flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 border border-slate-50 group-hover:shadow-xl group-hover:shadow-indigo-100 group-hover:-translate-y-1">
-                                <span className="text-2xl font-black font-display uppercase">{cat.name[0]}</span>
-                            </div>
-                            <span className="mt-4 text-xs font-bold text-slate-500 group-hover:text-indigo-600 uppercase tracking-widest transition-colors">
-                                {cat.name}
-                            </span>
-                        </Link>
-                    ))}
+            {/* 2. CATEGORY GRID (Danh mục phổ biến) */}
+            <section className="py-24">
+                <SectionHeader title="Danh mục phổ biến" link="/products" />
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                    {sections.map((cat: any) => {
+                        // Logic chọn icon dựa trên slug
+                        let icon = (
+                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        ); // Default Laptop Icon
+                        
+                        if (cat.slug === 'linh-kien') icon = (
+                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg>
+                        );
+                        if (cat.slug === 'phu-kien') icon = (
+                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" /></svg>
+                        );
+
+                        return (
+                            <Link
+                                key={cat.id}
+                                href={`/products?category=${cat.slug}`}
+                                className="group relative p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:shadow-indigo-100 dark:hover:shadow-indigo-900/20 hover:-translate-y-2 transition-all duration-500 flex flex-col items-center text-center overflow-hidden"
+                            >
+                                {/* Background trang trí nhỏ */}
+                                <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-indigo-50 dark:bg-indigo-900/10 rounded-full scale-0 group-hover:scale-100 transition-transform duration-700 opacity-50"></div>
+                                
+                                <div className="relative z-10 w-16 h-16 mb-6 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 transform group-hover:rotate-[10deg]">
+                                    {icon}
+                                </div>
+                                
+                                <span className="relative z-10 font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors uppercase tracking-wider text-xs">
+                                    {cat.name}
+                                </span>
+                                
+                                <span className="mt-2 text-[10px] font-medium text-slate-400 dark:text-slate-500 group-hover:text-slate-500 dark:group-hover:text-slate-400 uppercase tracking-[0.2em]">
+                                    {cat.products_count || 0} sản phẩm
+                                </span>
+                            </Link>
+                        );
+                    })}
                 </div>
             </section>
 
@@ -58,6 +86,42 @@ export default function Home({ featured_products, sections }: any) {
                     ))}
                 </div>
             </section>
+
+            {/* --- BƯỚC 2: GAMING UNIVERSE SECTION (DARK MODE) --- */}
+            {/* Phần này chỉ hiện nếu thực sự có sản phẩm Gaming */}
+            {gamingLaptops.length > 0 && (
+                <section className="py-24 bg-slate-900 rounded-[4rem] text-white my-12 relative overflow-hidden mx-[-1rem] px-4 md:px-12">
+                    {/* Hiệu ứng ánh sáng xanh tím huyền ảo ở nền */}
+                    <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-indigo-600/20 blur-[120px] rounded-full"></div>
+                        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-600/10 blur-[120px] rounded-full"></div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto relative z-10">
+                        <div className="flex items-end justify-between mb-12">
+                            <div>
+                                <span className="text-indigo-400 font-bold uppercase tracking-[0.3em] text-[10px]">Phân khúc cao cấp</span>
+                                <h2 className="text-4xl md:text-5xl font-black font-display mt-3 tracking-tight">
+                                    🔥 Gaming Universe
+                                </h2>
+                                <p className="text-slate-400 mt-4 max-w-md text-sm font-medium">
+                                    Đánh bại mọi đối thủ với dòng laptop cấu hình khủng, màn hình tần số quét cao nhất.
+                                </p>
+                            </div>
+                            <Link href="/products?category=laptop-gaming" className="text-indigo-400 font-bold hover:text-white transition-colors flex items-center gap-2 group text-sm uppercase tracking-widest">
+                                Khám phá ngay <span className="group-hover:translate-x-2 transition-transform">→</span>
+                            </Link>
+                        </div>
+
+                        {/* Danh sách sản phẩm Gaming (Dùng ProductCard với prop dark) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {gamingLaptops.slice(0, 4).map((product: any) => (
+                                <ProductCard key={product.id} product={product} dark={true} />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* 4. PROMOTION BANNER */}
             <section className="mb-24 relative overflow-hidden rounded-[3rem] bg-slate-900 p-8 md:p-16 text-white mx-4">
@@ -89,8 +153,8 @@ export default function Home({ featured_products, sections }: any) {
             {sections.map((section: any, index: number) => (
                 <section
                     key={section.id}
-                    className={`py-24 -mx-4 px-4 mb-12 ${
-                        index % 2 === 0 ? 'bg-slate-50 rounded-[4rem]' : 'bg-white'
+                    className={`py-24 -mx-4 px-4 mb-12 transition-colors duration-300 ${
+                        index % 2 === 0 ? 'bg-slate-50 dark:bg-slate-900/50 rounded-[4rem]' : 'bg-white dark:bg-slate-950'
                     }`}
                 >
                     <div className="max-w-7xl mx-auto">
