@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\Category;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -34,6 +35,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+               ...parent::share($request),
+        'categories' => Category::whereHas('products')->get(), // Chỉ lấy danh mục có sản phẩm
         ];
+       
     }
 }
