@@ -33,55 +33,23 @@ class OrderResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            // 1. TOP HEADER: ID, Badges and Actions
-            Grid::make(2)
-                ->schema([
-                    Forms\Components\Placeholder::make('id_header')
-                        ->label('')
-                        ->content(fn ($record) => new \Illuminate\Support\HtmlString("
-                            <div class='flex items-center gap-3'>
-                                <h1 class='text-2xl font-bold text-gray-900'>Order ID: {$record->order_code}</h1>
-                                <span class='px-2 py-0.5 text-xs font-semibold bg-orange-100 text-orange-600 rounded uppercase'>Payment pending</span>
-                                <span class='px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-600 rounded uppercase'>Unfulfilled</span>
-                            </div>
-                            <p class='text-sm text-gray-500 mt-1'>{$record->created_at->format('F j, Y \a\t g:i a')} from Storefront</p>
-                        ")),
-                    
-                    Forms\Components\Placeholder::make('actions_header')
-                        ->label('')
-                        ->content(new \Illuminate\Support\HtmlString("
-                            <div class='flex justify-end gap-2'>
-                                <button class='px-4 py-1.5 text-sm font-medium border rounded-lg bg-white hover:bg-gray-50'>Restock</button>
-                                <button class='px-4 py-1.5 text-sm font-medium border rounded-lg bg-white hover:bg-gray-50'>Edit</button>
-                                <button class='px-4 py-1.5 text-sm font-medium border rounded-lg bg-white hover:bg-gray-50'>More actions ▾</button>
-                            </div>
-                        ")),
-                ])->columnSpanFull(),
-
             Grid::make(3)
                 ->schema([
-                    // LEFT COLUMN (Main)
+                    // CỘT TRÁI: Thông tin đơn hàng
                     Grid::make(1)
                         ->schema([
-                            // SECTION: Order Item
-                            Section::make('Order Item')
-                                ->description('Manage fulfillment for this order')
+                            Section::make('Mặt hàng trong đơn')
                                 ->schema([
                                     Repeater::make('items')
                                         ->relationship('items')
                                         ->schema([
-                                            Forms\Components\ViewField::make('item_preview')
-                                                ->view('filament.forms.components.order-item-display') // Cần tạo tệp blade này hoặc dùng placeholder
-                                                ->columnSpanFull()
-                                                ->hidden(), // Tạm thời ẩn nếu chưa có view
-
                                             Select::make('product_id')
                                                 ->relationship('product', 'name')
                                                 ->label('Sản phẩm')
                                                 ->disabled()
                                                 ->columnSpan(3),
                                             TextInput::make('quantity')
-                                                ->label('SL')
+                                                ->label('Số lượng')
                                                 ->disabled()
                                                 ->prefix('x')
                                                 ->columnSpan(1),
@@ -95,126 +63,59 @@ class OrderResource extends Resource
                                         ->disableItemCreation()
                                         ->disableItemDeletion()
                                         ->disableLabel(),
-                                    
-                                    Forms\Components\Placeholder::make('fulfill_footer')
-                                        ->label('')
-                                        ->content(new \Illuminate\Support\HtmlString("
-                                            <div class='flex justify-end gap-3 mt-4 pt-4 border-t'>
-                                                <button class='px-4 py-2 text-sm font-medium border rounded-lg bg-white hover:bg-gray-50'>Fulfill item</button>
-                                                <button class='px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm'>Create shipping label</button>
-                                            </div>
-                                        ")),
                                 ]),
 
-                            // SECTION: Order Summary
-                            Section::make('Order Summary')
+                            Section::make('Tóm tắt thanh toán')
                                 ->schema([
-                                    Forms\Components\Placeholder::make('financial_breakdown')
+                                    Forms\Components\Placeholder::make('summary')
                                         ->label('')
                                         ->content(fn ($record) => new \Illuminate\Support\HtmlString("
-                                            <div class='space-y-3 pb-4'>
-                                                <div class='flex justify-between text-sm'>
-                                                    <span class='text-gray-500'>Subtotal</span>
-                                                    <span class='text-gray-900 font-medium'>" . number_format($record->total_amount, 0, ',', '.') . " VNĐ</span>
+                                            <div class='space-y-2 text-sm'>
+                                                <div class='flex justify-between'>
+                                                    <span class='text-gray-500'>Phương thức thanh toán:</span>
+                                                    <span class='font-bold text-indigo-600'>{$record->paymentMethod?->name}</span>
                                                 </div>
-                                                <div class='flex justify-between text-sm'>
-                                                    <span class='text-gray-500'>Discount</span>
-                                                    <span class='text-gray-900'>-0 VNĐ</span>
-                                                </div>
-                                                <div class='flex justify-between text-sm'>
-                                                    <span class='text-gray-500'>Shipping</span>
-                                                    <span class='text-gray-900'>0 VNĐ</span>
-                                                </div>
-                                                <div class='flex justify-between text-base font-bold text-gray-900 border-t pt-3'>
-                                                    <span>Total</span>
+                                                <div class='flex justify-between border-t pt-2 font-bold text-lg'>
+                                                    <span>Tổng thanh toán:</span>
                                                     <span>" . number_format($record->total_amount, 0, ',', '.') . " VNĐ</span>
                                                 </div>
                                             </div>
-                                            <div class='space-y-3 pt-4 border-t border-dashed'>
-                                                <div class='flex justify-between text-sm'>
-                                                    <span class='text-gray-500'>Paid by customer</span>
-                                                    <span class='text-gray-900'>0 VNĐ</span>
-                                                </div>
-                                                <div class='flex justify-between text-sm font-medium'>
-                                                    <span class='text-gray-500'>Payment due</span>
-                                                    <span class='text-indigo-600 underline cursor-pointer'>Edit</span>
-                                                    <span class='text-gray-900'>" . number_format($record->total_amount, 0, ',', '.') . " VNĐ</span>
-                                                </div>
-                                            </div>
-                                            <div class='flex justify-end gap-3 mt-6 pt-4 border-t'>
-                                                <button class='px-4 py-2 text-sm font-medium border rounded-lg bg-white hover:bg-gray-50'>Send invoice</button>
-                                                <button class='px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm'>Collect payment</button>
-                                            </div>
                                         ")),
                                 ]),
+                        ])->columnSpan(2),
 
-                            Section::make('Timeline')
-                                ->collapsed()
-                                ->schema([
-                                    Forms\Components\Placeholder::make('timeline_mock')
-                                        ->label('')
-                                        ->content('Leave a comment...'),
-                                ]),
-                        ])
-                        ->columnSpan(2),
-
-                    // RIGHT COLUMN (Sidebar)
+                    // CỘT PHẢI: Người duyệt & Khách hàng
                     Grid::make(1)
                         ->schema([
-                            Section::make('Notes')
+                            Section::make('Người thực hiện duyệt')
+                                ->icon('heroicon-o-shield-check')
                                 ->schema([
-                                    Textarea::make('notes')
+                                    Forms\Components\Placeholder::make('processor_status')
                                         ->label('')
-                                        ->rows(1)
-                                        ->placeholder('No notes provided')
-                                        ->disabled(),
+                                        ->content(fn ($record) => new \Illuminate\Support\HtmlString(
+                                            $record->processor 
+                                            ? "<div class='flex flex-col gap-1'>
+                                                <span class='font-bold text-gray-900'>{$record->processor->name}</span>
+                                                <span class='text-[10px] px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full w-fit uppercase font-black'>{$record->processor->role}</span>
+                                                <p class='text-[10px] text-gray-400 mt-1'>Đã xử lý: {$record->updated_at->format('d/m/Y H:i')}</p>
+                                               </div>"
+                                            : "<span class='text-amber-600 font-bold italic animate-pulse'>Đang chờ xử lý...</span>"
+                                        )),
                                 ]),
 
-                            Section::make('Customers')
+                            Section::make('Khách hàng')
                                 ->schema([
-                                    Forms\Components\Placeholder::make('customer_card')
+                                    Forms\Components\Placeholder::make('customer_info')
                                         ->label('')
                                         ->content(fn ($record) => new \Illuminate\Support\HtmlString("
-                                            <div class='flex flex-col gap-1'>
-                                                <a href='#' class='font-medium text-indigo-600 hover:underline flex items-center gap-2'>
-                                                    <svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'></path></svg>
-                                                    {$record->customer?->name}
-                                                </a>
-                                                <p class='text-sm text-gray-500'>1 Order</p>
-                                                <p class='text-xs text-gray-400 italic mt-1'>Customer is tax-exempt</p>
+                                            <div class='text-sm'>
+                                                <p className='font-bold'>{$record->customer?->name}</p>
+                                                <p className='text-gray-500'>{$record->customer?->email}</p>
+                                                <p className='mt-2 pt-2 border-t text-gray-700'>{$record->shipping_address}</p>
                                             </div>
                                         ")),
                                 ]),
-
-                            Section::make('Contact Information')
-                                ->schema([
-                                    Forms\Components\Placeholder::make('contact_card')
-                                        ->label('')
-                                        ->content(fn ($record) => new \Illuminate\Support\HtmlString("
-                                            <div class='flex flex-col gap-1 text-sm'>
-                                                <a href='mailto:{$record->customer?->email}' class='text-indigo-600 underline'>{$record->customer?->email}</a>
-                                                <span class='text-gray-500 mt-1'>No phone number</span>
-                                            </div>
-                                        ")),
-                                ]),
-
-                            Section::make('Shipping address')
-                                ->schema([
-                                    Forms\Components\Placeholder::make('shipping_card')
-                                        ->label('')
-                                        ->content(fn ($record) => new \Illuminate\Support\HtmlString("
-                                            <div class='text-sm text-gray-700 leading-relaxed'>
-                                                <p class='font-medium text-gray-900'>{$record->customer?->name}</p>
-                                                <p>{$record->shipping_address}</p>
-                                                <p class='mt-3 text-indigo-600 font-medium cursor-pointer flex items-center gap-1 hover:underline'>
-                                                    <svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'></path><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'></path></svg>
-                                                    View Map
-                                                </p>
-                                            </div>
-                                        ")),
-                                ]),
-                        ])
-                        ->columnSpan(1),
+                        ])->columnSpan(1),
                 ])
         ]);
     }
@@ -223,7 +124,6 @@ class OrderResource extends Resource
     {
         return $schema
             ->components([
-                // HEADER: Mã đơn + trạng thái
                 Section::make()
                     ->schema([
                         Flex::make([
@@ -235,96 +135,64 @@ class OrderResource extends Resource
                                     ->color('gray')
                                     ->size('sm'),
                             ])->grow(),
-                            Text::make(fn ($record) => match($record->status ?? 'pending') {
+                            Text::make(fn ($record) => match($record->order_status ?? 'pending') {
                                 'pending'    => 'Chờ xử lý',
                                 'processing' => 'Đang xử lý',
                                 'shipped'    => 'Đang giao',
                                 'delivered'  => 'Đã giao',
                                 'cancelled'  => 'Đã hủy',
-                                default      => ucfirst($record->status ?? 'pending'),
+                                default      => ucfirst($record->order_status ?? 'pending'),
                             })
                                 ->badge()
-                                ->color(fn ($record): string => match($record->status ?? 'pending') {
+                                ->color(fn ($record): string => match($record->order_status ?? 'pending') {
                                     'pending'    => 'warning',
                                     'processing' => 'info',
                                     'shipped'    => 'primary',
                                     'delivered'  => 'success',
                                     'cancelled'  => 'danger',
                                     default      => 'gray',
-                                })
-                                ->grow(false),
+                                }),
                         ])->alignCenter(),
                     ]),
 
-                // MẶT HÀNG ĐÃ ĐẶT
+                Section::make('Chi tiết thanh toán & Người duyệt')
+                    ->columns(2)
+                    ->schema([
+                        Group::make([
+                            Text::make('Phương thức thanh toán')->color('gray'),
+                            Text::make(fn ($record) => $record->paymentMethod?->name ?? 'N/A')->weight('bold'),
+                        ]),
+                        Group::make([
+                            Text::make('Người duyệt đơn')->color('gray'),
+                            Text::make(fn ($record) => $record->processor?->name ?? 'Chưa có người duyệt')
+                                ->weight('bold')
+                                ->color(fn($record) => $record->processed_by_id ? 'success' : 'warning'),
+                        ]),
+                    ]),
+
                 Section::make('Mặt hàng đã đặt')
-                    ->icon('heroicon-o-shopping-bag')
                     ->schema(fn ($record) => $record->items->map(fn ($item) =>
                         Flex::make([
                             Image::make(
                                 fn () => (str_starts_with($item->product?->thumbnail_url ?? '', 'http'))
                                     ? $item->product->thumbnail_url
                                     : asset('storage/' . ($item->product?->thumbnail_url ?? 'placeholder.png')),
-                                'Product Image'
-                            )
-                                ->extraAttributes(['class' => 'rounded-lg object-cover'])
-                                ->imageSize(56)
-                                ->grow(false),
-                            Group::make([
-                                Text::make($item->product?->name ?? 'Sản phẩm không tồn tại')
-                                    ->weight('semibold'),
-                                Text::make($item->variant?->sku ?? 'N/A')
-                                    ->color('gray')
-                                    ->size('sm'),
-                            ])->grow()->gap(0),
-                            Group::make([
-                                Text::make(number_format($item->unit_price, 0, ',', '.') . ' ₫')
-                                    ->weight('bold')
-                                    ->color('primary'),
-                                Text::make('x' . $item->quantity)
-                                    ->size('sm')
-                                    ->color('gray'),
-                            ])->grow(false)->gap(0),
-                        ])->alignCenter()->extraAttributes(['class' => 'py-3 border-b last:border-0 gap-4'])
+                                'Thumbnail'
+                            )->imageSize(50)->grow(false),
+                            Text::make($item->product?->name)->weight('bold')->grow(),
+                            Text::make(number_format($item->unit_price, 0, ',', '.') . ' ₫ x' . $item->quantity)->grow(false),
+                        ])->alignCenter()->extraAttributes(['class' => 'py-2 border-b last:border-0'])
                     )->toArray()),
 
-                // TÓM TẮT TÀI CHÍNH
-                Section::make('Tóm tắt tài chính')
-                    ->icon('heroicon-o-credit-card')
+                Section::make('Tổng cộng')
                     ->schema([
                         Flex::make([
-                            Text::make('Tạm tính')->color('gray'),
-                            Text::make(fn ($record) => number_format($record->total_amount, 0, ',', '.') . ' ₫'),
-                        ])->alignBetween(),
-
-                        Flex::make([
-                            Text::make('Phí vận chuyển')->color('gray'),
-                            Text::make('Miễn phí')->color('success')->weight('medium'),
-                        ])->alignBetween(),
-
-                        Flex::make([
-                            Text::make('Tổng cộng')->weight('bold'),
+                            Text::make('Tổng tiền thanh toán')->weight('bold')->size('lg'),
                             Text::make(fn ($record) => number_format($record->total_amount, 0, ',', '.') . ' ₫')
-                                ->weight('bold')
+                                ->weight('black')
+                                ->size('lg')
                                 ->color('primary'),
-                        ])->alignBetween()->extraAttributes(['class' => 'border-t pt-3 mt-1']),
-
-                        Flex::make([
-                            Text::make('Thanh toán')->color('gray'),
-                            Text::make(fn ($record) => match(strtolower($record->payment_status ?? 'pending')) {
-                                'paid'    => 'Đã thanh toán',
-                                'pending' => 'Chờ thanh toán',
-                                'failed'  => 'Thất bại',
-                                default   => strtoupper($record->payment_status ?? 'PENDING'),
-                            })
-                                ->badge()
-                                ->color(fn ($record): string => match(strtolower($record->payment_status ?? 'pending')) {
-                                    'paid'    => 'success',
-                                    'pending' => 'warning',
-                                    'failed'  => 'danger',
-                                    default   => 'gray',
-                                }),
-                        ])->alignBetween()->extraAttributes(['class' => 'mt-2']),
+                        ])->alignBetween(),
                     ]),
 
                 // KHÁCH HÀNG + ĐỊA CHỈ
@@ -389,8 +257,12 @@ class OrderResource extends Resource
                         'cancelled' => 'Đã hủy',
                     ])
                     ->afterStateUpdated(function ($state, $old, $record) {
+                        // TỰ ĐỘNG GÁN NGƯỜI DUYỆT khi trạng thái thay đổi sang processing/shipped/delivered
+                        if (in_array($state, ['processing', 'shipped', 'delivered']) && !$record->processed_by_id) {
+                            $record->update(['processed_by_id' => auth()->id()]);
+                        }
+
                         // Logic: Chỉ hoàn kho khi trạng thái CHUYỂN THÀNH 'cancelled'
-                        // và trạng thái cũ KHÁC 'cancelled' (Tránh cộng dồn nhiều lần)
                         if ($state === 'cancelled' && $old !== 'cancelled') {
                             self::restoreStock($record);
                         }

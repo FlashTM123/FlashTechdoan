@@ -12,27 +12,37 @@
 
 ---
 
-## 🚀 Đột phá trong phiên bản mới (Cập nhật 04/05)
+## 🏗️ Chuẩn hóa Hệ thống & Quản trị Doanh nghiệp (Cập nhật 06/05)
 
-Hôm nay, FlashTech đã được nâng cấp toàn diện về mặt **Storefront (Giao diện người dùng)** với các tính năng cao cấp:
+Hôm nay, FlashTech đã hoàn thành bước ngoặt về **Kiến trúc dữ liệu** và **Quy trình vận hành chuyên nghiệp**:
+
+### 💎 Chuẩn hóa Database (Normalization - 3NF)
+- **Từ JSON sang Relational:** Loại bỏ hoàn toàn việc lưu thông số kỹ thuật dạng JSON trong bảng sản phẩm. Thay thế bằng bảng quan hệ `product_variant_details` (1-N).
+- **Tối ưu hóa Truy vấn:** Sử dụng Eager Loading (`with('details')`) giúp giảm thiểu N+1 query, tăng tốc độ tải trang chi tiết sản phẩm.
+- **Tính nhất quán dữ liệu:** Đảm bảo mọi thông số kỹ thuật đều có cấu trúc rõ ràng (`attribute_name`, `attribute_value`), sẵn sàng cho tính năng lọc sản phẩm (Filtering) nâng cao.
+
+### 💳 Hệ thống Thanh toán & Truy vết (Audit Trail)
+- **Quản lý Thanh toán Tập trung:** Tách biệt phương thức thanh toán thành bảng `payment_methods`, cho phép dễ dàng mở rộng MoMo, VNPAY, COD... mà không cần sửa code.
+- **Truy vết Duyệt đơn:** Mọi đơn hàng giờ đây đều lưu vết `processed_by_id`. Hệ thống tự động ghi nhận nhân viên/admin xử lý khi đơn hàng thay đổi trạng thái.
+- **Badge Vai trò:** Hiển thị thông tin người duyệt kèm Badge vai trò (Admin/Staff) trực quan trong trang quản trị.
+
+### ⚙️ Tự động hóa & Branding
+- **Auto-SKU Generation:** Hệ thống tự động sinh mã SKU duy nhất cho từng biến thể sản phẩm (Format: `FT-XXXXXX`), giảm thiểu sai sót nhập liệu thủ công.
+- **Official Branding:** Chuyển đổi toàn bộ nhận diện từ "Laravel" sang thương hiệu chính thức **FlashTech** trên toàn bộ Dashboard và tiêu đề ứng dụng.
+
+---
+
+## 🚀 Đột phá trong Giao diện (Cập nhật 04/05)
+
+FlashTech đã được nâng cấp toàn diện về mặt **Storefront (Giao diện người dùng)** với các tính năng cao cấp:
 
 ### 🌗 Premium Dark/Light Mode
-- **Trải nghiệm đồng bộ:** Toàn bộ trang web (từ Header, Search Bar, Hero cho đến Footer) đều được tối ưu hóa cho chế độ tối.
-- **Ghi nhớ thông minh:** Tự động lưu lựa chọn của người dùng vào LocalStorage và đồng bộ với cài đặt hệ thống (Windows/macOS).
-- **Hiệu ứng mượt mà:** Chuyển đổi màu sắc với hiệu ứng `transition` dịu mắt.
+- **Trải nghiệm đồng bộ:** Toàn bộ trang web đều được tối ưu hóa cho chế độ tối (Header, Search Bar, Hero, Footer).
+- **Ghi nhớ thông minh:** Tự động lưu lựa chọn của người dùng và đồng bộ với cài đặt hệ thống.
 
 ### 🔍 Live Search & Suggestions
-- **Tìm kiếm tức thì:** Gợi ý sản phẩm ngay khi người dùng gõ từ 2 ký tự.
-- **Visual Feedback:** Hiển thị trực quan hình ảnh, tên sản phẩm và giá bán ngay trong dropdown gợi ý.
-- **Debounce Optimization:** Tối ưu hóa hiệu suất server, giảm thiểu truy vấn thừa.
-
-### 🔥 Gaming Universe Section
-- **Thiết kế chuyên biệt:** Một không gian Dark Mode dành riêng cho Laptop Gaming với hiệu ứng ánh sáng (Glow) và độ tương phản cao.
-- **Logic lọc thông minh:** Tự động lấy sản phẩm từ danh mục Gaming để hiển thị thành một khối riêng biệt đẳng cấp.
-
-### 📊 Dynamic Technical Specifications
-- **Cập nhật theo biến thể:** Bảng thông số kỹ thuật tự động thay đổi khi khách hàng chọn các phiên bản khác nhau (RAM/SSD).
-- **Xử lý dữ liệu linh hoạt:** Hỗ trợ cả định dạng JSON Object và Array từ Database, đảm bảo hiển thị thông số mượt mà, không lỗi.
+- **Tìm kiếm tức thì:** Gợi ý sản phẩm kèm hình ảnh và giá bán ngay khi người dùng gõ từ khóa.
+- **Hiệu ứng mượt mà:** Tối ưu hóa hiệu suất server, giảm thiểu truy vấn thừa.
 
 ---
 
@@ -85,10 +95,11 @@ npm run dev
 ## 📅 Nhật ký phát triển (Roadmap)
 
 - [x] **Phase 1**: Khởi tạo Core & Dual Database System.
-- [x] **Phase 2**: Xây dựng Admin Panel (Filament) & Quản lý Coupon.
-- [x] **Phase 3**: Triển khai Storefront UI, Live Search & Dark Mode (Current).
-- [ ] **Phase 4**: Hoàn thiện Giỏ hàng & Tích hợp Thanh toán Online.
-- [ ] **Phase 5**: Tối ưu SEO & Đóng gói sản phẩm.
+- [x] **Phase 2**: Xây dựng Admin Panel & Quản lý Coupon.
+- [x] **Phase 3**: Triển khai Storefront UI, Live Search & Dark Mode.
+- [x] **Phase 4**: Chuẩn hóa Database 3NF & Hệ thống Duyệt đơn Doanh nghiệp.
+- [ ] **Phase 5**: Hoàn thiện Giỏ hàng & Tích hợp Thanh toán Online thực tế.
+- [ ] **Phase 6**: Tối ưu SEO & Đóng gói sản phẩm.
 
 ---
 <div align="center">

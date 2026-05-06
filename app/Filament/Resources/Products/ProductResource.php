@@ -92,10 +92,13 @@ class ProductResource extends Resource
                             Repeater::make('variants')
                                 ->relationship('variants')
                                 ->schema([
-                                    Grid::make(3)->schema([
+                                    Grid::make(2)->schema([
                                         TextInput::make('variant_name')->label('Cấu hình (VD: Core i5/8GB)')->required(),
-                                        TextInput::make('color')->label('Màu sắc'),
-                                        TextInput::make('sku')->label('Mã SKU')->required(),
+                                        TextInput::make('sku')
+                                            ->label('Mã SKU')
+                                            ->default(fn () => 'FT-' . strtoupper(Str::random(6)))
+                                            ->required()
+                                            ->unique(ignoreRecord: true),
                                     ]),
                                     Grid::make(3)->schema([
                                         TextInput::make('price')->label('Giá bán')->numeric()->required(),
@@ -103,11 +106,12 @@ class ProductResource extends Resource
                                         TextInput::make('stock')->label('Tồn kho')->numeric()->default(0),
                                     ]),
 
-                                    Repeater::make('specifications')
-                                        ->label('Thông số kỹ thuật riêng cho cấu hình này')
+                                    Repeater::make('details')
+                                        ->relationship('details')
+                                        ->label('Thông số kỹ thuật chi tiết')
                                         ->schema([
-                                            TextInput::make('key')->label('Thuộc tính')->required(),
-                                            TextInput::make('value')->label('Giá trị')->required(),
+                                            TextInput::make('attribute_name')->label('Thuộc tính (VD: RAM)')->required(),
+                                            TextInput::make('attribute_value')->label('Giá trị (VD: 16GB)')->required(),
                                         ])
                                         ->columns(2)
                                         ->columnSpanFull()

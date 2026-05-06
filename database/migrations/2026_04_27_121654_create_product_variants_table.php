@@ -15,12 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->string('variant_name');
-            $table->string('color')->nullable();
             $table->decimal('price', 12, 2);
             $table->decimal('old_price', 12, 2)->nullable();
             $table->integer('stock')->default(0);
             $table->string('sku')->unique();
-            $table->json('specifications')->nullable();
             $table->timestamps();
         });
     }

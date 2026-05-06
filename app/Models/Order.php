@@ -13,12 +13,13 @@ class Order extends Model
         'order_code',
         'total_amount',
         'shipping_address',
-        'payment_method',
+        'payment_method_id', // Thay đổi từ payment_method (string) sang ID
         'payment_status',
         'order_status',
         'notes',
         'coupon_id',
         'discount_amount',
+        'processed_by_id', // Thêm người duyệt
     ];
 
     protected $casts = [
@@ -31,6 +32,16 @@ class Order extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+
+    public function processor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'processed_by_id');
     }
 
     public function items(): HasMany

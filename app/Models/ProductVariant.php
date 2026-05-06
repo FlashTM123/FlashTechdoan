@@ -7,23 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 class ProductVariant extends Model
 {
     protected $fillable = [
-        'product_id', 
+        'product_id',
         'variant_name', 
-        'color', 
-        'price', 
-        'old_price', 
-        'stock', 
+        'price',
+        'old_price',
+        'stock',
         'sku',
-        'specifications' // Thêm specifications
-    ];
-
-    // Ép kiểu mảng JSON
-    protected $casts = [
-        'specifications' => 'array',
     ];
 
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function details()
+    {
+        return $this->hasMany(ProductVariantDetail::class);
     }
 }

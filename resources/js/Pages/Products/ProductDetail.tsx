@@ -106,50 +106,40 @@ export default function ProductDetail({ product }: { product: any }) {
                         />
                     </div>
 
-                    {/* THÔNG SỐ KỸ THUẬT */}
+                    {/* THÔNG SỐ KỸ THUẬT (Đã chuẩn hóa Database) */}
                     <div className="pt-10 border-t border-slate-100">
                         <h4 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">Thông số kỹ thuật</h4>
-                        <div className="bg-slate-50 rounded-3xl overflow-hidden border border-slate-100 transition-all duration-500">
+                        <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 transition-all duration-500">
                             <table className="w-full text-sm">
-                                <tbody>
-                                    {selectedVariant?.specifications && (
-                                        Array.isArray(selectedVariant.specifications) 
-                                        ? // Trường hợp dữ liệu là Mảng: [{ name: 'CPU', value: 'i7' }, ...]
-                                          selectedVariant.specifications.map((spec: any, index: number) => (
-                                            <tr key={index} className={index % 2 === 0 ? 'bg-transparent' : 'bg-white/50'}>
-                                                <td className="py-4 pl-6 font-semibold text-slate-500 w-1/3">
-                                                    {spec.name || spec.label || spec.key || `Thông số ${index + 1}`}
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                    {selectedVariant?.details && selectedVariant.details.length > 0 ? (
+                                        selectedVariant.details.map((detail: any, index: number) => (
+                                            <tr key={detail.id} className="hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors">
+                                                <td className="py-4 pl-6 font-semibold text-slate-500 dark:text-slate-400 w-1/3">
+                                                    {detail.attribute_name}
                                                 </td>
-                                                <td className="py-4 pr-6 text-slate-900 font-bold">
-                                                    {spec.value || spec.content || spec.val || "—"}
+                                                <td className="py-4 pr-6 text-slate-900 dark:text-white font-bold">
+                                                    {detail.attribute_value}
                                                 </td>
                                             </tr>
-                                          ))
-                                        : // Trường hợp dữ liệu là Đối tượng: { "CPU": "i7", "RAM": "16GB" }
-                                          Object.entries(selectedVariant.specifications).map(([key, value], index) => (
-                                            <tr key={index} className={index % 2 === 0 ? 'bg-transparent' : 'bg-white/50'}>
-                                                <td className="py-4 pl-6 font-semibold text-slate-500 w-1/3">{key}</td>
-                                                <td className="py-4 pr-6 text-slate-900 font-bold">{String(value)}</td>
-                                            </tr>
-                                          ))
-                                    )}
-                                    {(!selectedVariant?.specifications || (typeof selectedVariant.specifications === 'object' && Object.keys(selectedVariant.specifications).length === 0)) && (
-                                        /* Fallback khi không có thông số */
+                                        ))
+                                    ) : (
+                                        /* Fallback khi không có thông số trong bảng details */
                                         [
                                             { label: "CPU", value: "Đang cập nhật" },
                                             { label: "RAM", value: "Đang cập nhật" },
                                             { label: "Ổ cứng", value: "Đang cập nhật" },
                                         ].map((spec, index) => (
-                                            <tr key={index} className={index % 2 === 0 ? 'bg-transparent' : 'bg-white/50'}>
-                                                <td className="py-4 pl-6 font-semibold text-slate-500 w-1/3">{spec.label}</td>
-                                                <td className="py-4 pr-6 text-slate-900 font-bold">{spec.value}</td>
+                                            <tr key={index}>
+                                                <td className="py-4 pl-6 font-semibold text-slate-500 dark:text-slate-400 w-1/3">{spec.label}</td>
+                                                <td className="py-4 pr-6 text-slate-900 dark:text-white font-bold">{spec.value}</td>
                                             </tr>
                                         ))
                                     )}
                                 </tbody>
                             </table>
                         </div>
-                        <button className="w-full mt-4 py-3 text-indigo-600 font-bold text-sm hover:bg-indigo-50 rounded-2xl transition-all">
+                        <button className="w-full mt-4 py-3 text-indigo-600 dark:text-indigo-400 font-bold text-sm hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-2xl transition-all">
                             Xem cấu hình chi tiết ↓
                         </button>
                     </div>
