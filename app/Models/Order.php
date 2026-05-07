@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     protected $fillable = [
-        'customer_id',
+        'user_id',
         'order_code',
         'total_amount',
         'shipping_address',
@@ -29,9 +29,9 @@ class Order extends Model
 
     // ─── Relationships ───────────────────────────────────────────────
 
-    public function customer(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function paymentMethod(): BelongsTo

@@ -63,6 +63,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->brandName('FlashTech')
             ->login(\App\Filament\Pages\Auth\Login::class)
+            ->authGuard('admin')
             ->colors([
                 'primary' => Color::Amber,
             ])

@@ -84,6 +84,21 @@ class ProductResource extends Resource
                                 ]),
                             Toggle::make('is_featured')->label('Nổi bật'),
                             Toggle::make('is_active')->label('Kích hoạt')->default(true),
+
+                            Repeater::make('images')
+                                ->relationship('images', modifyQueryUsing: fn ($query) => $query->whereNull('product_variant_id'))
+                                ->label('Bộ sưu tập ảnh chung')
+                                ->schema([
+                                    TextInput::make('image_url')
+                                        ->label('Link ảnh')
+                                        ->url()
+                                        ->required(),
+                                    Toggle::make('is_primary')
+                                        ->label('Ảnh chính')
+                                        ->default(false),
+                                ])
+                                ->columns(2)
+                                ->columnSpanFull(),
                         ]),
 
                     // TAB 2: BIẾN THỂ & THÔNG SỐ RIÊNG (MySQL)
@@ -112,6 +127,22 @@ class ProductResource extends Resource
                                         ->schema([
                                             TextInput::make('attribute_name')->label('Thuộc tính (VD: RAM)')->required(),
                                             TextInput::make('attribute_value')->label('Giá trị (VD: 16GB)')->required(),
+                                        ])
+                                        ->columns(2)
+                                        ->columnSpanFull(),
+
+                                    Repeater::make('images')
+                                        ->relationship('images')
+                                        ->label('Hình ảnh biến thể')
+                                        ->schema([
+                                            TextInput::make('image_url')
+                                                ->label('Link ảnh')
+                                                ->url()
+                                                ->required()
+                                                ->placeholder('https://example.com/image.jpg'),
+                                            Toggle::make('is_primary')
+                                                ->label('Ảnh chính')
+                                                ->default(false),
                                         ])
                                         ->columns(2)
                                         ->columnSpanFull()

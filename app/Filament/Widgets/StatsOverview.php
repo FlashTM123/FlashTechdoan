@@ -6,7 +6,7 @@ use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use App\Models\Product;
-use App\Models\Customer;
+use App\Models\User;
 use App\Models\Review;
 
 class StatsOverview extends StatsOverviewWidget
@@ -21,7 +21,7 @@ class StatsOverview extends StatsOverviewWidget
                 ->descriptionIcon('heroicon-m-computer-desktop')
                 ->color('success'),
 
-            Stat::make('Tổng khách hàng', Customer::count())
+            Stat::make('Tổng khách hàng', User::where('role', 'customer')->count())
                 ->description('Tài khoản đã đăng ký')
                 ->descriptionIcon('heroicon-m-user-group')
                 ->color('info'),

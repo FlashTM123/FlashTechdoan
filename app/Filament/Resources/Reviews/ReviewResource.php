@@ -31,9 +31,9 @@ class ReviewResource extends Resource
     {
         return $table
             ->columns([
-                // Hiển thị tên khách hàng
-                TextColumn::make('customer.name')
-                    ->label('Khách hàng')
+                // Hiển thị tên người dùng
+                TextColumn::make('user.name')
+                    ->label('Người đánh giá')
                     ->searchable()
                     ->sortable(),
 

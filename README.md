@@ -12,6 +12,26 @@
 
 ---
 
+## 🔐 Hợp nhất Hệ thống User & Premium Auth (Cập nhật 07/05)
+
+Hôm nay, FlashTech đã nâng cấp hệ thống định danh và bảo mật lên tiêu chuẩn chuyên nghiệp:
+
+### 👤 Hợp nhất Cơ sở dữ liệu Người dùng
+- **Unified Identity:** Hợp nhất bảng `customers` vào `users`. Toàn bộ dữ liệu khách hàng hiện được quản lý tập trung, giúp đơn giản hóa quy trình đặt hàng và báo cáo.
+- **Role-Based Guards:** Triển khai Guard riêng biệt cho `web` (Khách hàng) và `admin` (Nhân viên). Đảm bảo tính độc lập tuyệt đối của phiên làm việc (Session).
+- **Security First:** Chặn hoàn toàn quyền truy cập chéo giữa các giao diện (Nhân viên không được đăng nhập tại trang khách và ngược lại).
+
+### 🎨 Tái cấu hình Trải nghiệm Đăng nhập (Auth UI)
+- **Premium Design:** Thay thế trang Login/Register mặc định bằng giao diện **Split-screen** đẳng cấp, sử dụng hình ảnh Laptop 4K nghệ thuật.
+- **Component Redesign:** Tùy biến lại toàn bộ các UI components (`PrimaryButton`, `TextInput`) sang phong cách bo góc lớn, đồng bộ với ngôn ngữ thiết kế Apple-inspired.
+- **Staff Navbar Badge:** Tự động nhận diện và hiển thị nhãn **"STAFF"** kèm lối tắt vào Dashboard nhanh trên thanh điều hướng nếu người dùng là Quản trị viên.
+
+### 📊 Tối ưu hóa Quản trị (Filament)
+- **Dynamic Stats:** Widget thống kê đã được cập nhật để truy vấn dữ liệu trực tiếp từ bảng User đã hợp nhất.
+- **Read-only Customer View:** Thiết lập trang xem thông tin khách hàng chuyên biệt, đảm bảo an toàn dữ liệu khách hàng.
+
+---
+
 ## 🏗️ Chuẩn hóa Hệ thống & Quản trị Doanh nghiệp (Cập nhật 06/05)
 
 Hôm nay, FlashTech đã hoàn thành bước ngoặt về **Kiến trúc dữ liệu** và **Quy trình vận hành chuyên nghiệp**:
@@ -97,7 +117,7 @@ npm run dev
 - [x] **Phase 1**: Khởi tạo Core & Dual Database System.
 - [x] **Phase 2**: Xây dựng Admin Panel & Quản lý Coupon.
 - [x] **Phase 3**: Triển khai Storefront UI, Live Search & Dark Mode.
-- [x] **Phase 4**: Chuẩn hóa Database 3NF & Hệ thống Duyệt đơn Doanh nghiệp.
+- [x] **Phase 4**: Chuẩn hóa Database 3NF, Hợp nhất User & Bảo mật đa tầng.
 - [ ] **Phase 5**: Hoàn thiện Giỏ hàng & Tích hợp Thanh toán Online thực tế.
 - [ ] **Phase 6**: Tối ưu SEO & Đóng gói sản phẩm.
 

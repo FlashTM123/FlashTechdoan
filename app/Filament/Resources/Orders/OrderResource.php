@@ -105,12 +105,12 @@ class OrderResource extends Resource
 
                             Section::make('Khách hàng')
                                 ->schema([
-                                    Forms\Components\Placeholder::make('customer_info')
+                                    Forms\Components\Placeholder::make('user_info')
                                         ->label('')
                                         ->content(fn ($record) => new \Illuminate\Support\HtmlString("
                                             <div class='text-sm'>
-                                                <p className='font-bold'>{$record->customer?->name}</p>
-                                                <p className='text-gray-500'>{$record->customer?->email}</p>
+                                                <p className='font-bold'>{$record->user?->name}</p>
+                                                <p className='text-gray-500'>{$record->user?->email}</p>
                                                 <p className='mt-2 pt-2 border-t text-gray-700'>{$record->shipping_address}</p>
                                             </div>
                                         ")),
@@ -201,9 +201,9 @@ class OrderResource extends Resource
                         Section::make('Khách hàng')
                             ->icon('heroicon-o-user')
                             ->schema([
-                                Text::make(fn ($record) => $record->customer?->name ?? 'Khách vãng lai')
+                                Text::make(fn ($record) => $record->user?->name ?? 'Khách vãng lai')
                                     ->weight('semibold'),
-                                Text::make(fn ($record) => $record->customer?->email ?? '—')
+                                Text::make(fn ($record) => $record->user?->email ?? '—')
                                     ->color('gray')
                                     ->size('sm'),
                             ]),
@@ -237,8 +237,8 @@ class OrderResource extends Resource
                     ->sortable()
                     ->weight('bold'),
 
-                // Nếu bạn nối với User thì dùng user.name, nếu nối Customer thì dùng customer.name
-                Tables\Columns\TextColumn::make('customer.name')
+                // Nếu bạn nối với User thì dùng user.name
+                Tables\Columns\TextColumn::make('user.name')
                     ->label('Khách hàng')
                     ->searchable(),
 

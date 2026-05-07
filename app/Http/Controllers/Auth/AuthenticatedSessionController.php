@@ -31,9 +31,18 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // Chặn tất cả nhân viên (Admin, Moderator, Employee) đăng nhập tại trang khách
+        if (Auth::user()->role !== 'customer') {
+            Auth::guard('web')->logout();
+
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'email' => 'Tài khoản nhân viên/quản trị vui lòng đăng nhập tại trang dành riêng cho Staff.',
+            ]);
+        }
+
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended('/');
     }
 
     /**

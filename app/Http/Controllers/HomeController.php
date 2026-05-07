@@ -27,8 +27,14 @@ class HomeController extends Controller
 
     public function show($id)
     {
-        // Tìm sản phẩm kèm biến thể và chi tiết thông số
-        $product = Product::with(['variants.details', 'category'])->findOrFail($id);
+        // Tìm sản phẩm kèm biến thể, chi tiết thông số và hình ảnh
+        $product = Product::with([
+            'variants.details', 
+            'variants.images', 
+            'images', 
+            'category'
+        ])->findOrFail($id);
+
         return inertia('Products/ProductDetail', [
             'product' => $product
         ]);

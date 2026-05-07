@@ -20,6 +20,14 @@ class UserResource extends Resource
     protected static \UnitEnum|string|null $navigationGroup = 'Hệ thống';
     protected static ?int $navigationSort = 1;
 
+    /**
+     * Chỉ lấy những User KHÔNG PHẢI là customer (Admin, Moderator, Employee)
+     */
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->where('role', '!=', 'customer');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
