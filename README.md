@@ -26,9 +26,10 @@ Hôm nay, FlashTech đã nâng cấp hệ thống định danh và bảo mật l
 - **Component Redesign:** Tùy biến lại toàn bộ các UI components (`PrimaryButton`, `TextInput`) sang phong cách bo góc lớn, đồng bộ với ngôn ngữ thiết kế Apple-inspired.
 - **Staff Navbar Badge:** Tự động nhận diện và hiển thị nhãn **"STAFF"** kèm lối tắt vào Dashboard nhanh trên thanh điều hướng nếu người dùng là Quản trị viên.
 
-### 📊 Tối ưu hóa Quản trị (Filament)
-- **Dynamic Stats:** Widget thống kê đã được cập nhật để truy vấn dữ liệu trực tiếp từ bảng User đã hợp nhất.
-- **Read-only Customer View:** Thiết lập trang xem thông tin khách hàng chuyên biệt, đảm bảo an toàn dữ liệu khách hàng.
+### 📊 Tối ưu hóa Quản trị & Bảo mật đa tầng
+- **Zero-Disruption Login:** Áp dụng cơ chế "Kiểm tra trước xác thực" (Pre-auth check) để chặn đăng nhập sai role ngay lập tức. Điều này giúp bảo vệ tuyệt đối Session ID, ngăn chặn việc văng tài khoản Admin khi thao tác tại trang khách hàng.
+- **Extended Panel Access:** Cấu hình quyền truy cập trang quản trị cho bộ ba vai trò: `Admin`, `Moderator` và `Employee`.
+- **UI Bug Fixes:** Khắc phục lỗi chữ "tàng hình" trong Dark Mode và đồng bộ lại hệ thống hình ảnh nền cao cấp từ Unsplash.
 
 ---
 
