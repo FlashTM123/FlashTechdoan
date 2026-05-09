@@ -183,12 +183,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                         )}
                                     </div>
                                     <div className="flex items-center gap-3">
+                                        <Link 
+                                            href={route('profile.show')} 
+                                            className="text-[9px] font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors"
+                                        >
+                                            Hồ sơ
+                                        </Link>
                                         {(auth.user.role === 'admin' || auth.user.role === 'moderator') && (
                                             <a 
                                                 href="/admin" 
                                                 className="text-[9px] font-bold text-amber-600 dark:text-amber-500 hover:underline"
                                             >
-                                                Dashboard
+                                                Admin
                                             </a>
                                         )}
                                         <Link 
@@ -201,8 +207,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                         </Link>
                                     </div>
                                 </div>
-                                <div className="w-9 h-9 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-indigo-200 dark:shadow-none transform hover:rotate-6 transition-transform">
-                                    {auth.user.name.charAt(0).toUpperCase()}
+                                <div className="w-9 h-9 rounded-2xl overflow-hidden bg-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-indigo-500/20 dark:shadow-none transform hover:rotate-6 transition-all duration-300">
+                                    {auth.user.profile?.avatar ? (
+                                        <img 
+                                            src={`/storage/${auth.user.profile.avatar}`} 
+                                            alt={auth.user.name} 
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        auth.user.name.charAt(0).toUpperCase()
+                                    )}
                                 </div>
                             </div>
                         ) : (

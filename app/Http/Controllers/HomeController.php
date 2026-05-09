@@ -41,18 +41,36 @@ class HomeController extends Controller
     }
     public function product(Request $request)
     {
-      $products = Product::query()
-      ->with('variants.details')
-      ->where('is_active', true)
-      ->when($request->category, function ($query, $slug){
-            $query->whereHas('category', fn($q) => $q->where('slug', $slug));
-      })
-      ->latest()
-      ->get();
+        $query = Product::query()
+            ->with(['brand', 'variants.details', 'images'])
+            ->where('is_active', true);
 
-      return inertia('Product', [
-          'products' => $products
-      ]);
+        // Lọc theo Danh mục
+        if ($request->category) {
+            $query->whereHas('category', fn($q) => $q->where('slug', $request->category));
+        }
+
+        // Lọc theo Thương hiệu
+        if ($request->brand) {
+            $query->whereHas('brand', fn($q) => $q->where('slug', $request->brand));
+        }
+
+        // Lọc theo Khoảng giá (Lọc trên bảng variants)
+        if ($request->min_price) {
+            $query->whereHas('variants', fn($q) => $q->where('price', '>=', $request->min_price));
+        }
+        if ($request->max_price) {
+            $query->whereHas('variants', fn($q) => $q->where('price', '<=', $request->max_price));
+        }
+
+        $products = $query->latest()->paginate(12)->withQueryString();
+
+        return inertia('Products/Index', [
+            'products' => $products,
+            'brands' => \App\Models\Brand::all(),
+            'categories' => Category::all(),
+            'filters' => $request->all(),
+        ]);
     }
 
     public function apiSearch(Request $request)

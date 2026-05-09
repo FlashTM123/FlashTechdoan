@@ -1,128 +1,104 @@
 <div align="center">
-  <img src="https://images.unsplash.com/photo-1593642632823-8f785ba67e45?q=80&w=1200&auto=format&fit=crop" alt="FlashTech Header" width="100%" style="border-radius: 20px; margin-bottom: 20px;" />
-  <h1>⚡ FLASHTECH E-COMMERCE ECOSYSTEM</h1>
-  <p><b>Hệ thống thương mại điện tử Laptop & Linh kiện công nghệ hiện đại</b></p>
+  <img src="https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=1200&auto=format&fit=crop" alt="FlashTech Header" width="100%" style="border-radius: 24px; margin-bottom: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);" />
+  
+  <h1>⚡ FLASHTECH: THE NEXT-GEN TECH COMMERCE</h1>
+  <p><b>Hệ thống TMĐT Laptop & Đồ công nghệ cao cấp | Laravel 13 + React 19 + Filament V5</b></p>
 
-  <!-- Badges -->
-  <a href="https://laravel.com" target="_blank"><img src="https://img.shields.io/badge/Laravel_13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" /></a>
-  <a href="https://react.dev" target="_blank"><img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" /></a>
-  <a href="https://tailwindcss.com" target="_blank"><img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" /></a>
-  <a href="https://www.mongodb.com" target="_blank"><img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" /></a>
+  <div style="margin: 20px 0;">
+    <img src="https://img.shields.io/badge/Laravel_13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" />
+    <img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+    <img src="https://img.shields.io/badge/Filament_V5-FFB11B?style=for-the-badge&logo=filament&logoColor=black" alt="Filament" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
+  </div>
 </div>
 
 ---
 
-## 🔐 Hợp nhất Hệ thống User & Premium Auth (Cập nhật 07/05)
-
-Hôm nay, FlashTech đã nâng cấp hệ thống định danh và bảo mật lên tiêu chuẩn chuyên nghiệp:
-
-### 👤 Hợp nhất Cơ sở dữ liệu Người dùng
-- **Unified Identity:** Hợp nhất bảng `customers` vào `users`. Toàn bộ dữ liệu khách hàng hiện được quản lý tập trung, giúp đơn giản hóa quy trình đặt hàng và báo cáo.
-- **Role-Based Guards:** Triển khai Guard riêng biệt cho `web` (Khách hàng) và `admin` (Nhân viên). Đảm bảo tính độc lập tuyệt đối của phiên làm việc (Session).
-- **Security First:** Chặn hoàn toàn quyền truy cập chéo giữa các giao diện (Nhân viên không được đăng nhập tại trang khách và ngược lại).
-
-### 🎨 Tái cấu hình Trải nghiệm Đăng nhập (Auth UI)
-- **Premium Design:** Thay thế trang Login/Register mặc định bằng giao diện **Split-screen** đẳng cấp, sử dụng hình ảnh Laptop 4K nghệ thuật.
-- **Component Redesign:** Tùy biến lại toàn bộ các UI components (`PrimaryButton`, `TextInput`) sang phong cách bo góc lớn, đồng bộ với ngôn ngữ thiết kế Apple-inspired.
-- **Staff Navbar Badge:** Tự động nhận diện và hiển thị nhãn **"STAFF"** kèm lối tắt vào Dashboard nhanh trên thanh điều hướng nếu người dùng là Quản trị viên.
-
-### 📊 Tối ưu hóa Quản trị & Bảo mật đa tầng
-- **Zero-Disruption Login:** Áp dụng cơ chế "Kiểm tra trước xác thực" (Pre-auth check) để chặn đăng nhập sai role ngay lập tức. Điều này giúp bảo vệ tuyệt đối Session ID, ngăn chặn việc văng tài khoản Admin khi thao tác tại trang khách hàng.
-- **Extended Panel Access:** Cấu hình quyền truy cập trang quản trị cho bộ ba vai trò: `Admin`, `Moderator` và `Employee`.
-- **UI Bug Fixes:** Khắc phục lỗi chữ "tàng hình" trong Dark Mode và đồng bộ lại hệ thống hình ảnh nền cao cấp từ Unsplash.
+## 🌟 Tầm nhìn dự án
+**FlashTech** không chỉ là một trang web bán hàng, mà là một trải nghiệm số hóa đẳng cấp dành cho người yêu công nghệ. Dự án tập trung vào:
+- **Visual Excellence:** Giao diện Editorial-grade với phong cách tối giản nhưng sang trọng.
+- **Micro-interactions:** Hiệu ứng chuyển động mượt mà bằng Framer Motion.
+- **Enterprise Management:** Quy trình quản trị đơn hàng và sản phẩm chuẩn hóa doanh nghiệp.
 
 ---
 
-## 🏗️ Chuẩn hóa Hệ thống & Quản trị Doanh nghiệp (Cập nhật 06/05)
+## 🚀 Các Module Đột Phá
 
-Hôm nay, FlashTech đã hoàn thành bước ngoặt về **Kiến trúc dữ liệu** và **Quy trình vận hành chuyên nghiệp**:
+### 🎨 1. Storefront Editorial Experience
+- **Dynamic Catalog:** Hệ thống danh mục sản phẩm thông minh, tự động thay đổi giao diện theo context.
+- **Smart Filtering:** Bộ lọc đa năng (Category, Brand, Price Range) với trải nghiệm "Instant Result".
+- **Glassmorphism Sidebar:** Thiết kế sidebar dạng kính mờ, hỗ trợ Sticky-navigation khi cuộn trang.
+- **Premium Dark Mode:** Tối ưu hóa độ tương phản và màu sắc sâu (`Slate-950`), giảm mỏi mắt cho người dùng.
 
-### 💎 Chuẩn hóa Database (Normalization - 3NF)
-- **Từ JSON sang Relational:** Loại bỏ hoàn toàn việc lưu thông số kỹ thuật dạng JSON trong bảng sản phẩm. Thay thế bằng bảng quan hệ `product_variant_details` (1-N).
-- **Tối ưu hóa Truy vấn:** Sử dụng Eager Loading (`with('details')`) giúp giảm thiểu N+1 query, tăng tốc độ tải trang chi tiết sản phẩm.
-- **Tính nhất quán dữ liệu:** Đảm bảo mọi thông số kỹ thuật đều có cấu trúc rõ ràng (`attribute_name`, `attribute_value`), sẵn sàng cho tính năng lọc sản phẩm (Filtering) nâng cao.
+### 🛡️ 2. Unified Identity System (Auth & Profile)
+- **Hybrid Auth:** Hệ thống đăng nhập đa tầng cho Khách hàng và Nhân viên trên cùng một nền tảng.
+- **Premium User Profile:** Trang cá nhân quản lý thông tin, lịch sử đơn hàng với giao diện đồng bộ.
+- **Security Observer:** Tự động bảo mật và đồng bộ hóa dữ liệu thông qua Eloquent Observers (như việc tự động map `product_id` cho ảnh biến thể).
 
-### 💳 Hệ thống Thanh toán & Truy vết (Audit Trail)
-- **Quản lý Thanh toán Tập trung:** Tách biệt phương thức thanh toán thành bảng `payment_methods`, cho phép dễ dàng mở rộng MoMo, VNPAY, COD... mà không cần sửa code.
-- **Truy vết Duyệt đơn:** Mọi đơn hàng giờ đây đều lưu vết `processed_by_id`. Hệ thống tự động ghi nhận nhân viên/admin xử lý khi đơn hàng thay đổi trạng thái.
-- **Badge Vai trò:** Hiển thị thông tin người duyệt kèm Badge vai trò (Admin/Staff) trực quan trong trang quản trị.
-
-### ⚙️ Tự động hóa & Branding
-- **Auto-SKU Generation:** Hệ thống tự động sinh mã SKU duy nhất cho từng biến thể sản phẩm (Format: `FT-XXXXXX`), giảm thiểu sai sót nhập liệu thủ công.
-- **Official Branding:** Chuyển đổi toàn bộ nhận diện từ "Laravel" sang thương hiệu chính thức **FlashTech** trên toàn bộ Dashboard và tiêu đề ứng dụng.
-
----
-
-## 🚀 Đột phá trong Giao diện (Cập nhật 04/05)
-
-FlashTech đã được nâng cấp toàn diện về mặt **Storefront (Giao diện người dùng)** với các tính năng cao cấp:
-
-### 🌗 Premium Dark/Light Mode
-- **Trải nghiệm đồng bộ:** Toàn bộ trang web đều được tối ưu hóa cho chế độ tối (Header, Search Bar, Hero, Footer).
-- **Ghi nhớ thông minh:** Tự động lưu lựa chọn của người dùng và đồng bộ với cài đặt hệ thống.
-
-### 🔍 Live Search & Suggestions
-- **Tìm kiếm tức thì:** Gợi ý sản phẩm kèm hình ảnh và giá bán ngay khi người dùng gõ từ khóa.
-- **Hiệu ứng mượt mà:** Tối ưu hóa hiệu suất server, giảm thiểu truy vấn thừa.
+### ⚙️ 3. Enterprise Admin Dashboard (Filament V5)
+- **Advanced Inventory:** Quản lý biến thể (Variants) đa cấp, tự động sinh SKU.
+- **Order Audit Trail:** Truy vết mọi thao tác duyệt đơn hàng của nhân viên.
+- **Live Statistics:** Biểu đồ doanh thu và tăng trưởng khách hàng thời gian thực.
 
 ---
 
-## 🛠️ Công nghệ cốt lõi
+## 🛠️ Stack Công nghệ & Kiến trúc
 
-| Lớp (Layer) | Công nghệ | Mục đích |
-|-------------|-------------------|---------------------|
-| **Backend** | **Laravel 13** | API & Logic xử lý chính |
-| **Frontend**| **React 19 + Inertia** | Trải nghiệm SPA không tải lại trang |
-| **Styling** | **Tailwind CSS** | Giao diện hiện đại, tối ưu Mobile |
-| **Admin**   | **Filament V5** | Quản trị sản phẩm, đơn hàng siêu tốc |
-| **Dual DB** | **MySQL & MongoDB** | Lưu trữ quan hệ & Dữ liệu động (Specs, Reviews) |
-
----
-
-## 🗄️ Kiến trúc Dual Database
-
-FlashTech sử dụng kiến trúc kết hợp độc đáo:
-- **MySQL**: Quản lý dữ liệu ACID (Người dùng, Đơn hàng, Biến thể sản phẩm).
-- **MongoDB**: Quản lý dữ liệu linh hoạt (Thông số kỹ thuật động, Đánh giá sản phẩm, Nhật ký hệ thống).
+| Thành phần | Công nghệ | Chi tiết |
+|-------------|-------------------|--------------------------------------|
+| **Core** | **Laravel 13** | Framework hiện đại nhất |
+| **View Layer**| **React 19 + Inertia** | Trải nghiệm Single Page App (SPA) |
+| **Animations**| **Framer Motion** | Layout animations & Page transitions |
+| **Styling** | **Tailwind CSS** | Thiết kế Responsive & Dark Mode |
+| **Database** | **MySQL & MongoDB** | Quan hệ (Orders) & Linh hoạt (Specs/Reviews) |
 
 ---
 
-## 🔧 Hướng dẫn Cài đặt nhanh
+## 🗄️ Kiến trúc Dữ liệu Hybrid
+FlashTech tận dụng sức mạnh của cả hai thế giới:
+- **MySQL (ACID):** Quản lý Giao dịch, Người dùng, Đơn hàng, và Cấu trúc Sản phẩm cốt lõi.
+- **MongoDB (NoSQL):** Lưu trữ Thông số kỹ thuật động (Dynamic Specs) của từng loại Laptop khác nhau và Hệ thống Đánh giá (Reviews) đòi hỏi tính linh hoạt cao.
 
-### 1. Cài đặt Dependencies
+---
+
+## 🔧 Cài đặt & Triển khai
+
+### 1. Dependencies
 ```bash
 composer install
-npm install --legacy-peer-deps
+npm install
 ```
 
-### 2. Thiết lập Môi trường
-Sao chép `.env.example` thành `.env` và cấu hình MySQL/MongoDB. Sau đó chạy:
+### 2. Database Setup
+Cấu hình `.env` với các tham số DB_CONNECTION (MySQL) và MONGODB_URI.
 ```bash
 php artisan key:generate
-php artisan migrate:fresh --seed
+php artisan migrate --seed
 ```
 
-### 3. Khởi chạy Hệ thống
+### 3. Development
 ```bash
-# Terminal 1
+# Terminal 1: Laravel Server
 php artisan serve
 
-# Terminal 2
+# Terminal 2: Vite Build
 npm run dev
 ```
 
 ---
 
-## 📅 Nhật ký phát triển (Roadmap)
+## 📅 Roadmap Phát triển
 
-- [x] **Phase 1**: Khởi tạo Core & Dual Database System.
-- [x] **Phase 2**: Xây dựng Admin Panel & Quản lý Coupon.
-- [x] **Phase 3**: Triển khai Storefront UI, Live Search & Dark Mode.
-- [x] **Phase 4**: Chuẩn hóa Database 3NF, Hợp nhất User & Bảo mật đa tầng.
-- [ ] **Phase 5**: Hoàn thiện Giỏ hàng & Tích hợp Thanh toán Online thực tế.
-- [ ] **Phase 6**: Tối ưu SEO & Đóng gói sản phẩm.
+- [x] **Giai đoạn 1:** Khởi tạo Core, Hybrid Database & Filament Dashboard.
+- [x] **Giai đoạn 2:** Triển khai Storefront cao cấp, Live Search & Premium Filtering.
+- [x] **Giai đoạn 3:** Hợp nhất hệ thống User & Xây dựng User Profile.
+- [x] **Giai đoạn 4:** Tối ưu hóa Database (3NF) & Eloquent Observers.
+- [ ] **Giai đoạn 5:** Hoàn thiện Giỏ hàng, Wishlist & Tích hợp VNPay/Momo.
+- [ ] **Giai đoạn 6:** Hệ thống thông báo Real-time & App Mobile (PWA).
 
 ---
+
 <div align="center">
-  <i>Đồ Án Tốt Nghiệp - Phát triển bởi ❤️ FlashTech Team</i>
+  <p><i>Dự án Đồ Án Tốt Nghiệp - Xây dựng bởi ❤️ <b>FlashTech Team</b></i></p>
+  <p>Developed with passion for modern web standards.</p>
 </div>

@@ -14,6 +14,7 @@ class UserProfile extends Model
         'phone',
         'address',
         'points',
+        'avatar',
     ];
 
     /**
