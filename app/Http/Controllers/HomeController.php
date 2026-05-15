@@ -15,6 +15,7 @@ class HomeController extends Controller
         $categories_with_products = Category::with(['products' => function ($q) {
             $q->where('is_active', true)->with('variants.details')->latest()->take(4);
         }])
+        ->withCount('products') // Đếm số sản phẩm trong mỗi danh mục
             ->whereHas('products') // Chỉ lấy danh mục nào thực sự có hàng
             ->get();
 
@@ -29,9 +30,9 @@ class HomeController extends Controller
     {
         // Tìm sản phẩm kèm biến thể, chi tiết thông số và hình ảnh
         $product = Product::with([
-            'variants.details', 
-            'variants.images', 
-            'images', 
+            'variants.details',
+            'variants.images',
+            'images',
             'category'
         ])->findOrFail($id);
 

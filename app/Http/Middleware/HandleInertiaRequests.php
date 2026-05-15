@@ -36,6 +36,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user() ? $request->user()->load('profile') : null,
             ],
             'categories' => Category::whereHas('products')->get(),
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
         ];
        
     }

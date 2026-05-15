@@ -1,12 +1,18 @@
 import AppLayout from '@/Layouts/AppLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, Heart, Share2, CheckCircle2, ChevronRight, Info, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useCart } from '@/Context/CartContext';
+import ReviewSection from '@/Components/Reviews/ReviewSection';
+import { usePage } from '@inertiajs/react';
 
 export default function ProductDetail({ product }: { product: any }) {
+    const { auth } = usePage().props as any;
+    const { addToCart } = useCart();
+
     // Khởi tạo biến thể đang chọn
     const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null);
     const [isWishlisted, setIsWishlisted] = useState(false);
@@ -24,7 +30,7 @@ export default function ProductDetail({ product }: { product: any }) {
         }
         const productImages = product.images || [];
         const productPrimary = productImages.find((img: any) => img.is_primary && !img.product_variant_id) || productImages.find((img: any) => !img.product_variant_id);
-        
+
         if (productPrimary) {
             return getImageUrl(productPrimary.image_url);
         }
@@ -32,11 +38,23 @@ export default function ProductDetail({ product }: { product: any }) {
     }, [selectedVariant, product]);
 
     const handleAddToCart = () => {
+        if (!selectedVariant) return;
+
+        addToCart({
+            id: product.id,
+            name: product.name,
+            variant_id: selectedVariant.id,
+            variant_name: selectedVariant.variant_name,
+            price: selectedVariant.price,
+            image: activeImage,
+            quantity: 1
+        });
+
         toast.success("Đã thêm vào giỏ hàng", {
             description: `${product.name} - ${selectedVariant?.variant_name} đã được thêm vào giỏ hàng của bạn.`,
             action: {
                 label: "Xem giỏ hàng",
-                onClick: () => console.log("View cart")
+                onClick: () => router.visit('/cart')
             }
         });
     };
@@ -69,7 +87,7 @@ export default function ProductDetail({ product }: { product: any }) {
                                 className="max-h-full w-auto object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-700"
                             />
                         </AnimatePresence>
-                        
+
                         {/* Phóng to overlay */}
                         <div className="absolute inset-0 bg-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                     </div>
@@ -77,7 +95,7 @@ export default function ProductDetail({ product }: { product: any }) {
                     {/* Thumbnail list (nếu có nhiều ảnh) */}
                     <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
                         {product.images?.map((img: any, idx: number) => (
-                            <button 
+                            <button
                                 key={img.id}
                                 onClick={() => setSelectedVariant(product.variants.find((v:any) => v.id === img.product_variant_id) || selectedVariant)}
                                 className={cn(
@@ -100,7 +118,9 @@ export default function ProductDetail({ product }: { product: any }) {
                             </span>
                             <div className="flex items-center gap-1 text-amber-400">
                                 <Star className="w-4 h-4 fill-current" />
-                                <span className="text-xs font-bold text-slate-600 dark:text-slate-400">4.9 (120 đánh giá)</span>
+                                <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                                    {product.average_rating || 0} ({product.reviews_count || 0} đánh giá)
+                                </span>
                             </div>
                         </div>
 
@@ -175,14 +195,14 @@ export default function ProductDetail({ product }: { product: any }) {
 
                     {/* HÀNH ĐỘNG */}
                     <div className="flex gap-4">
-                        <button 
+                        <button
                             onClick={handleAddToCart}
                             className="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-6 rounded-[2rem] font-black text-lg hover:bg-indigo-600 dark:hover:bg-indigo-500 dark:hover:text-white transition-all shadow-2xl shadow-slate-300 dark:shadow-none active:scale-[0.98] flex items-center justify-center gap-3 group"
                         >
                             <ShoppingCart className="w-6 h-6 group-hover:animate-bounce" strokeWidth={2.5} />
                             Thêm vào giỏ hàng
                         </button>
-                        <button 
+                        <button
                             onClick={() => setIsWishlisted(!isWishlisted)}
                             className={cn(
                                 "w-20 h-20 flex items-center justify-center border-2 rounded-[2rem] transition-all active:scale-90",
@@ -245,8 +265,12 @@ export default function ProductDetail({ product }: { product: any }) {
                             </table>
                         </div>
                     </div>
+                    </div>
                 </div>
-            </div>
+          
+
+            {/* PHẦN ĐÁNH GIÁ VÀ BÌNH LUẬN */}
+            <ReviewSection productId={product.id} auth={auth} />
         </AppLayout>
     );
 }

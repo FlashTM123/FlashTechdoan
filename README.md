@@ -15,75 +15,58 @@
 ---
 
 ## 🌟 Tầm nhìn dự án
-**FlashTech** không chỉ là một trang web bán hàng, mà là một trải nghiệm số hóa đẳng cấp dành cho người yêu công nghệ. Dự án tập trung vào:
-- **Visual Excellence:** Giao diện Editorial-grade với phong cách tối giản nhưng sang trọng.
-- **Micro-interactions:** Hiệu ứng chuyển động mượt mà bằng Framer Motion.
-- **Enterprise Management:** Quy trình quản trị đơn hàng và sản phẩm chuẩn hóa doanh nghiệp.
+**FlashTech** là một hệ thống thương mại điện tử chuyên biệt cho Laptop, tập trung vào trải nghiệm người dùng cao cấp (Premium UX) và quản trị doanh nghiệp chặt chẽ.
 
 ---
 
-## 🚀 Các Module Đột Phá
+## 🚀 Các Module Đột Phá Vừa Hoàn Thiện
 
-### 🎨 1. Storefront Editorial Experience
-- **Dynamic Catalog:** Hệ thống danh mục sản phẩm thông minh, tự động thay đổi giao diện theo context.
-- **Smart Filtering:** Bộ lọc đa năng (Category, Brand, Price Range) với trải nghiệm "Instant Result".
-- **Glassmorphism Sidebar:** Thiết kế sidebar dạng kính mờ, hỗ trợ Sticky-navigation khi cuộn trang.
-- **Premium Dark Mode:** Tối ưu hóa độ tương phản và màu sắc sâu (`Slate-950`), giảm mỏi mắt cho người dùng.
+### 🛒 1. Advanced Checkout & Discount System
+- **Smart Coupon Logic**: Hệ thống mã giảm giá đa dạng (Cố định hoặc Phần trăm).
+- **Anti-Abuse Control**: Giới hạn lượt dùng trên toàn hệ thống và **giới hạn mỗi người dùng chỉ được dùng 1 lần** thông qua truy vết lịch sử đơn hàng.
+- **Transaction History**: Lưu vết số tiền đã giảm (`discount_amount`) ngay trong đơn hàng để đảm bảo tính toàn vẹn của hóa đơn kể cả khi mã giảm giá bị xóa.
 
-### 🛡️ 2. Unified Identity System (Auth & Profile)
-- **Hybrid Auth:** Hệ thống đăng nhập đa tầng cho Khách hàng và Nhân viên trên cùng một nền tảng.
-- **Premium User Profile:** Trang cá nhân quản lý thông tin, lịch sử đơn hàng với giao diện đồng bộ.
-- **Security Observer:** Tự động bảo mật và đồng bộ hóa dữ liệu thông qua Eloquent Observers (như việc tự động map `product_id` cho ảnh biến thể).
+### 📦 2. Order Management & Tracking
+- **Real-time Status Sync**: Đồng bộ hóa trạng thái đơn hàng giữa Admin (Filament) và Khách hàng (React).
+- **History Tracking**: Giao diện Lịch sử đơn hàng (My Orders) dạng Card với đầy đủ thông tin trạng thái: *Chờ xử lý, Đang xử lý, Đang giao, Đã giao hàng, Đã hủy*.
+- **Self-Cancel Logic**: Khách hàng có thể tự hủy đơn khi ở trạng thái 'Chờ xử lý', tự động hoàn lại số lượng tồn kho (Stock).
 
-### ⚙️ 3. Enterprise Admin Dashboard (Filament V5)
-- **Advanced Inventory:** Quản lý biến thể (Variants) đa cấp, tự động sinh SKU.
-- **Order Audit Trail:** Truy vết mọi thao tác duyệt đơn hàng của nhân viên.
-- **Live Statistics:** Biểu đồ doanh thu và tăng trưởng khách hàng thời gian thực.
-
----
-
-## 🛠️ Stack Công nghệ & Kiến trúc
-
-| Thành phần | Công nghệ | Chi tiết |
-|-------------|-------------------|--------------------------------------|
-| **Core** | **Laravel 13** | Framework hiện đại nhất |
-| **View Layer**| **React 19 + Inertia** | Trải nghiệm Single Page App (SPA) |
-| **Animations**| **Framer Motion** | Layout animations & Page transitions |
-| **Styling** | **Tailwind CSS** | Thiết kế Responsive & Dark Mode |
-| **Database** | **MySQL & MongoDB** | Quan hệ (Orders) & Linh hoạt (Specs/Reviews) |
+### ⭐️ 3. Review & Feedback System
+- **Verified Purchase Only**: Chỉ những khách hàng đã mua và nhận hàng thành công (`Delivered`) mới được phép gửi đánh giá.
+- **Multi-Image Upload**: Hỗ trợ khách hàng đăng tải hình ảnh thực tế sản phẩm (Tối đa 5 ảnh).
+- **Dynamic Rating**: Tự động tính toán số sao trung bình và số lượng đánh giá hiển thị ngay trên thẻ sản phẩm.
+- **Admin Moderation**: Admin có quyền duyệt hoặc ẩn các bình luận không phù hợp trước khi hiển thị công khai.
 
 ---
 
-## 🗄️ Kiến trúc Dữ liệu Hybrid
-FlashTech tận dụng sức mạnh của cả hai thế giới:
-- **MySQL (ACID):** Quản lý Giao dịch, Người dùng, Đơn hàng, và Cấu trúc Sản phẩm cốt lõi.
-- **MongoDB (NoSQL):** Lưu trữ Thông số kỹ thuật động (Dynamic Specs) của từng loại Laptop khác nhau và Hệ thống Đánh giá (Reviews) đòi hỏi tính linh hoạt cao.
+## 🗄️ Kiến trúc Dữ liệu (Database Architecture)
+Dự án được thiết kế theo quy chuẩn **3NF**, đảm bảo tối ưu hóa truy vấn và tránh dư thừa dữ liệu:
+- **Product Variants**: Quản lý Laptop theo từng cấu hình (CPU, RAM, SSD, Màu sắc) với kho hàng riêng biệt.
+- **Order Relationship**: Liên kết chặt chẽ giữa `Orders` -> `Coupons`, `Orders` -> `Payments` và `Orders` -> `Users`.
+- **Hybrid Schema**: Sử dụng JSON cho danh sách hình ảnh đánh giá để tăng tốc độ load trang.
 
 ---
 
 ## 🔧 Cài đặt & Triển khai
 
-### 1. Dependencies
-```bash
-composer install
-npm install
-```
-
-### 2. Database Setup
-Cấu hình `.env` với các tham số DB_CONNECTION (MySQL) và MONGODB_URI.
-```bash
-php artisan key:generate
-php artisan migrate --seed
-```
-
-### 3. Development
-```bash
-# Terminal 1: Laravel Server
-php artisan serve
-
-# Terminal 2: Vite Build
-npm run dev
-```
+1. **Clone project & Cài đặt thư viện**:
+   ```bash
+   composer install
+   npm install
+   ```
+2. **Cấu hình Database**: Copy `.env.example` thành `.env` và cấu hình MySQL.
+3. **Migrate & Seed**:
+   ```bash
+   php artisan migrate --seed
+   php artisan storage:link
+   ```
+4. **Chạy Project**:
+   ```bash
+   # Terminal 1
+   php artisan serve
+   # Terminal 2
+   npm run dev
+   ```
 
 ---
 
@@ -92,9 +75,9 @@ npm run dev
 - [x] **Giai đoạn 1:** Khởi tạo Core, Hybrid Database & Filament Dashboard.
 - [x] **Giai đoạn 2:** Triển khai Storefront cao cấp, Live Search & Premium Filtering.
 - [x] **Giai đoạn 3:** Hợp nhất hệ thống User & Xây dựng User Profile.
-- [x] **Giai đoạn 4:** Tối ưu hóa Database (3NF) & Eloquent Observers.
-- [ ] **Giai đoạn 5:** Hoàn thiện Giỏ hàng, Wishlist & Tích hợp VNPay/Momo.
-- [ ] **Giai đoạn 6:** Hệ thống thông báo Real-time & App Mobile (PWA).
+- [x] **Giai đoạn 4:** Hoàn thiện Giỏ hàng & Lịch sử đơn hàng.
+- [x] **Giai đoạn 5:** Hệ thống Đánh giá (Review) & Mã giảm giá (Coupon).
+- [ ] **Giai đoạn 6:** Tích hợp VNPay/Momo & Thông báo Real-time.
 
 ---
 

@@ -6,72 +6,12 @@ import { Toaster } from 'sonner';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingCart, User, Moon, Sun, ChevronDown, Loader2, Menu, X } from 'lucide-react';
+import UserDropdown from '@/Components/UserDropdown';
+import { CartProvider, useCart } from '@/Context/CartContext';
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-    // 1. Lấy dữ liệu categories và auth được chia sẻ từ HandleInertiaRequests.php
-    const { categories, auth } = usePage().props as any;
-
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isScrolled, setIsScrolled] = useState(false);
-
-    // Live Search States
-    const [searchTerm, setSearchTerm] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-
-    // Dark Mode State
-    const [isDarkMode, setIsDarkMode] = useState(false);
-
-    // Khởi tạo Dark Mode từ LocalStorage
-    useEffect(() => {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            setIsDarkMode(true);
-            document.documentElement.classList.add('dark');
-        }
-    }, []);
-
-    const toggleDarkMode = () => {
-        if (isDarkMode) {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-            setIsDarkMode(false);
-        } else {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-            setIsDarkMode(true);
-        }
-    };
-
-    // Logic Live Search với Debounce
-    useEffect(() => {
-        const delayDebounceFn = setTimeout(() => {
-            if (searchTerm.length >= 2) {
-                setIsSearching(true);
-                axios.get(`/api/search?q=${searchTerm}`)
-                    .then(res => {
-                        setSearchResults(res.data);
-                        setShowSuggestions(true);
-                    })
-                    .finally(() => setIsSearching(false));
-            } else {
-                setSearchResults([]);
-                setShowSuggestions(false);
-            }
-        }, 300);
-
-        return () => clearTimeout(delayDebounceFn);
-    }, [searchTerm]);
-
-    // Hiệu ứng đổi màu Navbar khi cuộn trang
-    useEffect(() => {
-        const handleScroll = () => setIsScrolled(window.scrollY > 20);
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpen, isScrolled, searchTerm, setSearchTerm, isSearching, searchResults, showSuggestions, auth, categories, isDropdownOpen, setIsDropdownOpen }: any) {
+    const { cart } = useCart();
+    const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
         <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-500 overflow-x-hidden">
@@ -165,62 +105,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
                         <Link href="/cart" className="relative p-3 hover:bg-white dark:hover:bg-slate-800 rounded-2xl transition-all group">
                             <ShoppingCart className="w-5 h-5 md:w-4 md:h-4 group-hover:text-indigo-600 transition-colors" />
-                            <span className="absolute top-2 right-2 w-4 h-4 bg-indigo-600 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-slate-50 dark:border-slate-950">
-                                0
-                            </span>
+                            {cartCount > 0 && (
+                                <span className="absolute top-2 right-2 w-4 h-4 bg-indigo-600 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-slate-50 dark:border-slate-950 animate-in zoom-in duration-300">
+                                    {cartCount}
+                                </span>
+                            )}
                         </Link>
 
                         {/* --- USER PROFILE / AUTH --- */}
                         {auth.user ? (
-                            <div className="flex items-center gap-3 pl-2 border-l border-slate-200 dark:border-slate-800 ml-2">
-                                <div className="hidden md:flex flex-col items-end">
-                                    <div className="flex items-center gap-1.5 mb-1">
-                                        <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider leading-none">
-                                            {auth.user.name}
-                                        </span>
-                                        {(auth.user.role === 'admin' || auth.user.role === 'moderator') && (
-                                            <span className="text-[8px] font-black bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Staff</span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Link 
-                                            href={route('profile.show')} 
-                                            className="text-[9px] font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors"
-                                        >
-                                            Hồ sơ
-                                        </Link>
-                                        {(auth.user.role === 'admin' || auth.user.role === 'moderator') && (
-                                            <a 
-                                                href="/admin" 
-                                                className="text-[9px] font-bold text-amber-600 dark:text-amber-500 hover:underline"
-                                            >
-                                                Admin
-                                            </a>
-                                        )}
-                                        <Link 
-                                            href={route('logout')} 
-                                            method="post" 
-                                            as="button" 
-                                            className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
-                                        >
-                                            Đăng xuất
-                                        </Link>
-                                    </div>
-                                </div>
-                                <div className="w-9 h-9 rounded-2xl overflow-hidden bg-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-indigo-500/20 dark:shadow-none transform hover:rotate-6 transition-all duration-300">
-                                    {auth.user.profile?.avatar ? (
-                                        <img 
-                                            src={`/storage/${auth.user.profile.avatar}`} 
-                                            alt={auth.user.name} 
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        auth.user.name.charAt(0).toUpperCase()
-                                    )}
-                                </div>
-                            </div>
+                            <UserDropdown user={auth.user} />
                         ) : (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 pl-2">
                                 <Link 
                                     href={route('login')} 
                                     className="hidden md:block px-5 py-2.5 text-slate-600 dark:text-slate-400 font-bold text-[11px] uppercase tracking-widest hover:text-indigo-600 transition-colors"
@@ -276,5 +172,92 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {/* Global Toaster */}
             <Toaster position="bottom-right" richColors theme={isDarkMode ? 'dark' : 'light'} />
         </div>
+    );
+}
+
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+    // 1. Lấy dữ liệu categories và auth được chia sẻ từ HandleInertiaRequests.php
+    const { categories, auth } = usePage().props as any;
+
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Dropdown menu sản phẩm
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    // Live Search States
+    const [searchTerm, setSearchTerm] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    // Dark Mode State
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    // Khởi tạo Dark Mode từ LocalStorage
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            setIsDarkMode(true);
+            document.documentElement.classList.add('dark');
+        }
+    }, []);
+
+    const toggleDarkMode = () => {
+        if (isDarkMode) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            setIsDarkMode(false);
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            setIsDarkMode(true);
+        }
+    };
+
+    // Logic Live Search với Debounce
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            if (searchTerm.length >= 2) {
+                setIsSearching(true);
+                axios.get(`/api/search?q=${searchTerm}`)
+                    .then(res => {
+                        setSearchResults(res.data);
+                        setShowSuggestions(true);
+                    })
+                    .finally(() => setIsSearching(false));
+            } else {
+                setSearchResults([]);
+                setShowSuggestions(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm]);
+
+    // Hiệu ứng đổi màu Navbar khi cuộn trang
+    useEffect(() => {
+        const handleScroll = () => setIsScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    return (
+        <LayoutContent 
+            children={children}
+            isDarkMode={isDarkMode}
+            toggleDarkMode={toggleDarkMode}
+            isMobileMenuOpen={isMobileMenuOpen}
+            setIsMobileMenuOpen={setIsMobileMenuOpen}
+            isScrolled={isScrolled}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            isSearching={isSearching}
+            searchResults={searchResults}
+            showSuggestions={showSuggestions}
+            auth={auth}
+            categories={categories}
+            isDropdownOpen={isDropdownOpen}
+            setIsDropdownOpen={setIsDropdownOpen}
+        />
     );
 }

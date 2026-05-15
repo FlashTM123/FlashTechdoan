@@ -60,9 +60,27 @@ export default function ProductCard({ product }: { product: any }) {
                             </span>
                         </div>
 
-                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg md:text-xl mb-3 line-clamp-2 leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg md:text-xl mb-2 line-clamp-2 leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                             {product.name}
                         </h3>
+
+                        {/* Rating Summary */}
+                        <div className="flex items-center gap-1.5 mb-4">
+                            <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star 
+                                        key={star} 
+                                        className={cn(
+                                            "w-2.5 h-2.5",
+                                            (product.average_rating || 0) >= star ? "fill-amber-400 text-amber-400" : "text-slate-200 dark:text-slate-800"
+                                        )} 
+                                    />
+                                ))}
+                            </div>
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                                ({product.reviews_count || 0})
+                            </span>
+                        </div>
 
                         <div className="mt-auto pt-4 flex items-end justify-between">
                             <div className="space-y-1">

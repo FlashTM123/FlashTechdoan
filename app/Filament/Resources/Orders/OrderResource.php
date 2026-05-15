@@ -93,7 +93,7 @@ class OrderResource extends Resource
                                     Forms\Components\Placeholder::make('processor_status')
                                         ->label('')
                                         ->content(fn ($record) => new \Illuminate\Support\HtmlString(
-                                            $record->processor 
+                                            $record->processor
                                             ? "<div class='flex flex-col gap-1'>
                                                 <span class='font-bold text-gray-900'>{$record->processor->name}</span>
                                                 <span class='text-[10px] px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full w-fit uppercase font-black'>{$record->processor->role}</span>
@@ -256,6 +256,7 @@ class OrderResource extends Resource
                         'delivered' => 'Đã giao hàng',
                         'cancelled' => 'Đã hủy',
                     ])
+                    ->disabled(fn ($record) => in_array($record->order_status, ['cancelled', 'delivered']))
                     ->afterStateUpdated(function ($state, $old, $record) {
                         // TỰ ĐỘNG GÁN NGƯỜI DUYỆT khi trạng thái thay đổi sang processing/shipped/delivered
                         if (in_array($state, ['processing', 'shipped', 'delivered']) && !$record->processed_by_id) {
