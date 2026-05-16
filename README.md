@@ -77,8 +77,10 @@ Dự án được thiết kế theo quy chuẩn chuyên nghiệp, kết hợp s�
 - [x] **Giai đoạn 3:** Hợp nhất hệ thống User & Xây dựng User Profile.
 - [x] **Giai đoạn 4:** Hoàn thiện Giỏ hàng & Lịch sử đơn hàng.
 - [x] **Giai đoạn 5:** Hệ thống Đánh giá (Review) & Mã giảm giá (Coupon).
-- [x] **Giai đoạn 6:** Tích hợp cổng thanh toán VNPay.
-- [ ] **Giai đoạn 7:** Tối ưu hóa SEO & Hệ thống Báo cáo doanh thu chi tiết.
+- [ ] **Giai đoạn 6:** Hoàn thiện tích hợp cổng thanh toán VNPay & MoMo.
+- [ ] **Giai đoạn 7:** Phát triển module So sánh sản phẩm (Compare Products).
+- [ ] **Giai đoạn 8:** Hệ thống Báo cáo doanh thu & Phân tích dữ liệu khách hàng.
+- [ ] **Giai đoạn 9:** Tối ưu hóa trải nghiệm Mobile (PWA) & Hiệu năng hệ thống.
 
 ---
 
