@@ -62,6 +62,19 @@ export default function Login({ status, canResetPassword }: { status?: string; c
                         </div>
                     )}
 
+                    {/* Hiển thị lỗi sai thông tin đăng nhập */}
+                    {errors.email && (
+                        <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                            <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span className="text-white text-xs font-black">!</span>
+                            </div>
+                            <div>
+                                <p className="text-red-600 dark:text-red-400 text-sm font-bold">Đăng nhập thất bại</p>
+                                <p className="text-red-500 dark:text-red-400/80 text-xs font-medium mt-0.5">Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại.</p>
+                            </div>
+                        </div>
+                    )}
+
                     <form onSubmit={submit} className="space-y-6">
                         <div className="space-y-2">
                             <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Địa chỉ Email</label>
@@ -74,7 +87,6 @@ export default function Login({ status, canResetPassword }: { status?: string; c
                                 autoComplete="username"
                                 onChange={(e) => setData('email', e.target.value)}
                             />
-                            <InputError message={errors.email} />
                         </div>
 
                         <div className="space-y-2">
@@ -98,7 +110,6 @@ export default function Login({ status, canResetPassword }: { status?: string; c
                                 autoComplete="current-password"
                                 onChange={(e) => setData('password', e.target.value)}
                             />
-                            <InputError message={errors.password} />
                         </div>
 
                         <div className="flex items-center justify-between py-2">

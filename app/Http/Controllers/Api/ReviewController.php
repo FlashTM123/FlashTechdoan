@@ -17,8 +17,8 @@ class ReviewController extends Controller
     public function index(Product $product)
     {
         $reviews = $product->reviews()
-            ->with(['user:id,name', 'user.profile:user_id,avatar'])
-            ->where('status', 'approved')
+            ->with(['user:id,name'])
+            ->where('is_visible', true)
             ->latest()
             ->paginate(10);
 

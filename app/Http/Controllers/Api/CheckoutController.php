@@ -99,8 +99,11 @@ class CheckoutController extends Controller
                 // 4. Tạo chi tiết đơn hàng (order_items)
                 foreach ($orderItemsData as $orderItem) {
                     $orderItem['order_id'] = $order->id;
-                    OrderItem::create($orderItem);
+                    \App\Models\OrderItem::create($orderItem);
                 }
+
+                // PHÁT SỰ KIỆN: Thông báo đơn hàng mới cho Admin
+                event(new \App\Events\OrderCreated($order));
 
                 // 4.5 Xóa giỏ hàng trong Database sau khi đặt hàng thành công
                 \App\Models\CartItem::where('user_id', $user->id)->delete();

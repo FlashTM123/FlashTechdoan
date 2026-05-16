@@ -267,6 +267,9 @@ class OrderResource extends Resource
                         if ($state === 'cancelled' && $old !== 'cancelled') {
                             self::restoreStock($record);
                         }
+
+                        // PHÁT SỰ KIỆN: Thông báo cho khách hàng khi Admin đổi trạng thái
+                        event(new \App\Events\OrderStatusUpdated($record));
                     }),
 
                 Tables\Columns\TextColumn::make('created_at')
@@ -302,12 +305,14 @@ class OrderResource extends Resource
      */
     protected static function restoreStock(Order $order)
     {
+        // ĐẢM BẢO LOAD LẠI ITEMS
+        $order->load('items');
+
         // Duyệt qua từng món trong đơn hàng
         foreach ($order->items as $item) {
-            if ($item->product_variant_id) {
-                $variant = ProductVariant::find($item->product_variant_id);
+            if ($item->product_variants_id) {
+                $variant = \App\Models\ProductVariant::find($item->product_variants_id);
                 if ($variant) {
-                    // Cột lưu số lượng trong bảng product_variants của bạn (ví dụ: stock hoặc quantity)
                     $variant->increment('stock', $item->quantity);
                 }
             }

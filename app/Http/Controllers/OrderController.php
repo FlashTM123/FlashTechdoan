@@ -60,15 +60,21 @@ class OrderController extends Controller
                 'payment_status' => $order->payment_status === 'paid' ? 'refunding' : 'failed'
             ]);
 
+            // ĐẢM BẢO LOAD LẠI ITEMS để cộng kho
+            $order->load('items');
+
             // 4. Hoàn trả số lượng vào kho (stock)
             foreach ($order->items as $item) {
                 if ($item->product_variants_id) {
-                    ProductVariant::where('id', $item->product_variants_id)
+                    \App\Models\ProductVariant::where('id', $item->product_variants_id)
                         ->increment('stock', $item->quantity);
                 }
             }
 
             DB::commit();
+
+            // PHÁT SỰ KIỆN: Thông báo trạng thái thay đổi (Hủy đơn)
+            event(new \App\Events\OrderStatusUpdated($order));
 
             return back()->with('success', 'Đơn hàng của bạn đã được hủy thành công.');
         } catch (\Exception $e) {

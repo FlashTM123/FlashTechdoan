@@ -103,6 +103,8 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                             {isDarkMode ? <Sun className="w-5 h-5 md:w-4 md:h-4 text-yellow-400" /> : <Moon className="w-5 h-5 md:w-4 md:h-4 text-slate-600" />}
                         </button>
 
+                        {/* Notification Bell - Tạm thời đã tắt */}
+
                         <Link href="/cart" className="relative p-3 hover:bg-white dark:hover:bg-slate-800 rounded-2xl transition-all group">
                             <ShoppingCart className="w-5 h-5 md:w-4 md:h-4 group-hover:text-indigo-600 transition-colors" />
                             {cartCount > 0 && (
@@ -242,22 +244,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
-        <LayoutContent 
-            children={children}
-            isDarkMode={isDarkMode}
-            toggleDarkMode={toggleDarkMode}
-            isMobileMenuOpen={isMobileMenuOpen}
-            setIsMobileMenuOpen={setIsMobileMenuOpen}
-            isScrolled={isScrolled}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            isSearching={isSearching}
-            searchResults={searchResults}
-            showSuggestions={showSuggestions}
-            auth={auth}
-            categories={categories}
-            isDropdownOpen={isDropdownOpen}
-            setIsDropdownOpen={setIsDropdownOpen}
-        />
+        <CartProvider>
+            <LayoutContent
+                children={children}
+                isDarkMode={isDarkMode}
+                toggleDarkMode={toggleDarkMode}
+                isMobileMenuOpen={isMobileMenuOpen}
+                setIsMobileMenuOpen={setIsMobileMenuOpen}
+                isScrolled={isScrolled}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                isSearching={isSearching}
+                searchResults={searchResults}
+                showSuggestions={showSuggestions}
+                auth={auth}
+                categories={categories}
+                isDropdownOpen={isDropdownOpen}
+                setIsDropdownOpen={setIsDropdownOpen}
+            />
+        </CartProvider>
     );
 }

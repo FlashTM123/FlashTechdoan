@@ -42,9 +42,12 @@ export default function ReviewSection({ productId, auth }: Props) {
     const fetchReviews = async () => {
         try {
             const res = await axios.get(`/products/${productId}/reviews`);
-            setReviews(res.data.data);
+            // API trả về paginated data: { data: [...], total: N, ... }
+            const data = res.data?.data ?? res.data;
+            setReviews(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Error fetching reviews", error);
+            setReviews([]);
         } finally {
             setLoading(false);
         }
