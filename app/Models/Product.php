@@ -14,10 +14,12 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
     public function brand()
     {
         return $this->belongsTo(Brand::class);
     }
+
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);
@@ -33,19 +35,14 @@ class Product extends Model
         return $this->hasMany(Review::class);
     }
 
-    /**
-     * Lấy số sao trung bình của sản phẩm.
-     */
     public function getAverageRatingAttribute()
     {
         return round($this->reviews()->where('status', 'approved')->avg('rating') ?: 0, 1);
     }
 
-    /**
-     * Lấy tổng số lượng đánh giá.
-     */
     public function getReviewsCountAttribute()
     {
         return $this->reviews()->where('status', 'approved')->count();
     }
 }
+
