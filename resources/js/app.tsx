@@ -6,6 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 
 import { CartProvider } from './Context/CartContext';
+import { CompareProvider } from './Context/CompareContext';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -18,12 +19,14 @@ createInertiaApp({
         );
         const Page = page.default;
         const WrappedPage = (props: any) => (
-            <CartProvider>
-                <Page {...props} />
-            </CartProvider>
+            <CompareProvider>
+                <CartProvider>
+                    <Page {...props} />
+                </CartProvider>
+            </CompareProvider>
         );
         WrappedPage.layout = Page.layout; // Giữ lại layout nếu có
-        
+
         return {
             ...page,
             default: WrappedPage,

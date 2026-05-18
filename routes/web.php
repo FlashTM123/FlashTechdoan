@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ReviewController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/product/{id}', [HomeController::class, 'show'])->name('product.show');
 Route::get('/products', [HomeController::class, 'product'])->name('products.index');
+Route::get('/compare', fn() => Inertia::render('Compare/ComparePage'))->name('compare.index');
 Route::get('/api/search', [HomeController::class, 'apiSearch']);
 
 // Public Reviews

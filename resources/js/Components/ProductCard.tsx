@@ -1,12 +1,13 @@
 import { Link } from "@inertiajs/react";
 import { motion } from "framer-motion";
-import { ShoppingCart, ArrowRight, Star } from "lucide-react";
+import { ShoppingCart, ArrowRight, Star, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import CompareButton from "@/Components/CompareButton";
 
 export default function ProductCard({ product }: { product: any }) {
     const cheapestVariant = product.variants?.[0];
-    const discount = cheapestVariant?.old_price > cheapestVariant?.price 
-        ? Math.round(((cheapestVariant.old_price - cheapestVariant.price) / cheapestVariant.old_price) * 100) 
+    const discount = cheapestVariant?.old_price > cheapestVariant?.price
+        ? Math.round(((cheapestVariant.old_price - cheapestVariant.price) / cheapestVariant.old_price) * 100)
         : 0;
 
     return (
@@ -24,7 +25,7 @@ export default function ProductCard({ product }: { product: any }) {
                             className="w-full h-full object-contain p-8 group-hover:scale-110 transition-transform duration-700 ease-out"
                             alt={product.name}
                         />
-                        
+
                         {/* Tags */}
                         <div className="absolute top-5 left-5 flex flex-col gap-2 z-10">
                             {discount > 0 ? (
@@ -68,12 +69,12 @@ export default function ProductCard({ product }: { product: any }) {
                         <div className="flex items-center gap-1.5 mb-4">
                             <div className="flex items-center gap-0.5">
                                 {[1, 2, 3, 4, 5].map((star) => (
-                                    <Star 
-                                        key={star} 
+                                    <Star
+                                        key={star}
                                         className={cn(
                                             "w-2.5 h-2.5",
                                             (product.average_rating || 0) >= star ? "fill-amber-400 text-amber-400" : "text-slate-200 dark:text-slate-800"
-                                        )} 
+                                        )}
                                     />
                                 ))}
                             </div>
@@ -82,7 +83,7 @@ export default function ProductCard({ product }: { product: any }) {
                             </span>
                         </div>
 
-                        <div className="mt-auto pt-4 flex items-end justify-between">
+                        <div className="mt-auto pt-4 flex items-end justify-between gap-2">
                             <div className="space-y-1">
                                 <p className="text-2xl font-black text-slate-900 dark:text-white font-display tracking-tight leading-none">
                                     {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
@@ -95,10 +96,13 @@ export default function ProductCard({ product }: { product: any }) {
                                     </p>
                                 )}
                             </div>
-                            
-                            <button className="bg-slate-100 dark:bg-slate-800 hover:bg-indigo-600 dark:hover:bg-indigo-600 p-3.5 rounded-2xl text-slate-600 dark:text-slate-400 hover:text-white transition-all duration-300 active:scale-90 shadow-sm">
-                                <ShoppingCart className="w-5 h-5" strokeWidth={2.5} />
-                            </button>
+
+                            <div className="flex gap-2">
+                                <CompareButton productId={product.id} size="sm" />
+                                <button className="bg-slate-100 dark:bg-slate-800 hover:bg-indigo-600 dark:hover:bg-indigo-600 p-3.5 rounded-2xl text-slate-600 dark:text-slate-400 hover:text-white transition-all duration-300 active:scale-90 shadow-sm">
+                                    <ShoppingCart className="w-5 h-5" strokeWidth={2.5} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

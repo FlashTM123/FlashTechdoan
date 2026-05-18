@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CheckoutController;
+use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,9 @@ Route::get('/user', function (Request $request) {
 
 // VNPAY Callback route (Public)
 Route::get('/checkout/vnpay-return', [CheckoutController::class, 'vnpayReturn']);
+
+// Products - Public routes
+Route::post('/products/compare', [ProductController::class, 'compare']);
 
 // Reviews
 

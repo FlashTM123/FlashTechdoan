@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useCart } from '@/Context/CartContext';
 import ReviewSection from '@/Components/Reviews/ReviewSection';
+import CompareButton from '@/Components/CompareButton';
 import { usePage } from '@inertiajs/react';
 
 export default function ProductDetail({ product }: { product: any }) {
@@ -194,23 +195,26 @@ export default function ProductDetail({ product }: { product: any }) {
                     )}
 
                     {/* HÀNH ĐỘNG */}
-                    <div className="flex gap-4">
+                    <div className="space-y-4">
                         <button
                             onClick={handleAddToCart}
-                            className="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-6 rounded-[2rem] font-black text-lg hover:bg-indigo-600 dark:hover:bg-indigo-500 dark:hover:text-white transition-all shadow-2xl shadow-slate-300 dark:shadow-none active:scale-[0.98] flex items-center justify-center gap-3 group"
+                            className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-6 rounded-[2rem] font-black text-lg hover:bg-indigo-600 dark:hover:bg-indigo-500 dark:hover:text-white transition-all shadow-2xl shadow-slate-300 dark:shadow-none active:scale-[0.98] flex items-center justify-center gap-3 group"
                         >
                             <ShoppingCart className="w-6 h-6 group-hover:animate-bounce" strokeWidth={2.5} />
                             Thêm vào giỏ hàng
                         </button>
-                        <button
-                            onClick={() => setIsWishlisted(!isWishlisted)}
-                            className={cn(
-                                "w-20 h-20 flex items-center justify-center border-2 rounded-[2rem] transition-all active:scale-90",
-                                isWishlisted ? "bg-red-50 border-red-200 text-red-500" : "border-slate-100 dark:border-slate-800 text-slate-400 hover:bg-slate-50"
-                            )}
-                        >
-                            <Heart className={cn("w-7 h-7", isWishlisted && "fill-current")} strokeWidth={2.5} />
-                        </button>
+                        <div className="flex gap-4">
+                            <CompareButton productId={product.id} size="md" className="flex-1" />
+                            <button
+                                onClick={() => setIsWishlisted(!isWishlisted)}
+                                className={cn(
+                                    "w-20 h-20 flex items-center justify-center border-2 rounded-[2rem] transition-all active:scale-90",
+                                    isWishlisted ? "bg-red-50 border-red-200 text-red-500" : "border-slate-100 dark:border-slate-800 text-slate-400 hover:bg-slate-50"
+                                )}
+                            >
+                                <Heart className={cn("w-7 h-7", isWishlisted && "fill-current")} strokeWidth={2.5} />
+                            </button>
+                        </div>
                     </div>
 
                     {/* CHÍNH SÁCH NHANH */}
