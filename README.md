@@ -245,5 +245,5 @@ Dự án này được cấp phép dưới MIT License - xem file [LICENSE](LICE
   <p><b>FlashTech E-Commerce Platform</b></p>
   <p>Xây dựng bởi ❤️ với <b>Laravel + React</b></p>
   <p>Developed with passion for modern web standards</p>
-  <p>© 2025 FlashTech. All rights reserved.</p>
+  <p>© 2026 FlashTech. All rights reserved.</p>
 </div>
