@@ -10,11 +10,9 @@ import UserDropdown from '@/Components/UserDropdown';
 import { CartProvider, useCart } from '@/Context/CartContext';
 import { useCompare } from '@/hooks/useCompare';
 
-function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpen, isScrolled, searchTerm, setSearchTerm, isSearching, searchResults, showSuggestions, auth, categories, isDropdownOpen, setIsDropdownOpen }: any) {
+function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpen, isScrolled, searchTerm, setSearchTerm, isSearching, searchResults, showSuggestions, auth, categories, isDropdownOpen, setIsDropdownOpen, compareCount }: any) {
     const { cart } = useCart();
-    const { getCompareCount } = useCompare();
     const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const compareCount = getCompareCount();
 
     return (
         <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-500 overflow-x-hidden">
@@ -191,10 +189,11 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-    // 1. Lấy dữ liệu categories và auth được chia sẻ từ HandleInertiaRequests.php
     const { categories, auth } = usePage().props as any;
+    const { getCompareCount } = useCompare();
+    const compareCount = getCompareCount();
 
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Dropdown menu sản phẩm
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
     // Live Search States
@@ -274,6 +273,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 categories={categories}
                 isDropdownOpen={isDropdownOpen}
                 setIsDropdownOpen={setIsDropdownOpen}
+                compareCount={compareCount}
             />
         </CartProvider>
     );
