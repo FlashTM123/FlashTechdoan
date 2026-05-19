@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCompare } from '@/hooks/useCompare';
-import { AppLayout } from '@/Layouts/AppLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { Link } from '@inertiajs/react';
 import axios from 'axios';
 import { Loader2, Trash2, ShoppingCart } from 'lucide-react';
