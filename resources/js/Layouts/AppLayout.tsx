@@ -5,13 +5,16 @@ import Footer from '@/Components/Footer';
 import { Toaster } from 'sonner';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingCart, User, Moon, Sun, ChevronDown, Loader2, Menu, X } from 'lucide-react';
+import { Search, ShoppingCart, User, Moon, Sun, ChevronDown, Loader2, Menu, X, BarChart3 } from 'lucide-react';
 import UserDropdown from '@/Components/UserDropdown';
 import { CartProvider, useCart } from '@/Context/CartContext';
+import { useCompare } from '@/hooks/useCompare';
 
 function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpen, isScrolled, searchTerm, setSearchTerm, isSearching, searchResults, showSuggestions, auth, categories, isDropdownOpen, setIsDropdownOpen }: any) {
     const { cart } = useCart();
+    const { getCompareCount } = useCompare();
     const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const compareCount = getCompareCount();
 
     return (
         <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-500 overflow-x-hidden">
@@ -102,6 +105,16 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                         <button onClick={toggleDarkMode} className="p-3 hover:bg-white dark:hover:bg-slate-800 rounded-2xl transition-all active:scale-90">
                             {isDarkMode ? <Sun className="w-5 h-5 md:w-4 md:h-4 text-yellow-400" /> : <Moon className="w-5 h-5 md:w-4 md:h-4 text-slate-600" />}
                         </button>
+
+                        {/* Compare Button */}
+                        <Link href="/compare" className="relative p-3 hover:bg-white dark:hover:bg-slate-800 rounded-2xl transition-all group">
+                            <BarChart3 className="w-5 h-5 md:w-4 md:h-4 group-hover:text-indigo-600 transition-colors" />
+                            {compareCount > 0 && (
+                                <span className="absolute top-2 right-2 w-4 h-4 bg-purple-600 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-slate-50 dark:border-slate-950 animate-in zoom-in duration-300">
+                                    {compareCount}
+                                </span>
+                            )}
+                        </Link>
 
                         {/* Notification Bell - Tạm thời đã tắt */}
 
