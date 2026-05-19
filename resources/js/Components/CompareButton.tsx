@@ -4,21 +4,21 @@ import { BarChart3 } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 
 interface CompareButtonProps {
-    productId: number;
+    variantId: number;
     className?: string;
     size?: 'sm' | 'md' | 'lg';
     showBadge?: boolean;
 }
 
 export default function CompareButton({
-    productId,
+    variantId,
     className = '',
     size = 'md',
     showBadge = false,
 }: CompareButtonProps) {
     const { addToCompare, isInCompare, getCompareCount } = useCompare();
 
-    const isComparing = isInCompare(productId);
+    const isComparing = isInCompare(variantId);
     const compareCount = getCompareCount();
 
     const sizeClasses = {
@@ -34,7 +34,7 @@ export default function CompareButton({
     return (
         <div className="relative">
             <button
-                onClick={() => addToCompare(productId)}
+                onClick={() => addToCompare(variantId)}
                 className={`
                     ${sizeClasses[size]}
                     ${buttonClass}

@@ -204,7 +204,7 @@ export default function ProductDetail({ product }: { product: any }) {
                             Thêm vào giỏ hàng
                         </button>
                         <div className="flex gap-4">
-                            <CompareButton productId={product.id} size="md" className="flex-1" />
+                            <CompareButton variantId={selectedVariant?.id} size="md" className="flex-1" />
                             <button
                                 onClick={() => setIsWishlisted(!isWishlisted)}
                                 className={cn(

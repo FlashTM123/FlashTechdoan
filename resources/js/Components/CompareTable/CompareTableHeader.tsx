@@ -5,7 +5,7 @@ import { formatPrice, getDiscountPercentage, CompareProductData } from '@/utils/
 
 interface CompareTableHeaderProps {
     products: CompareProductData[];
-    onRemove: (productId: number) => void;
+    onRemove: (variantId: number) => void;
 }
 
 export default function CompareTableHeader({ products, onRemove }: CompareTableHeaderProps) {
@@ -39,6 +39,11 @@ export default function CompareTableHeader({ products, onRemove }: CompareTableH
                                         {product.name}
                                     </Link>
                                 </h3>
+                                {product.variants[0].variant_name && (
+                                    <p className="text-xs text-slate-400 mt-1">
+                                        ({product.variants[0].variant_name})
+                                    </p>
+                                )}
                             </div>
 
                             {/* Price Info */}
@@ -81,7 +86,7 @@ export default function CompareTableHeader({ products, onRemove }: CompareTableH
                             {/* Action Buttons */}
                             <div className="flex gap-2 pt-2">
                                 <button
-                                    onClick={() => onRemove(product.id)}
+                                    onClick={() => onRemove(product.variants[0].id)}
                                     className="flex-1 px-3 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 rounded-lg transition flex items-center justify-center gap-2 text-sm"
                                     title="Xóa khỏi danh sách so sánh"
                                 >

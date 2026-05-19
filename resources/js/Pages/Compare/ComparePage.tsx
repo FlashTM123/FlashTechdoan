@@ -34,7 +34,7 @@ export default function ComparePage() {
             setLoading(true);
             try {
                 const response = await axios.post('/api/products/compare', {
-                    product_ids: compareList,
+                    variant_ids: compareList,
                 });
 
                 if (response.data.status === 'success') {
@@ -55,8 +55,8 @@ export default function ComparePage() {
         fetchCompareData();
     }, [compareList]);
 
-    const handleRemove = (productId: number) => {
-        removeFromCompare(productId);
+    const handleRemove = (variantId: number) => {
+        removeFromCompare(variantId);
         toast.success('Đã xóa sản phẩm khỏi danh sách so sánh');
     };
 

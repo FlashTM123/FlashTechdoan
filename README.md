@@ -36,6 +36,13 @@
 - **Multi-Image Support**: Hỗ trợ đăng tải hình ảnh thực tế giúp tăng độ tin cậy cho cửa hàng.
 - **Admin Moderation**: Hệ thống quản trị cho phép kiểm duyệt nội dung và kiểm soát hiển thị đánh giá thông qua cơ chế Toggle thông minh.
 
+### 🔄 4. Compare Products System (Phase 7)
+- **Variant Comparison**: So sánh cụ thể từng biến thể sản phẩm (CPU, RAM, GPU, Screen) chứ không chỉ sản phẩm chung.
+- **Highlight Differences**: Tự động phát hiện & làm nổi bật các thông số khác nhau giữa sản phẩm so sánh (màu nền tím).
+- **Smart Storage**: Lưu danh sách so sánh vào localStorage, tự động phục hồi khi tải lại trang.
+- **Multi-Compare**: Hỗ trợ so sánh tối đa 3 biến thể cùng lúc, có thể từ cùng 1 sản phẩm hoặc khác sản phẩm.
+- **Show Differences Only**: Tính năng lọc chỉ hiển thị những thông số có sự khác biệt giữa các sản phẩm.
+
 ---
 
 ## 🗄️ Kiến trúc Dữ liệu (Database Architecture)
@@ -46,6 +53,32 @@ Dự án được thiết kế theo quy chuẩn chuyên nghiệp, kết hợp s�
 
 ---
 
+## 🛠️ Tech Stack & Công nghệ
+
+### Backend
+- **Framework**: Laravel 11 (PHP 8.3+)
+- **ORM**: Eloquent + Laravel MongoDB
+- **Authentication**: Laravel Sanctum
+- **Payment Gateway**: VNPay API
+- **Admin Panel**: Filament V3 (Premium Laravel Dashboard)
+
+### Frontend  
+- **Framework**: React 19 (Vite)
+- **Styling**: Tailwind CSS + Dark Mode Support
+- **Animations**: Framer Motion
+- **State Management**: React Context API
+- **HTTP Client**: Axios
+- **UI Components**: Lucide React Icons, SweetAlert2, Sonner Toast
+- **Type Safety**: TypeScript
+
+### Infrastructure
+- **Database**: MySQL 8.0, MongoDB Atlas
+- **Server**: PHP 8.3, Node.js 20+
+- **Build Tool**: Vite
+- **Package Manager**: Composer, NPM
+
+---
+
 ## 🔧 Cài đặt & Triển khai
 
 1. **Clone project & Cài đặt thư viện**:
@@ -53,7 +86,15 @@ Dự án được thiết kế theo quy chuẩn chuyên nghiệp, kết hợp s�
    composer install
    npm install
    ```
-2. **Cấu hình Database**: Copy `.env.example` thành `.env` và điền các thông tin kết nối DB, VNPay.
+2. **Cấu hình Environment**: Copy `.env.example` thành `.env` và điền:
+   ```
+   DB_CONNECTION=mysql
+   DB_DATABASE=flashtech_doan
+   DB_USERNAME=root
+   
+   MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/?appName=FlashTech
+   MONGO_DB=flashtech_product
+   ```
 3. **Khởi tạo dữ liệu**:
    ```bash
    php artisan key:generate
@@ -62,11 +103,102 @@ Dự án được thiết kế theo quy chuẩn chuyên nghiệp, kết hợp s�
    ```
 4. **Chạy Project**:
    ```bash
-   # Terminal 1
+   # Terminal 1 - Backend
    php artisan serve
-   # Terminal 2
+   
+   # Terminal 2 - Frontend
    npm run dev
+   
+   # Terminal 3 (Optional) - Queue & Logs
+   php artisan queue:listen
    ```
+
+---
+
+## 📖 Hướng dẫn Sử dụng Chính
+
+### Compare Products
+1. Chọn sản phẩm bất kỳ → Click "So sánh" (BarChart icon)
+2. Chọn thêm đến 3 biến thể từ các sản phẩm khác
+3. Vào trang `/compare` hoặc click icon Compare trong navbar
+4. **Tính năng**:
+   - Xem thông số đầy đủ của từng biến thể
+   - Click "Chỉ hiển thị điểm khác biệt" để lọc thông số khác
+   - Xóa sản phẩm bằng nút "Xóa" (Trash icon)
+   - Mua ngay từ trang so sánh
+
+### Shopping Cart
+1. Click "Thêm vào giỏ" trên trang chi tiết sản phẩm
+2. Chọn số lượng & biến thể trước khi thêm
+3. Xem tóm tắt trong icon Shopping Cart (navbar)
+4. Checkout qua VNPay (Sandbox mode)
+
+### Reviews & Ratings
+1. Sau khi đơn hàng được giao → Viết đánh giá
+2. Đính kèm hình ảnh thực tế của sản phẩm
+3. Admin kiểm duyệt trước khi hiển thị
+
+---
+
+## 📁 Cấu trúc Project
+
+```
+FlashTech/
+├── app/
+│   ├── Http/Controllers/        # API Controllers
+│   ├── Models/                  # Eloquent Models
+│   └── Filament/               # Filament Resources
+├── resources/
+│   ├── js/
+│   │   ├── Pages/              # React Pages (Products, Compare, Checkout, etc)
+│   │   ├── Components/         # Reusable React Components
+│   │   ├── Context/            # React Context (Cart, Compare)
+│   │   ├── hooks/              # Custom React Hooks
+│   │   └── utils/              # Helper Functions
+│   └── views/                  # Blade Templates
+├── routes/
+│   ├── api.php                 # API Routes
+│   └── web.php                 # Web Routes (Inertia)
+├── database/
+│   ├── migrations/             # Schema Migrations
+│   └── seeders/                # Database Seeders
+└── storage/                    # User Uploads
+```
+
+---
+
+## 🔌 API Endpoints (Compare Feature)
+
+### POST `/api/products/compare`
+So sánh nhiều biến thể sản phẩm
+```javascript
+Request:
+{
+  "variant_ids": [1, 2, 3]  // Max 3 variants
+}
+
+Response:
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 1,                    // Variant ID
+      "name": "Product Name",
+      "variants": [{
+        "id": 1,
+        "variant_name": "i7 RTX3060",
+        "price": 36990000,
+        "stock": 10,
+        "details": {
+          "cpu": "Intel i7-11800H",
+          "ram": "16GB DDR4",
+          "gpu": "RTX 3060"
+        }
+      }]
+    }
+  ]
+}
+```
 
 ---
 
@@ -77,14 +209,41 @@ Dự án được thiết kế theo quy chuẩn chuyên nghiệp, kết hợp s�
 - [x] **Giai đoạn 3:** Hợp nhất hệ thống User & Xây dựng User Profile.
 - [x] **Giai đoạn 4:** Hoàn thiện Giỏ hàng & Lịch sử đơn hàng.
 - [x] **Giai đoạn 5:** Hệ thống Đánh giá (Review) & Mã giảm giá (Coupon).
-- [ ] **Giai đoạn 6:** Hoàn thiện tích hợp cổng thanh toán VNPay & MoMo.
-- [ ] **Giai đoạn 7:** Phát triển module So sánh sản phẩm (Compare Products).
+- [x] **Giai đoạn 6:** Hoàn thiện tích hợp cổng thanh toán VNPay & MoMo.
+- [x] **Giai đoạn 7:** Phát triển module So sánh sản phẩm (Compare Products) với hỗ trợ so sánh biến thể.
 - [ ] **Giai đoạn 8:** Hệ thống Báo cáo doanh thu & Phân tích dữ liệu khách hàng.
 - [ ] **Giai đoạn 9:** Tối ưu hóa trải nghiệm Mobile (PWA) & Hiệu năng hệ thống.
 
 ---
 
+## 🤝 Đóng góp & Hỗ trợ
+
+### Yêu cầu PR
+1. Fork project → Tạo branch feature (`git checkout -b feature/amazing-feature`)
+2. Commit changes (`git commit -m 'Add amazing feature'`)
+3. Push to branch (`git push origin feature/amazing-feature`)
+4. Mở Pull Request
+
+### Báo cáo Bug
+- Dùng [GitHub Issues](../../issues/new) để báo cáo bugs
+- Cung cấp chi tiết: mô tả, screenshot, steps to reproduce
+
+### Hỗ trợ
+📧 **Email**: support@flashtech.dev  
+📞 **Discord**: [Tham gia server](https://discord.gg/flashtech)
+
+---
+
+## 📄 License
+
+Dự án này được cấp phép dưới MIT License - xem file [LICENSE](LICENSE) để biết chi tiết.
+
+---
+
 <div align="center">
-  <p><i>Dự án Đồ Án Tốt Nghiệp - Xây dựng bởi ❤️ <b>FlashTech Team</b></i></p>
-  <p>Developed with passion for modern web standards.</p>
+  <p><i>🎓 Dự án Đồ Án Tốt Nghiệp</i></p>
+  <p><b>FlashTech E-Commerce Platform</b></p>
+  <p>Xây dựng bởi ❤️ với <b>Laravel + React</b></p>
+  <p>Developed with passion for modern web standards</p>
+  <p>© 2025 FlashTech. All rights reserved.</p>
 </div>

@@ -3,9 +3,9 @@ import Swal from 'sweetalert2';
 
 interface CompareContextType {
     compareList: number[];
-    addToCompare: (productId: number) => void;
-    removeFromCompare: (productId: number) => void;
-    isInCompare: (productId: number) => boolean;
+    addToCompare: (variantId: number) => void;
+    removeFromCompare: (variantId: number) => void;
+    isInCompare: (variantId: number) => boolean;
     getCompareCount: () => number;
     clearCompare: () => void;
 }
@@ -26,10 +26,10 @@ export const CompareProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('flash_compare', JSON.stringify(compareList));
     }, [compareList]);
 
-    const addToCompare = (productId: number) => {
+    const addToCompare = (variantId: number) => {
         setCompareList(prev => {
             // Already in list
-            if (prev.includes(productId)) {
+            if (prev.includes(variantId)) {
                 Swal.fire({
                     icon: 'info',
                     title: 'Sản phẩm đã có trong danh sách',
@@ -53,7 +53,7 @@ export const CompareProvider = ({ children }: { children: ReactNode }) => {
             }
 
             // Add to list
-            const newList = [...prev, productId];
+            const newList = [...prev, variantId];
             Swal.fire({
                 icon: 'success',
                 title: 'Thêm vào danh sách so sánh',
@@ -65,12 +65,12 @@ export const CompareProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
-    const removeFromCompare = (productId: number) => {
-        setCompareList(prev => prev.filter(id => id !== productId));
+    const removeFromCompare = (variantId: number) => {
+        setCompareList(prev => prev.filter(id => id !== variantId));
     };
 
-    const isInCompare = (productId: number): boolean => {
-        return compareList.includes(productId);
+    const isInCompare = (variantId: number): boolean => {
+        return compareList.includes(variantId);
     };
 
     const getCompareCount = (): number => {

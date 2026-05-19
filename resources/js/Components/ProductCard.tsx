@@ -98,7 +98,7 @@ export default function ProductCard({ product }: { product: any }) {
                             </div>
 
                             <div className="flex gap-2">
-                                <CompareButton productId={product.id} size="sm" />
+                                <CompareButton variantId={cheapestVariant?.id} size="sm" />
                                 <button className="bg-slate-100 dark:bg-slate-800 hover:bg-indigo-600 dark:hover:bg-indigo-600 p-3.5 rounded-2xl text-slate-600 dark:text-slate-400 hover:text-white transition-all duration-300 active:scale-90 shadow-sm">
                                     <ShoppingCart className="w-5 h-5" strokeWidth={2.5} />
                                 </button>
