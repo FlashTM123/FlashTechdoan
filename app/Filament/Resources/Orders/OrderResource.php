@@ -109,9 +109,9 @@ class OrderResource extends Resource
                                         ->label('')
                                         ->content(fn ($record) => new \Illuminate\Support\HtmlString("
                                             <div class='text-sm'>
-                                                <p className='font-bold'>{$record->user?->name}</p>
-                                                <p className='text-gray-500'>{$record->user?->email}</p>
-                                                <p className='mt-2 pt-2 border-t text-gray-700'>{$record->shipping_address}</p>
+                                                <p class='font-bold'>{$record->user?->name}</p>
+                                                <p class='text-gray-500'>{$record->user?->email}</p>
+                                                <p class='mt-2 pt-2 border-t text-gray-700'>{$record->shipping_address}</p>
                                             </div>
                                         ")),
                                 ]),
@@ -278,7 +278,25 @@ class OrderResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                // Thêm bộ lọc nếu muốn
+                // UI 5: Filter theo trạng thái đơn hàng
+                Tables\Filters\SelectFilter::make('order_status')
+                    ->label('Trạng thái')
+                    ->options([
+                        'pending'    => '🟡 Chờ xử lý',
+                        'processing' => '🔵 Đang đóng gói',
+                        'shipped'    => '🟣 Đang vận chuyển',
+                        'delivered'  => '🟢 Đã giao hàng',
+                        'cancelled'  => '🔴 Đã hủy',
+                    ])
+                    ->placeholder('Tất cả trạng thái'),
+
+                Tables\Filters\Filter::make('today')
+                    ->label('Đặt hôm nay')
+                    ->query(fn ($query) => $query->whereDate('created_at', today())),
+
+                Tables\Filters\Filter::make('pending_only')
+                    ->label('Cần xử lý ngay')
+                    ->query(fn ($query) => $query->where('order_status', 'pending')),
             ])
             ->actions([
                 \Filament\Actions\ViewAction::make()

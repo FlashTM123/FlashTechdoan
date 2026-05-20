@@ -43,6 +43,13 @@
 - **Multi-Compare**: Hỗ trợ so sánh tối đa 3 biến thể cùng lúc, có thể từ cùng 1 sản phẩm hoặc khác sản phẩm.
 - **Show Differences Only**: Tính năng lọc chỉ hiển thị những thông số có sự khác biệt giữa các sản phẩm.
 
+### 🎨 5. Admin Premium Dashboard & Real-time Notifications
+- **Filament V5 Migration**: Cập nhật toàn bộ hệ thống Actions và Notifications theo chuẩn kiến trúc mới của Filament v5.
+- **Premium UI Redesign**: Tái thiết kế toàn bộ Dashboard với CSS tùy chỉnh (Gỡ viền cam, tối ưu typography, hover effects) giúp giao diện sang trọng, gọn gàng.
+- **Topbar Real-time Clock**: Tích hợp đồng hồ thời gian thực bằng Alpine.js trực tiếp lên Topbar của Filament (bên cạnh Avatar người dùng).
+- **Instant Order Notifications**: Áp dụng hệ thống Filament Database Notification để báo động (Push Notification) ngay lập tức cho Admin khi có khách hàng đặt đơn mới mà không cần reload trang.
+- **Smart Data Formatting**: Các Widget thống kê (như Doanh thu) tự động rút gọn số tiền (tr ₫, tỷ ₫) và Việt hóa ngôn ngữ ngày tháng.
+
 ---
 
 ## 🗄️ Kiến trúc Dữ liệu (Database Architecture)

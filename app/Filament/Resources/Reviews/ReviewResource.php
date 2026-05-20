@@ -31,15 +31,14 @@ class ReviewResource extends Resource
     {
         return $table
             ->columns([
-                // Hiển thị tên người dùng
-                TextColumn::make('user.name')
-                    ->label('Người đánh giá')
-                    ->searchable()
-                    ->sortable(),
-
                 // Hiển thị tên sản phẩm
                 TextColumn::make('product.name')
                     ->label('Sản phẩm')
+                    ->searchable(),
+
+                // Tên người đánh giá
+                TextColumn::make('user.name')
+                    ->label('Người đánh giá')
                     ->searchable(),
 
                 // Hiển thị Rating dạng Ngôi sao
@@ -58,7 +57,22 @@ class ReviewResource extends Resource
                     ->label('Nội dung')
                     ->limit(50),
 
-                // Nút Toggle duyệt nhanh
+                // Trạng thái duyệt
+                TextColumn::make('status')
+                    ->label('Trạng thái')
+                    ->badge()
+                    ->color(fn ($state) => match ($state) {
+                        'approved' => 'success',
+                        'rejected' => 'danger',
+                        default    => 'warning',
+                    })
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'approved' => 'Đã duyệt',
+                        'rejected' => 'Từ chối',
+                        default    => 'Chờ duyệt',
+                    }),
+
+                // Nút Toggle hiển thị
                 ToggleColumn::make('is_visible')
                     ->label('Hiển thị')
                     ->sortable(),
@@ -66,15 +80,47 @@ class ReviewResource extends Resource
                 TextColumn::make('created_at')
                     ->label('Ngày gửi')
                     ->dateTime('d/m/Y H:i')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
             ])
             ->filters([
+                // UI 4: Filter mặc định hiện review chờ duyệt
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Trạng thái')
+                    ->options([
+                        'pending'  => '🟡 Chờ duyệt',
+                        'approved' => '🟢 Đã duyệt',
+                        'rejected' => '🔴 Từ chối',
+                    ])
+                    ->placeholder('Tất cả'),
+
                 Tables\Filters\Filter::make('is_visible')
-                    ->label('Đã duyệt')
+                    ->label('Đang hiển thị')
                     ->query(fn ($query) => $query->where('is_visible', true)),
             ])
             ->actions([
-                // ĐÃ LOẠI BỎ EDIT ACTION
+                // Filament v5: dùng ButtonAction cho custom actions
+                \Filament\Actions\ButtonAction::make('approve')
+                    ->label('Duyệt')
+                    ->icon('heroicon-m-check-badge')
+                    ->color('success')
+                    ->visible(fn ($record) => $record->status === 'pending')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->update([
+                        'status'     => 'approved',
+                        'is_visible' => true,
+                    ])),
+
+                \Filament\Actions\ButtonAction::make('reject')
+                    ->label('Từ chối')
+                    ->icon('heroicon-m-x-circle')
+                    ->color('danger')
+                    ->visible(fn ($record) => $record->status === 'pending')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->update([
+                        'status'     => 'rejected',
+                        'is_visible' => false,
+                    ])),
+
                 \Filament\Actions\DeleteAction::make(),
             ]);
     }

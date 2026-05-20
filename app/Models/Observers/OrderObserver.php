@@ -6,8 +6,6 @@ use App\Events\OrderCreated;
 use App\Events\OrderStatusUpdated;
 use App\Models\Order;
 use App\Models\User;
-use App\Notifications\OrderCreatedNotification;
-use App\Notifications\OrderStatusUpdateNotification;
 use Illuminate\Support\Facades\Event;
 
 class OrderObserver
@@ -17,8 +15,20 @@ class OrderObserver
         Event::dispatch(new OrderCreated($order));
 
         $admins = User::where('role', 'admin')->get();
+        
         foreach ($admins as $admin) {
-            $admin->notify(new OrderCreatedNotification($order));
+            \Filament\Notifications\Notification::make()
+                ->title('Đơn hàng mới')
+                ->body("Đơn hàng #{$order->order_code} vừa được đặt, chờ xử lý.")
+                ->icon('heroicon-o-shopping-bag')
+                ->color('success')
+                ->actions([
+                    \Filament\Actions\Action::make('view')
+                        ->label('Xem đơn')
+                        ->url(url("/admin/orders/{$order->id}/edit"))
+                        ->button(),
+                ])
+                ->sendToDatabase($admin);
         }
     }
 
@@ -26,10 +36,6 @@ class OrderObserver
     {
         if ($order->isDirty('order_status')) {
             Event::dispatch(new OrderStatusUpdated($order));
-
-            if ($order->user) {
-                $order->user->notify(new OrderStatusUpdateNotification($order));
-            }
         }
     }
 }

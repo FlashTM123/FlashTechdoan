@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewController;
@@ -21,4 +22,11 @@ Route::get('/checkout/vnpay-return', [CheckoutController::class, 'vnpayReturn'])
 Route::post('/products/compare', [ProductController::class, 'compare']);
 
 // Reviews
+
+// ─── Admin API Routes ────────────────────────────────────────────
+Route::middleware(['auth:sanctum', \App\Http\Middleware\IsAdmin::class])->prefix('admin')->group(function () {
+    // Orders Management
+    Route::get('orders', [AdminOrderController::class, 'index']);
+    Route::get('orders/{order}', [AdminOrderController::class, 'show']);
+});
 

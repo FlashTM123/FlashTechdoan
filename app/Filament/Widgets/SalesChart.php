@@ -8,12 +8,16 @@ use Illuminate\Support\Carbon;
 
 class SalesChart extends ChartWidget
 {
+    protected static ?int $sort = 30;
+    protected int|string|array $columnSpan = 1;
+
     protected ?string $heading = 'Doanh thu theo thời gian';
     protected ?string $pollingInterval = '60s';
 
     public static function canView(): bool
     {
-        return auth()->user()->isStaff();
+        // BUG 5 FIX: cho phép cả employee xem biểu đồ doanh thu
+        return auth()->user()?->canAccessPanel(app(\Filament\Panel::class)) ?? false;
     }
 
     // Mặc định chọn "Tháng này"

@@ -8,34 +8,53 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Review;
+use App\Models\Order;
 
 class StatsOverview extends StatsOverviewWidget
 {
+    protected static ?int $sort = 10;
+    protected int|string|array $columnSpan = 'full';
+
     // Tự tải lại sau mỗi 30 giây
     protected ?string $pollingInterval = '30s';
+
     protected function getStats(): array
     {
+        $totalOrders = Order::count();
+
+        // Sparkline 7 ngày cho đơn hàng
+        $orderSparkline = collect(range(6, 0))
+            ->map(fn ($d) => Order::whereDate('created_at', today()->subDays($d))->count())
+            ->toArray();
+
+        // Sparkline 7 ngày cho sản phẩm (tích lũy)
+        $productSparkline = collect(range(6, 0))
+            ->map(fn ($d) => Product::whereDate('created_at', '<=', today()->subDays($d))->count())
+            ->toArray();
+
         return [
-            Stat::make('Tổng số Sản phẩm', Product::count())
+            Stat::make('Tổng đơn hàng', number_format($totalOrders))
+                ->description('Tất cả đơn đã tạo')
+                ->descriptionIcon('heroicon-m-shopping-bag')
+                ->color('primary')
+                ->chart($orderSparkline),
+
+            Stat::make('Tổng số sản phẩm', Product::count())
                 ->description('Tất cả cấu hình trong kho')
                 ->descriptionIcon('heroicon-m-computer-desktop')
-                ->color('success'),
+                ->color('success')
+                ->chart($productSparkline),
 
             Stat::make('Tổng khách hàng', User::where('role', 'customer')->count())
                 ->description('Tài khoản đã đăng ký')
                 ->descriptionIcon('heroicon-m-user-group')
                 ->color('info'),
 
-            Stat::make('Đánh giá mới', Review::where('is_visible', false)->count())
-                ->description('Đang chờ phê duyệt')
+            // BUG 1 FIX: dùng status = 'pending' thay vì is_visible = false
+            Stat::make('Đánh giá chờ duyệt', Review::where('status', 'pending')->count())
+                ->description('Chưa hiển thị công khai')
                 ->descriptionIcon('heroicon-m-chat-bubble-left-right')
                 ->color('warning'),
-            /* CODE DỰ PHÒNG CHO ORDERS SAU NÀY
-            Stat::make('Doanh thu', '0đ')
-                ->description('Sau khi làm bảng Orders')
-                ->descriptionIcon('heroicon-m-banknotes')
-                ->color('primary'),
-            */
         ];
     }
 }

@@ -24,7 +24,10 @@ use App\Filament\Widgets\LatestProducts;
 use App\Filament\Widgets\PendingReview;
 use App\Filament\Widgets\RevenueWidget;
 use App\Filament\Widgets\SalesChart;
+use App\Filament\Widgets\TopSellingProducts;
+use App\Filament\Widgets\RecentOrders;
 use App\Filament\Resources\Coupons\CouponResource;
+use App\Filament\Widgets\ClockWidget;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -34,27 +37,110 @@ class AdminPanelProvider extends PanelProvider
             'panels::body.end',
             fn (): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('
                 <style>
-                    /* Chỉ áp dụng nền xám sáng khi KHÔNG phải dark mode */
-                    html:not(.dark) .fi-main, 
-                    html:not(.dark) .fi-sidebar { 
-                        background-color: #f3f4f6 !important; 
+                    /* ═══════════════════════════════════════════════
+                       FLASHTECH ADMIN — CLEAN PROFESSIONAL UI
+                    ═══════════════════════════════════════════════ */
+
+                    /* ── STAT CARD ─────────────────────────────────────── */
+                    .fi-wi-stats-overview-stat {
+                        position: relative !important;
+                        border-radius: 0.875rem !important;
+                        overflow: hidden !important;
+                        transition: transform 0.18s ease, box-shadow 0.18s ease !important;
                     }
-                    
-                    /* Tinh chỉnh bo góc và bóng cho Section */
-                    .fi-section { 
-                        border-radius: 1.25rem !important; 
-                        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important; 
-                        border: 1px solid rgb(0 0 0 / 0.05) !important;
+                    .fi-wi-stats-overview-stat:hover {
+                        transform: translateY(-2px) !important;
+                        box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+                    }
+                    .dark .fi-wi-stats-overview-stat:hover {
+                        box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
                     }
 
-                    .dark .fi-section {
-                        border: 1px solid rgb(255 255 255 / 0.1) !important;
-                        background-color: rgb(24 24 27) !important;
+                    /* Bỏ ::before (đường viền cam xấu) */
+                    .fi-wi-stats-overview-stat::before {
+                        display: none !important;
                     }
 
+                    /* ── STAT LABEL — bình thường, không uppercase ──────── */
+                    .fi-wi-stats-overview-stat-label {
+                        font-size: 0.8rem !important;
+                        font-weight: 600 !important;
+                        letter-spacing: 0.01em !important;
+                        text-transform: none !important;
+                    }
+
+                    /* ── STAT VALUE — vừa đủ, không bị xuống dòng ────── */
+                    .fi-wi-stats-overview-stat-value {
+                        font-size: 1.65rem !important;
+                        font-weight: 800 !important;
+                        line-height: 1.15 !important;
+                        letter-spacing: -0.015em !important;
+                        white-space: nowrap !important;
+                        overflow: hidden !important;
+                        text-overflow: ellipsis !important;
+                    }
+
+                    /* ── STAT DESCRIPTION ──────────────────────────────── */
+                    .fi-wi-stats-overview-stat-description {
+                        font-size: 0.775rem !important;
+                        font-weight: 500 !important;
+                        margin-top: 0.25rem !important;
+                    }
+
+                    /* ── SPARKLINE nhỏ gọn ─────────────────────────────── */
+                    .fi-wi-stats-overview-stat-chart {
+                        height: 48px !important;
+                        opacity: 0.85 !important;
+                    }
+
+                    /* ── SECTION / CARD wrapper ────────────────────────── */
+                    .fi-section {
+                        border-radius: 0.875rem !important;
+                        transition: box-shadow 0.18s ease !important;
+                    }
+                    .fi-section:hover {
+                        box-shadow: 0 6px 18px rgba(0,0,0,0.09) !important;
+                    }
+                    .dark .fi-section:hover {
+                        box-shadow: 0 6px 24px rgba(0,0,0,0.35) !important;
+                    }
+
+                    /* ── TABLE header ──────────────────────────────────── */
+                    .fi-ta-header-cell {
+                        font-size: 0.72rem !important;
+                        font-weight: 700 !important;
+                        letter-spacing: 0.04em !important;
+                        text-transform: uppercase !important;
+                    }
+
+                    /* ── BADGE ─────────────────────────────────────────── */
+                    .fi-badge {
+                        border-radius: 9999px !important;
+                        font-weight: 600 !important;
+                        font-size: 0.7rem !important;
+                        padding: 0.15rem 0.6rem !important;
+                    }
+
+                    /* ── SIDEBAR ───────────────────────────────────────── */
+                    .fi-sidebar-item-button {
+                        border-radius: 0.5rem !important;
+                    }
+                    .fi-sidebar-group-label {
+                        font-size: 0.68rem !important;
+                        letter-spacing: 0.08em !important;
+                        text-transform: uppercase !important;
+                        font-weight: 700 !important;
+                    }
+
+                    /* Ẩn footer Filament */
                     .fi-sidebar-footer { display: none !important; }
                 </style>
             '),
+        );
+
+        \Filament\Support\Facades\FilamentView::registerRenderHook(
+            \Filament\View\PanelsRenderHook::USER_MENU_BEFORE,
+            fn (): \Illuminate\Contracts\View\View => view('filament.components.clock'),
         );
 
         return $panel
@@ -77,7 +163,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
+                StatsOverview::class,
+                RevenueWidget::class,
+                SalesChart::class,
+                ProductByCategoryChart::class,
+                TopSellingProducts::class,
+                RecentOrders::class,
+                LatestProducts::class,
+                PendingReview::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -92,14 +185,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
-            ->widgets([
-            StatsOverview::class,
-            RevenueWidget::class,
-            SalesChart::class,
-            ProductByCategoryChart::class,
-            LatestProducts::class,
-            PendingReview::class,
-        ]);
+            ]);
     }
 }
