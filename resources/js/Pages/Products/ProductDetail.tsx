@@ -2,7 +2,7 @@ import AppLayout from '@/Layouts/AppLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Heart, Share2, CheckCircle2, ChevronRight, Info, Star } from 'lucide-react';
+import { ShoppingCart, Heart, Share2, CheckCircle2, ChevronRight, X, Info, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useCart } from '@/Context/CartContext';
@@ -17,6 +17,9 @@ export default function ProductDetail({ product }: { product: any }) {
     // Khởi tạo biến thể đang chọn
     const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null);
     const [isWishlisted, setIsWishlisted] = useState(false);
+    const [showSpecsModal, setShowSpecsModal] = useState(false);
+
+    const SPECS_PREVIEW_COUNT = 5;
 
     const getImageUrl = (path: string) => {
         if (!path) return 'https://via.placeholder.com/600';
@@ -42,7 +45,6 @@ export default function ProductDetail({ product }: { product: any }) {
         if (!selectedVariant) return;
 
         addToCart({
-            id: product.id,
             name: product.name,
             variant_id: selectedVariant.id,
             variant_name: selectedVariant.variant_name,
@@ -248,26 +250,134 @@ export default function ProductDetail({ product }: { product: any }) {
                                 <Share2 className="w-4 h-4" /> Thông số kỹ thuật
                             </h4>
                         </div>
-                        <div className="bg-slate-50 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-100 dark:border-slate-800">
-                            <table className="w-full text-sm">
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                    {(selectedVariant?.details?.length > 0 ? selectedVariant.details : [
-                                        { attribute_name: "CPU", attribute_value: "Apple M3 Chip" },
-                                        { attribute_name: "RAM", attribute_value: "16GB Unified Memory" },
-                                        { attribute_name: "Storage", attribute_value: "512GB SSD" },
-                                    ]).map((detail: any) => (
-                                        <tr key={detail.id} className="hover:bg-white dark:hover:bg-slate-800 transition-colors group">
-                                            <td className="py-5 pl-8 font-black text-slate-400 dark:text-slate-500 uppercase text-[10px] tracking-widest w-1/3">
-                                                {detail.attribute_name}
-                                            </td>
-                                            <td className="py-5 pr-8 text-slate-900 dark:text-white font-bold group-hover:text-indigo-600 transition-colors">
-                                                {detail.attribute_value}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+
+                        {(() => {
+                            const allSpecs = selectedVariant?.details?.length > 0
+                                ? selectedVariant.details
+                                : [
+                                    { attribute_name: "CPU", attribute_value: "Apple M3 Chip" },
+                                    { attribute_name: "RAM", attribute_value: "16GB Unified Memory" },
+                                    { attribute_name: "Storage", attribute_value: "512GB SSD" },
+                                ];
+                            const previewSpecs = allSpecs.slice(0, SPECS_PREVIEW_COUNT);
+                            const hasMore = allSpecs.length > SPECS_PREVIEW_COUNT;
+
+                            return (
+                                <>
+                                    {/* Bảng preview */}
+                                    <div className="relative bg-slate-50 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-100 dark:border-slate-800">
+                                        <table className="w-full text-sm">
+                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                {previewSpecs.map((detail: any, idx: number) => (
+                                                    <tr key={detail.id ?? idx} className="hover:bg-white dark:hover:bg-slate-800 transition-colors group">
+                                                        <td className="py-5 pl-8 font-black text-slate-400 dark:text-slate-500 uppercase text-[10px] tracking-widest w-1/3">
+                                                            {detail.attribute_name}
+                                                        </td>
+                                                        <td className="py-5 pr-8 text-slate-900 dark:text-white font-bold group-hover:text-indigo-600 transition-colors">
+                                                            {detail.attribute_value}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+
+                                        {/* Gradient fade ứ ở dưới */}
+                                        {hasMore && (
+                                            <div className="h-14 bg-gradient-to-t from-slate-50 dark:from-slate-900 to-transparent -mt-14 relative pointer-events-none" />
+                                        )}
+                                    </div>
+
+                                    {/* Nút mở popup */}
+                                    {hasMore && (
+                                        <motion.button
+                                            onClick={() => setShowSpecsModal(true)}
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.97 }}
+                                            className="mt-5 w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-indigo-600 dark:hover:bg-indigo-500 dark:hover:text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg"
+                                        >
+                                            <Share2 className="w-4 h-4" />
+                                            Xem tất cả {allSpecs.length} thông số
+                                        </motion.button>
+                                    )}
+
+                                    {/* POPUP MODAL */}
+                                    <AnimatePresence>
+                                        {showSpecsModal && (
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                onClick={() => setShowSpecsModal(false)}
+                                                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
+                                            >
+                                                <motion.div
+                                                    initial={{ opacity: 0, scale: 0.85, y: 40 }}
+                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                    exit={{ opacity: 0, scale: 0.85, y: 40 }}
+                                                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="w-full max-w-2xl max-h-[85vh] flex flex-col bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden"
+                                                >
+                                                    {/* Modal Header */}
+                                                    <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
+                                                        <div>
+                                                            <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                                                                Thông số kỹ thuật
+                                                            </h3>
+                                                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+                                                                {product.name} • {selectedVariant?.variant_name}
+                                                            </p>
+                                                        </div>
+                                                        <motion.button
+                                                            onClick={() => setShowSpecsModal(false)}
+                                                            whileHover={{ scale: 1.1, rotate: 90 }}
+                                                            whileTap={{ scale: 0.9 }}
+                                                            className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-rose-100 hover:text-rose-500 dark:hover:bg-rose-500/20 dark:hover:text-rose-400 transition-colors"
+                                                        >
+                                                            <X className="w-5 h-5" />
+                                                        </motion.button>
+                                                    </div>
+
+                                                    {/* Modal Body - Scrollable */}
+                                                    <div className="overflow-y-auto flex-1">
+                                                        <table className="w-full text-sm">
+                                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                                {allSpecs.map((detail: any, idx: number) => (
+                                                                    <motion.tr
+                                                                        key={detail.id ?? idx}
+                                                                        initial={{ opacity: 0, x: -10 }}
+                                                                        animate={{ opacity: 1, x: 0 }}
+                                                                        transition={{ delay: idx * 0.02, duration: 0.25 }}
+                                                                        className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group"
+                                                                    >
+                                                                        <td className="py-5 pl-8 font-black text-slate-400 dark:text-slate-500 uppercase text-[10px] tracking-widest w-2/5">
+                                                                            {detail.attribute_name}
+                                                                        </td>
+                                                                        <td className="py-5 pr-8 text-slate-900 dark:text-white font-bold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                                            {detail.attribute_value}
+                                                                        </td>
+                                                                    </motion.tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                    {/* Modal Footer */}
+                                                    <div className="px-8 py-5 border-t border-slate-100 dark:border-slate-800 flex-shrink-0">
+                                                        <button
+                                                            onClick={() => setShowSpecsModal(false)}
+                                                            className="w-full py-3.5 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-sm hover:bg-indigo-600 dark:hover:bg-indigo-500 dark:hover:text-white transition-all active:scale-95"
+                                                        >
+                                                            Đóng
+                                                        </button>
+                                                    </div>
+                                                </motion.div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </>
+                            );
+                        })()}
                     </div>
                     </div>
                 </div>

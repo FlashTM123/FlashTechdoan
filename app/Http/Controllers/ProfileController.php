@@ -19,8 +19,12 @@ class ProfileController extends Controller
      */
     public function show(Request $request): Response
     {
+        $user = $request->user()->load('profile');
+        $ordersCount = $user->orders()->count();
+
         return Inertia::render('Profile/Show', [
-            'user' => $request->user()->load('profile'),
+            'user'         => $user,
+            'ordersCount'  => $ordersCount,
         ]);
     }
 

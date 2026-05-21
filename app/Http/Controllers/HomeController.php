@@ -64,6 +64,15 @@ class HomeController extends Controller
             $query->whereHas('variants', fn($q) => $q->where('price', '<=', $request->max_price));
         }
 
+        // Lọc theo từ khóa tìm kiếm
+        if ($request->search) {
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', $searchTerm)
+                  ->orWhere('description', 'LIKE', $searchTerm);
+            });
+        }
+
         $products = $query->latest()->paginate(12)->withQueryString();
 
         return inertia('Products/Index', [

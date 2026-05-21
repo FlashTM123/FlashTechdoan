@@ -11,9 +11,20 @@ interface CartItem {
     image: string;
 }
 
+export interface AppliedCoupon {
+    coupon_code: string;
+    type: "percent" | "fixed";
+    value: number;
+    discount_amount: number;
+    final_total: number;
+}
+
 interface CartContextType {
     cart: CartItem[];
     totalPrice: number;
+    appliedCoupon: AppliedCoupon | null;
+    setAppliedCoupon: React.Dispatch<React.SetStateAction<AppliedCoupon | null>>;
+    finalTotal: number;
     addToCart: (item: CartItem) => void;
     removeFromCart: (variant_id: number) => void;
     updateQuantity: (variant_id: number, quantity: number) => void;
@@ -30,9 +41,34 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         return savedCart ? JSON.parse(savedCart) : [];
     });
 
+    // Coupon state — persist in sessionStorage so it survives navigation to Checkout
+    const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(() => {
+        const saved = sessionStorage.getItem('flash_coupon');
+        return saved ? JSON.parse(saved) : null;
+    });
+
     const totalPrice = useMemo(() => {
         return cart.reduce((total, item) => total + item.price * item.quantity, 0);
     }, [cart]);
+
+    // Recalculate discount whenever cart total changes (e.g. user removes items)
+    const finalTotal = useMemo(() => {
+        if (!appliedCoupon) return totalPrice;
+        if (appliedCoupon.type === 'percent') {
+            const discount = Math.min((appliedCoupon.value / 100) * totalPrice, totalPrice);
+            return Math.max(0, totalPrice - discount);
+        }
+        return Math.max(0, totalPrice - appliedCoupon.value);
+    }, [totalPrice, appliedCoupon]);
+
+    // Persist coupon to sessionStorage
+    useEffect(() => {
+        if (appliedCoupon) {
+            sessionStorage.setItem('flash_coupon', JSON.stringify(appliedCoupon));
+        } else {
+            sessionStorage.removeItem('flash_coupon');
+        }
+    }, [appliedCoupon]);
 
     // Logic đồng bộ
     const syncCart = async () => {
@@ -43,16 +79,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                     const items = JSON.parse(localCart);
                     if (items.length > 0) {
                         // Đồng bộ lên server
-                        await axios.post(route('cart.sync'), { 
-                            items: items.map((i: any) => ({ 
-                                variant_id: i.variant_id, 
-                                quantity: i.quantity 
-                            })) 
+                        await axios.post(route('cart.sync'), {
+                            items: items.map((i: any) => ({
+                                variant_id: i.variant_id,
+                                quantity: i.quantity
+                            }))
                         });
                         localStorage.removeItem('flash_cart');
                     }
                 }
-                
+
                 // Lấy dữ liệu từ DB và CHUẨN HÓA (Mapping)
                 const response = await axios.get(route('cart.data'));
                 const normalizedCart = response.data.map((item: any) => ({
@@ -60,16 +96,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                     variant_id: item.product_variant_id,
                     variant_name: item.variant.variant_name,
                     price: Number(item.variant.price),
-                    image: item.variant.images?.[0]?.image_url 
-                            ? (item.variant.images[0].image_url.startsWith('http') 
-                                ? item.variant.images[0].image_url 
+                    image: item.variant.images?.[0]?.image_url
+                            ? (item.variant.images[0].image_url.startsWith('http')
+                                ? item.variant.images[0].image_url
                                 : `/storage/${item.variant.images[0].image_url}`)
-                            : (item.variant.product.thumbnail_url?.startsWith('http') 
-                                ? item.variant.product.thumbnail_url 
+                            : (item.variant.product.thumbnail_url?.startsWith('http')
+                                ? item.variant.product.thumbnail_url
                                 : `/storage/${item.variant.product.thumbnail_url}`),
                     quantity: item.quantity
                 }));
-                
+
                 setCart(normalizedCart);
             } catch (error) {
                 console.error("Lỗi đồng bộ giỏ hàng:", error);
@@ -104,46 +140,53 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
         // Nếu đã đăng nhập, gọi API để lưu vào DB luôn
         if (auth.user) {
-            axios.post(route('cart.sync'), { 
-                items: [{ variant_id: item.variant_id, quantity: item.quantity }] 
+            axios.post(route('cart.sync'), {
+                items: [{ variant_id: item.variant_id, quantity: item.quantity }]
             });
         }
     };
 
     const removeFromCart = (variant_id: number) => {
         setCart(prev => prev.filter(item => item.variant_id !== variant_id));
-        
+
         if (auth.user) {
-            axios.post(route('cart.sync'), { 
-                items: [{ variant_id, quantity: 0 }] 
+            axios.post(route('cart.sync'), {
+                items: [{ variant_id, quantity: 0 }]
             });
         }
     };
 
     const updateQuantity = (variant_id: number, quantity: number) => {
         if (quantity < 1) return;
-        
-        setCart(prev => prev.map(item => 
+
+        setCart(prev => prev.map(item =>
             item.variant_id === variant_id ? { ...item, quantity } : item
         ));
 
         if (auth.user) {
-            // Logic sync đơn giản nhất: gửi số lượng mới
-            axios.post(route('cart.sync'), { 
-                items: [{ variant_id, quantity }] 
+            axios.post(route('cart.sync'), {
+                items: [{ variant_id, quantity }]
             });
         }
     };
 
     return (
-        <CartContext.Provider value={{ cart, totalPrice, addToCart, removeFromCart, updateQuantity, setCart }}>
+        <CartContext.Provider value={{
+            cart,
+            totalPrice,
+            appliedCoupon,
+            setAppliedCoupon,
+            finalTotal,
+            addToCart,
+            removeFromCart,
+            updateQuantity,
+            setCart,
+        }}>
             {children}
         </CartContext.Provider>
     );
-
-
-
 };
+
 export const useCart = () => {
     const context = useContext(CartContext);
     if (!context) {

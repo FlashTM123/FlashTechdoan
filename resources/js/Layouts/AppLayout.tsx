@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Footer from '@/Components/Footer';
@@ -10,7 +10,7 @@ import UserDropdown from '@/Components/UserDropdown';
 import { CartProvider, useCart } from '@/Context/CartContext';
 import { useCompare } from '@/hooks/useCompare';
 
-function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpen, isScrolled, searchTerm, setSearchTerm, isSearching, searchResults, showSuggestions, auth, categories, isDropdownOpen, setIsDropdownOpen, compareCount }: any) {
+function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpen, isScrolled, searchTerm, setSearchTerm, isSearching, searchResults, showSuggestions, setShowSuggestions, auth, categories, isDropdownOpen, setIsDropdownOpen, compareCount }: any) {
     const { cart } = useCart();
     const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -86,10 +86,63 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm Laptop..."
-                                className="w-full bg-slate-100 dark:bg-slate-800/50 border-2 border-transparent rounded-2xl py-2.5 pl-11 pr-4 text-xs font-semibold focus:bg-white dark:focus:bg-slate-800 transition-all outline-none"
+                                className="w-full bg-slate-100 dark:bg-slate-800/50 border-2 border-transparent rounded-2xl py-2.5 pl-11 pr-4 text-xs font-semibold focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500/30 transition-all outline-none"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                onFocus={() => {
+                                    if (searchResults.length > 0) setShowSuggestions(true);
+                                }}
+                                onBlur={() => {
+                                    // Delay để có thể click được vào kết quả trước khi đóng
+                                    setTimeout(() => setShowSuggestions(false), 200);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && searchTerm.trim() !== '') {
+                                        router.visit(`/products?search=${encodeURIComponent(searchTerm)}`);
+                                    }
+                                }}
                             />
+
+                            <AnimatePresence>
+                                {showSuggestions && searchResults.length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        className="absolute top-full left-0 w-full mt-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden z-50"
+                                    >
+                                        <div className="flex flex-col">
+                                            <div className="px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800/50">
+                                                Kết quả tìm kiếm
+                                            </div>
+                                            {searchResults.map((item: any) => {
+                                                const price = item.variants?.[0]?.price || 0;
+                                                const imageUrl = item.thumbnail_url 
+                                                    ? (item.thumbnail_url.startsWith('http') ? item.thumbnail_url : `/storage/${item.thumbnail_url}`)
+                                                    : 'https://via.placeholder.com/150';
+
+                                                return (
+                                                    <Link
+                                                        key={item.id}
+                                                        href={`/product/${item.id}`}
+                                                        className="flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-b border-slate-50 dark:border-slate-800 last:border-0"
+                                                    >
+                                                        <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-700">
+                                                            <img src={imageUrl} alt={item.name} className="w-full h-full object-contain p-1" />
+                                                        </div>
+                                                        <div className="flex-grow min-w-0">
+                                                            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{item.name}</h4>
+                                                            <p className="text-[11px] font-black text-indigo-600 dark:text-indigo-400 mt-1">
+                                                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)}
+                                                            </p>
+                                                        </div>
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
 
@@ -269,6 +322,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 isSearching={isSearching}
                 searchResults={searchResults}
                 showSuggestions={showSuggestions}
+                setShowSuggestions={setShowSuggestions}
                 auth={auth}
                 categories={categories}
                 isDropdownOpen={isDropdownOpen}

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\CouponController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -49,6 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     // Reviews
     Route::post('/products/{product}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+
+    // Coupon
+    Route::post('/coupon/apply', [CouponController::class, 'apply'])->name('coupon.apply');
 });
 
 Route::middleware(['auth'])->prefix('admin')->group(function () {

@@ -10,6 +10,13 @@ import { CompareProvider } from './Context/CompareContext';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/build/sw.js', { scope: '/' });
+    });
+}
+
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: async (name) => {

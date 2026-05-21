@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
@@ -45,11 +46,12 @@ class CheckoutController extends Controller
     {
         $request->validate([
             'shipping_address' => 'required|string',
-            'phone' => 'required|string',
-            'payment_method_id' => 'required|exists:payment_methods,id',
-            'items' => 'required|array',
+            'phone'            => 'required|string',
+            'payment_method_id'=> 'required|exists:payment_methods,id',
+            'items'            => 'required|array',
             'items.*.variant_id' => 'required|exists:product_variants,id',
-            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.quantity'   => 'required|integer|min:1',
+            'coupon_code'      => 'nullable|string',
         ]);
 
         $user = $request->user();
@@ -74,32 +76,54 @@ class CheckoutController extends Controller
                     $totalAmount += $itemTotal;
 
                     $orderItemsData[] = [
-                        'product_id' => $variant->product_id,
+                        'product_id'          => $variant->product_id,
                         'product_variants_id' => $variant->id,
-                        'quantity' => $item['quantity'],
-                        'unit_price' => $variant->price,
+                        'quantity'            => $item['quantity'],
+                        'unit_price'          => $variant->price,
                     ];
 
                     // 2. Trừ tồn kho
                     $variant->decrement('stock', $item['quantity']);
                 }
 
+                // 2.5 Xác thực mã giảm giá (nếu có)
+                $coupon        = null;
+                $discountAmount = 0;
+                $couponId      = null;
+
+                if ($request->filled('coupon_code')) {
+                    $coupon = Coupon::where('code', strtoupper(trim($request->coupon_code)))->first();
+
+                    if ($coupon && $coupon->isValid()) {
+                        $discountAmount = $coupon->calculateDiscount((float) $totalAmount);
+                        $totalAmount    = max(0, $totalAmount - $discountAmount);
+                        $couponId       = $coupon->id;
+                    }
+                }
+
                 // 3. Tạo đơn hàng (orders)
                 $order = Order::create([
-                    'user_id' => $user->id,
-                    'order_code' => 'FT' . strtoupper(Str::random(10)),
-                    'total_amount' => $totalAmount,
-                    'shipping_address' => $request->shipping_address . " (SĐT: " . $request->phone . ")",
+                    'user_id'           => $user->id,
+                    'order_code'        => 'FT' . strtoupper(Str::random(10)),
+                    'total_amount'      => $totalAmount,
+                    'shipping_address'  => $request->shipping_address . " (SĐT: " . $request->phone . ")",
                     'payment_method_id' => $paymentMethod->id,
-                    'payment_status' => 'pending',
-                    'order_status' => 'pending',
-                    'notes' => $request->notes,
+                    'payment_status'    => 'pending',
+                    'order_status'      => 'pending',
+                    'notes'             => $request->notes,
+                    'coupon_id'         => $couponId,
+                    'discount_amount'   => $discountAmount,
                 ]);
 
                 // 4. Tạo chi tiết đơn hàng (order_items)
                 foreach ($orderItemsData as $orderItem) {
                     $orderItem['order_id'] = $order->id;
                     \App\Models\OrderItem::create($orderItem);
+                }
+
+                // 4.2 Tăng số lần dùng coupon
+                if ($coupon) {
+                    $coupon->incrementUsage();
                 }
 
                 // PHÁT SỰ KIỆN: Thông báo đơn hàng mới cho Admin

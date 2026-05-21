@@ -15,9 +15,10 @@ import {
 
 interface ProfileShowProps {
     user: any;
+    ordersCount: number;
 }
 
-export default function Show({ user }: ProfileShowProps) {
+export default function Show({ user, ordersCount }: ProfileShowProps) {
     return (
         <AppLayout>
             <Head title="Hồ sơ của tôi" />
@@ -80,9 +81,13 @@ export default function Show({ user }: ProfileShowProps) {
                                             <Settings size={18} className="mr-2" />
                                             Chỉnh sửa hồ sơ
                                         </Link>
-                                        <button className="inline-flex items-center px-8 py-4 bg-slate-800 text-white text-sm font-black rounded-2xl hover:bg-slate-700 transition-all border border-slate-700">
+                                        <Link
+                                            href={route('orders.index')}
+                                            className="inline-flex items-center px-8 py-4 bg-slate-800 text-white text-sm font-black rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 active:scale-95"
+                                        >
+                                            <Package size={18} className="mr-2" />
                                             Đơn hàng của tôi
-                                        </button>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
@@ -95,7 +100,7 @@ export default function Show({ user }: ProfileShowProps) {
                             <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-4 group-hover:scale-110 transition-transform">
                                 <Package size={28} />
                             </div>
-                            <span className="text-3xl font-black text-white mb-1">12</span>
+                            <span className="text-3xl font-black text-white mb-1">{ordersCount}</span>
                             <span className="text-slate-500 text-xs font-bold uppercase tracking-widest">Đơn hàng đã đặt</span>
                         </div>
 

@@ -34,7 +34,7 @@ export default function Success({ order_code }: { order_code: string }) {
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </Link>
                         <Link 
-                            href="/dashboard" 
+                            href={route('orders.index')} 
                             className="w-full py-4 text-slate-500 dark:text-slate-400 font-bold hover:text-indigo-600 dark:hover:text-white transition-colors flex items-center justify-center gap-2"
                         >
                             <ShoppingBag className="w-4 h-4" />

@@ -4,7 +4,7 @@ import { ShoppingCart, ArrowRight, Star, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CompareButton from "@/Components/CompareButton";
 
-export default function ProductCard({ product }: { product: any }) {
+export default function ProductCard({ product, dark = false }: { product: any, dark?: boolean }) {
     const cheapestVariant = product.variants?.[0];
     const discount = cheapestVariant?.old_price > cheapestVariant?.price
         ? Math.round(((cheapestVariant.old_price - cheapestVariant.price) / cheapestVariant.old_price) * 100)

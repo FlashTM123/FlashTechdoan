@@ -218,8 +218,8 @@ Response:
 - [x] **Giai đoạn 5:** Hệ thống Đánh giá (Review) & Mã giảm giá (Coupon).
 - [x] **Giai đoạn 6:** Hoàn thiện tích hợp cổng thanh toán VNPay & MoMo.
 - [x] **Giai đoạn 7:** Phát triển module So sánh sản phẩm (Compare Products) với hỗ trợ so sánh biến thể.
-- [ ] **Giai đoạn 8:** Hệ thống Báo cáo doanh thu & Phân tích dữ liệu khách hàng.
-- [ ] **Giai đoạn 9:** Tối ưu hóa trải nghiệm Mobile (PWA) & Hiệu năng hệ thống.
+- [x] **Giai đoạn 8:** Hệ thống Báo cáo doanh thu & Phân tích dữ liệu khách hàng.
+- [x] **Giai đoạn 9:** Tối ưu hóa trải nghiệm Mobile (PWA) & Hiệu năng hệ thống.
 
 ---
 

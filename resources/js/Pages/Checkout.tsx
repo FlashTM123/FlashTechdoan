@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useCart } from '../Context/CartContext';
 import AppLayout from '@/Layouts/AppLayout';
 import { Head, router } from '@inertiajs/react';
-import { CreditCard, MapPin, Phone, MessageSquare, ShieldCheck, ArrowRight, Wallet, Banknote, ShoppingBag } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { CreditCard, MapPin, Phone, MessageSquare, ShieldCheck, ArrowRight, Wallet, Banknote, ShoppingBag, Tag, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
 interface PaymentMethod {
@@ -18,7 +18,7 @@ interface Props {
 }
 
 const Checkout: React.FC<Props> = ({ auth, paymentMethods }) => {
-    const { cart, totalPrice, setCart } = useCart();
+    const { cart, totalPrice, finalTotal, appliedCoupon, setAppliedCoupon, setCart } = useCart();
     const [formData, setFormData] = useState({
         shipping_address: auth.user.profile?.address || '',
         phone: auth.user.profile?.phone || '',
@@ -27,6 +27,43 @@ const Checkout: React.FC<Props> = ({ auth, paymentMethods }) => {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // ─── Coupon UI State (local only) ───────────────────────────────
+    const [couponCode, setCouponCode] = useState('');
+    const [couponLoading, setCouponLoading] = useState(false);
+    const [couponError, setCouponError] = useState('');
+
+    const handleApplyCoupon = async () => {
+        const trimmed = couponCode.trim().toUpperCase();
+        if (!trimmed) return;
+        setCouponLoading(true);
+        setCouponError('');
+        setAppliedCoupon(null);
+        try {
+            const response = await axios.post(route('coupon.apply'), {
+                code: trimmed,
+                order_total: totalPrice,
+            });
+            if (response.data.status === 'success') {
+                setAppliedCoupon(response.data);
+                setCouponCode('');
+            }
+        } catch (err: any) {
+            const msg =
+                err?.response?.data?.message ||
+                err?.response?.data?.errors?.code?.[0] ||
+                'Có lỗi xảy ra, vui lòng thử lại.';
+            setCouponError(msg);
+        } finally {
+            setCouponLoading(false);
+        }
+    };
+
+    const handleRemoveCoupon = () => {
+        setAppliedCoupon(null);
+        setCouponError('');
+        setCouponCode('');
+    };
 
     const handlePlaceOrder = async () => {
         if (!formData.payment_method_id) {
@@ -48,11 +85,13 @@ const Checkout: React.FC<Props> = ({ auth, paymentMethods }) => {
                     variant_id: item.variant_id,
                     quantity: item.quantity,
                 })),
+                coupon_code: appliedCoupon?.coupon_code ?? null,
             });
 
             if (response.data.status === 'success') {
-                // Xóa giỏ hàng ở Frontend
+                // Xóa giỏ hàng và coupon ở Frontend
                 setCart([]);
+                setAppliedCoupon(null);
                 localStorage.removeItem('flash_cart');
 
                 if (response.data.payment_url) {
@@ -230,13 +269,120 @@ const Checkout: React.FC<Props> = ({ auth, paymentMethods }) => {
                                         <span className="uppercase tracking-widest">Tạm tính</span>
                                         <span className="text-white">{totalPrice.toLocaleString()}đ</span>
                                     </div>
-                                    <div className="flex justify-between text-slate-400 font-bold text-sm">
+                                    <div className="flex justify-between text-slate-400 font-bold text-sm border-b border-slate-800 pb-5">
                                         <span className="uppercase tracking-widest">Vận chuyển</span>
                                         <span className="text-emerald-400 uppercase tracking-widest text-[10px]">Miễn phí</span>
                                     </div>
+
+                                    {/* ─── Mã giảm giá ─── */}
+                                    <div className="pt-2 pb-4 border-b border-slate-800">
+                                        <span className="uppercase tracking-widest text-slate-400 font-bold text-xs mb-3 flex items-center gap-2">
+                                            <Tag className="w-3.5 h-3.5" />
+                                            Mã giảm giá
+                                        </span>
+
+                                        {/* Input nhập mã (khi chưa có coupon) */}
+                                        {!appliedCoupon && (
+                                            <div className="flex gap-2 mt-3">
+                                                <input
+                                                    type="text"
+                                                    value={couponCode}
+                                                    onChange={(e) => {
+                                                        setCouponCode(e.target.value.toUpperCase());
+                                                        setCouponError('');
+                                                    }}
+                                                    onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
+                                                    placeholder="FLASHTECH2026..."
+                                                    disabled={couponLoading}
+                                                    className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-medium uppercase disabled:opacity-50"
+                                                />
+                                                <button
+                                                    onClick={handleApplyCoupon}
+                                                    disabled={couponLoading || !couponCode.trim()}
+                                                    className="bg-slate-800 hover:bg-slate-700 text-indigo-400 hover:text-indigo-300 border border-slate-700/50 hover:border-slate-600 px-5 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                                >
+                                                    {couponLoading ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                        'Áp dụng'
+                                                    )}
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Thông báo lỗi */}
+                                        <AnimatePresence>
+                                            {couponError && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: -6 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -6 }}
+                                                    className="mt-3 flex items-start gap-2 text-rose-400 text-xs font-semibold"
+                                                >
+                                                    <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                                    <span>{couponError}</span>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+
+                                        {/* Badge mã đã áp dụng */}
+                                        <AnimatePresence>
+                                            {appliedCoupon && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: -6 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -6 }}
+                                                    className="mt-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+                                                >
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                                                        <div className="min-w-0">
+                                                            <p className="text-emerald-400 font-black text-sm tracking-widest truncate">{appliedCoupon.coupon_code}</p>
+                                                            <p className="text-emerald-500/70 text-[10px] font-bold uppercase tracking-wider">
+                                                                {appliedCoupon.type === 'percent'
+                                                                    ? `Giảm ${appliedCoupon.value}%`
+                                                                    : `Giảm ${Number(appliedCoupon.value).toLocaleString()}đ`}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={handleRemoveCoupon}
+                                                        className="text-slate-500 hover:text-rose-400 transition-colors flex-shrink-0"
+                                                        title="Xóa mã"
+                                                    >
+                                                        <XCircle className="w-4 h-4" />
+                                                    </button>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+
+                                    {/* Dòng giảm giá */}
+                                    <AnimatePresence>
+                                        {appliedCoupon && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="flex justify-between text-sm font-bold overflow-hidden"
+                                            >
+                                                <span className="text-slate-400 uppercase tracking-widest">Giảm giá</span>
+                                                <span className="text-emerald-400">- {appliedCoupon.discount_amount.toLocaleString()}đ</span>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
                                     <div className="flex justify-between text-3xl font-black font-display pt-4">
                                         <span>Tổng số</span>
-                                        <span className="text-indigo-400">{totalPrice.toLocaleString()}đ</span>
+                                        <motion.span
+                                            key={finalTotal}
+                                            initial={{ scale: 1.1, color: '#34d399' }}
+                                            animate={{ scale: 1, color: '#818cf8' }}
+                                            transition={{ duration: 0.4 }}
+                                            className="text-indigo-400"
+                                        >
+                                            {finalTotal.toLocaleString()}đ
+                                        </motion.span>
                                     </div>
                                 </div>
 

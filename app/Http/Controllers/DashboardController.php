@@ -69,7 +69,7 @@ class DashboardController extends Controller
                 'products.id',
                 'products.name',
                 DB::raw('SUM(order_items.quantity) as total_sold'),
-                DB::raw('SUM(order_items.quantity * order_items.price) as revenue')
+                DB::raw('SUM(order_items.quantity * order_items.unit_price) as revenue')
             )
             ->groupBy('products.id', 'products.name')
             ->orderByDesc('total_sold')
