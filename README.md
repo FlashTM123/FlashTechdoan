@@ -56,6 +56,10 @@
 - **Apple-style Product Detail**: Nút chọn cấu hình tinh tế, tích hợp Animation mượt mà và hiển thị tồn kho Real-time.
 - **Advanced Filtering**: Bộ lọc chuyên nghiệp với hiệu ứng Morphing Layout, chuyển đổi lưới hiển thị không độ trễ.
 - **Dark/Light Mode Optimized**: Hoàn thiện 100% giao diện sáng tối, đảm bảo độ tương phản hoàn hảo và trải nghiệm thị giác cao cấp nhất.
+### 🫙 7. Edit Product Detail & Product Manager
+- **Edit & Change Position Discription and Specitification**: Làm lại 2 vị trí phần mô tả và thông số chi tiết để nhìn gọn mắt hơn và thay đổi giới hạn hiển thị ở thông số kĩ thuật
+- **Change Position Old Price and Price**: Thay đổi vị trí giá bán và giá gốc, và đổi tên giá gốc thành giá chưa giảm
+- **Change Type Discription in Database**: Điểu chỉnh lại cột discription trong bảng Product sang Text thay vì VARCHAR
 
 ---
 
@@ -261,3 +265,4 @@ Dự án này được cấp phép dưới MIT License - xem file [LICENSE](LICE
   <p>Developed with passion for modern web standards</p>
   <p>© 2026 FlashTech. All rights reserved.</p>
 </div>
+

@@ -44,7 +44,7 @@ class ProductResource extends Resource
                                     ->label('Tên sản phẩm')
                                     ->required()
                                     ->live(debounce: 500)
-                                    ->afterStateUpdated(fn ($set, ?string $state) => $set('slug', Str::slug($state))),
+                                    ->afterStateUpdated(fn($set, ?string $state) => $set('slug', Str::slug($state))),
 
                                 TextInput::make('slug')
                                     ->label('Slug')
@@ -86,7 +86,7 @@ class ProductResource extends Resource
                             Toggle::make('is_active')->label('Kích hoạt')->default(true),
 
                             Repeater::make('images')
-                                ->relationship('images', modifyQueryUsing: fn ($query) => $query->whereNull('product_variant_id'))
+                                ->relationship('images', modifyQueryUsing: fn($query) => $query->whereNull('product_variant_id'))
                                 ->label('Bộ sưu tập ảnh chung')
                                 ->schema([
                                     TextInput::make('image_url')
@@ -111,13 +111,13 @@ class ProductResource extends Resource
                                         TextInput::make('variant_name')->label('Cấu hình (VD: Core i5/8GB)')->required(),
                                         TextInput::make('sku')
                                             ->label('Mã SKU')
-                                            ->default(fn () => 'FT-' . strtoupper(Str::random(6)))
+                                            ->default(fn() => 'FT-' . strtoupper(Str::random(6)))
                                             ->required()
                                             ->unique(ignoreRecord: true),
                                     ]),
                                     Grid::make(3)->schema([
+                                        TextInput::make('old_price')->label('Giá chưa giảm (nếu có)')->numeric(),
                                         TextInput::make('price')->label('Giá bán')->numeric()->required(),
-                                        TextInput::make('old_price')->label('Giá gốc')->numeric(),
                                         TextInput::make('stock')->label('Tồn kho')->numeric()->default(0),
                                     ]),
 
@@ -160,7 +160,7 @@ class ProductResource extends Resource
                 ->schema([
                     \Filament\Schemas\Components\Flex::make([
                         \Filament\Schemas\Components\Image::make(
-                            fn ($record) => (str_starts_with($record->thumbnail_url ?? '', 'http'))
+                            fn($record) => (str_starts_with($record->thumbnail_url ?? '', 'http'))
                                 ? $record->thumbnail_url
                                 : asset('storage/' . ($record->thumbnail_url ?? 'placeholder.png')),
                             'Thumbnail'
@@ -170,23 +170,23 @@ class ProductResource extends Resource
                             ->grow(false),
 
                         \Filament\Schemas\Components\Group::make([
-                            \Filament\Schemas\Components\Text::make(fn ($record) => $record->name)
+                            \Filament\Schemas\Components\Text::make(fn($record) => $record->name)
                                 ->weight('bold')
                                 ->size('xl'),
                             \Filament\Schemas\Components\Flex::make([
-                                \Filament\Schemas\Components\Text::make(fn ($record) => $record->brand?->name ?? '—')
+                                \Filament\Schemas\Components\Text::make(fn($record) => $record->brand?->name ?? '—')
                                     ->badge()
                                     ->color('gray'),
-                                \Filament\Schemas\Components\Text::make(fn ($record) => $record->category?->name ?? '—')
+                                \Filament\Schemas\Components\Text::make(fn($record) => $record->category?->name ?? '—')
                                     ->badge()
                                     ->color('info'),
-                                \Filament\Schemas\Components\Text::make(fn ($record) => $record->is_featured ? 'Nổi bật' : null)
+                                \Filament\Schemas\Components\Text::make(fn($record) => $record->is_featured ? 'Nổi bật' : null)
                                     ->badge()
                                     ->color('warning')
-                                    ->hidden(fn ($record) => !$record->is_featured),
-                                \Filament\Schemas\Components\Text::make(fn ($record) => $record->is_active ? 'Đang bán' : 'Ngừng bán')
+                                    ->hidden(fn($record) => !$record->is_featured),
+                                \Filament\Schemas\Components\Text::make(fn($record) => $record->is_active ? 'Đang bán' : 'Ngừng bán')
                                     ->badge()
-                                    ->color(fn ($record) => $record->is_active ? 'success' : 'danger'),
+                                    ->color(fn($record) => $record->is_active ? 'success' : 'danger'),
                             ])->gap(2),
                         ])->grow()->gap(1),
                     ])->alignCenter()->extraAttributes(['class' => 'gap-4']),
@@ -200,19 +200,19 @@ class ProductResource extends Resource
                         \Filament\Schemas\Components\Group::make([
                             \Filament\Schemas\Components\Text::make('Giá thấp nhất')->color('gray')->size('sm'),
                             \Filament\Schemas\Components\Text::make(
-                                fn ($record) => number_format($record->variants->min('price') ?? 0, 0, ',', '.') . ' ₫'
+                                fn($record) => number_format($record->variants->min('price') ?? 0, 0, ',', '.') . ' ₫'
                             )->weight('bold')->color('primary'),
                         ])->grow()->gap(0),
                         \Filament\Schemas\Components\Group::make([
                             \Filament\Schemas\Components\Text::make('Giá cao nhất')->color('gray')->size('sm'),
                             \Filament\Schemas\Components\Text::make(
-                                fn ($record) => number_format($record->variants->max('price') ?? 0, 0, ',', '.') . ' ₫'
+                                fn($record) => number_format($record->variants->max('price') ?? 0, 0, ',', '.') . ' ₫'
                             )->weight('bold'),
                         ])->grow()->gap(0),
                         \Filament\Schemas\Components\Group::make([
                             \Filament\Schemas\Components\Text::make('Tổng tồn kho')->color('gray')->size('sm'),
                             \Filament\Schemas\Components\Text::make(
-                                fn ($record) => $record->variants->sum('stock') . ' sản phẩm'
+                                fn($record) => $record->variants->sum('stock') . ' sản phẩm'
                             )->weight('bold')->color('success'),
                         ])->grow()->gap(0),
                     ])->alignBetween(),
@@ -221,7 +221,8 @@ class ProductResource extends Resource
             // BIẾN THỂ
             \Filament\Schemas\Components\Section::make('Biến thể sản phẩm')
                 ->icon('heroicon-o-squares-2x2')
-                ->schema(fn ($record) => $record->variants->map(fn ($v) =>
+                ->schema(fn($record) => $record->variants->map(
+                    fn($v) =>
                     \Filament\Schemas\Components\Flex::make([
                         \Filament\Schemas\Components\Group::make([
                             \Filament\Schemas\Components\Text::make($v->variant_name ?? '—')->weight('semibold'),
@@ -242,7 +243,7 @@ class ProductResource extends Resource
                 ->collapsed()
                 ->schema([
                     \Filament\Schemas\Components\Text::make(
-                        fn ($record) => strip_tags($record->description ?? 'Chưa có mô tả.')
+                        fn($record) => strip_tags($record->description ?? 'Chưa có mô tả.')
                     )->extraAttributes(['class' => 'text-sm leading-relaxed text-gray-600 dark:text-gray-400']),
                 ]),
         ]);
@@ -254,7 +255,7 @@ class ProductResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('thumbnail_url')
                     ->label('Ảnh')
-                    ->state(fn ($record) => $record->thumbnail_url),
+                    ->state(fn($record) => $record->thumbnail_url),
 
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên Laptop')
@@ -280,18 +281,59 @@ class ProductResource extends Resource
                     })
                     ->html(),
             ])
+            ->filters([
+                // BẠN DÁN SELECT FILTER VÀO ĐÂY NHÉ:
+                    Tables\Filters\SelectFilter::make('brand_id')
+                    ->label('Thương hiệu')
+                    ->relationship('brand', 'name'),
+                Tables\Filters\SelectFilter::make('category_id')
+                    ->label('Danh mục')
+                    ->relationship('category', 'name'),
+                Tables\Filters\TernaryFilter::make('is_featured')
+                    ->label('Nổi bật')
+                    ->trueLabel('Có')
+                    ->falseLabel('Không'),
+                Tables\Filters\TernaryFilter::make('is_active')
+                    ->label('Trạng thái')
+                    ->trueLabel('Đang bán')
+                    ->falseLabel('Ngừng bán'),
+                Tables\Filters\Filter::make('price_range')
+                    ->label('Khoảng giá')
+                    ->form([
+                        Forms\Components\TextInput::make('min_price')
+                            ->label('Giá từ')
+                            ->numeric()
+                            ->placeholder('0'),
+                        Forms\Components\TextInput::make('max_price')
+                            ->label('Đến')
+                            ->numeric()
+                            ->placeholder('10000000'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        if ($data['min_price'] !== null) {
+                            $query->whereHas('variants', function ($q) use ($data) {
+                                $q->where('price', '>=', $data['min_price']);
+                            });
+                        }
+                        if ($data['max_price'] !== null) {
+                            $query->whereHas('variants', function ($q) use ($data) {
+                                $q->where('price', '<=', $data['max_price']);
+                            });
+                        }
+                    }),
+            ])
             ->actions([
                 \Filament\Actions\ViewAction::make()
                     ->slideOver()
                     ->modalWidth(\Filament\Support\Enums\Width::FourExtraLarge),
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make()
-                    ->hidden(fn () => !auth()->user()->isStaff()),
+                    ->hidden(fn() => !auth()->user()->isStaff()),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
                     \Filament\Actions\DeleteBulkAction::make()
-                        ->hidden(fn () => !auth()->user()->isStaff()),
+                        ->hidden(fn() => !auth()->user()->isStaff()),
                 ]),
             ]);
     }

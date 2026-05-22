@@ -10,10 +10,15 @@ class EditProduct extends EditRecord
 {
     protected static string $resource = ProductResource::class;
 
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [
             DeleteAction::make(),
         ];
+    }
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }

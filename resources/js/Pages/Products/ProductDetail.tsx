@@ -19,7 +19,7 @@ export default function ProductDetail({ product }: { product: any }) {
     const [isWishlisted, setIsWishlisted] = useState(false);
     const [showSpecsModal, setShowSpecsModal] = useState(false);
 
-    const SPECS_PREVIEW_COUNT = 5;
+    const SPECS_PREVIEW_COUNT = 4;
 
     const getImageUrl = (path: string) => {
         if (!path) return 'https://via.placeholder.com/600';
@@ -176,7 +176,7 @@ export default function ProductDetail({ product }: { product: any }) {
                                             "absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-cyan-500/5 transition-opacity duration-300",
                                             selectedVariant?.id === variant.id ? "opacity-100" : "opacity-0"
                                         )} />
-                                        
+
                                         <div className="relative z-10">
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className={cn(
@@ -245,18 +245,11 @@ export default function ProductDetail({ product }: { product: any }) {
                         ))}
                     </div>
 
-                    {/* MÔ TẢ CHI TIẾT */}
-                    <div className="pt-16 border-t border-slate-100 dark:border-slate-800">
-                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-10 flex items-center gap-2">
-                            <Info className="w-4 h-4" /> Mô tả sản phẩm
-                        </h4>
-                        <div
-                            className="prose prose-slate dark:prose-invert max-w-none text-slate-600 dark:text-slate-400 leading-relaxed font-medium"
-                            dangerouslySetInnerHTML={{ __html: product.description || "Chưa có nội dung mô tả." }}
-                        />
                     </div>
+                </div>
 
-                    {/* THÔNG SỐ KỸ THUẬT */}
+                {/* THÔNG SỐ KỸ THUẬT (FULL WIDTH, TRÊN MÔ TẢ) */}
+                <div className="max-w-5xl mx-auto mt-20">
                     <div className="pt-16 border-t border-slate-100 dark:border-slate-800">
                         <div className="flex items-center justify-between mb-10">
                             <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-2">
@@ -306,7 +299,7 @@ export default function ProductDetail({ product }: { product: any }) {
                                             onClick={() => setShowSpecsModal(true)}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.97 }}
-                                            className="mt-5 w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-indigo-600 dark:hover:bg-indigo-500 dark:hover:text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg"
+                                            className="mt-5 max-w-sm mx-auto w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-indigo-600 dark:hover:bg-indigo-500 dark:hover:text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg"
                                         >
                                             <Share2 className="w-4 h-4" />
                                             Xem tất cả {allSpecs.length} thông số
@@ -392,9 +385,21 @@ export default function ProductDetail({ product }: { product: any }) {
                             );
                         })()}
                     </div>
+                </div>
+
+                {/* MÔ TẢ CHI TIẾT (FULL WIDTH, DƯỚI THÔNG SỐ) */}
+                <div className="max-w-5xl mx-auto mt-16 pb-20">
+                    <div className="pt-16 border-t border-slate-100 dark:border-slate-800">
+                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-10 flex items-center gap-2">
+                            <Info className="w-4 h-4" /> Mô tả sản phẩm
+                        </h4>
+                        <div
+                            className="prose prose-slate dark:prose-invert max-w-none text-slate-600 dark:text-slate-400 leading-relaxed font-medium"
+                            dangerouslySetInnerHTML={{ __html: product.description || "Chưa có nội dung mô tả." }}
+                        />
                     </div>
                 </div>
-          
+
 
             {/* PHẦN ĐÁNH GIÁ VÀ BÌNH LUẬN */}
             <ReviewSection productId={product.id} auth={auth} />
