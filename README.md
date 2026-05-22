@@ -5,7 +5,7 @@
   <p><b>Hệ thống TMĐT Laptop & Đồ công nghệ cao cấp | Laravel 13 + React 19 + Filament V3</b></p>
 
   <div style="margin: 20px 0;">
-    <img src="https://img.shields.io/badge/Laravel_11-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" />
+    <img src="https://img.shields.io/badge/Laravel_13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" />
     <img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
     <img src="https://img.shields.io/badge/Filament_V3-FFB11B?style=for-the-badge&logo=filament&logoColor=black" alt="Filament" />
     <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
@@ -21,7 +21,7 @@
 
 ## 🚀 Các Module Đột Phá Đã Hoàn Thiện
 
-### 🛒 1. Advanced Checkout & VNPay Integration
+### 🛒 1. Advanced Checkout & VNPay Integration (Đang phát triển)
 - **Hệ thống Thanh toán**: Tích hợp cổng thanh toán trực tuyến **VNPay** (Sandbox) cho các giao dịch an toàn.
 - **Smart Coupon Logic**: Hệ thống mã giảm giá đa dạng, tự động kiểm tra điều kiện và áp dụng ngay tại trang thanh toán.
 - **Anti-Abuse Control**: Giới hạn lượt dùng mã giảm giá trên mỗi tài khoản người dùng dựa trên lịch sử giao dịch.
@@ -66,7 +66,6 @@
 ## 🗄️ Kiến trúc Dữ liệu (Database Architecture)
 Dự án được thiết kế theo quy chuẩn chuyên nghiệp, kết hợp sức mạnh của nhiều loại Database:
 - **MySQL (Main)**: Quản lý Auth, Đơn hàng, Mã giảm giá và các quan hệ 3NF.
-- **MongoDB (Catalog)**: Lưu trữ thông tin sản phẩm và thông số kỹ thuật (Specs) linh hoạt.
 - **Product Variants**: Quản lý Laptop theo từng SKU cấu hình (CPU, RAM, SSD) độc lập.
 
 ---
