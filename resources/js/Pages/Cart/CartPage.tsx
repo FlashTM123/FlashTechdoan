@@ -215,13 +215,24 @@ const CartPage: React.FC = () => {
                                         <AnimatePresence>
                                             {appliedCoupon && (
                                                 <motion.div
-                                                    initial={{ opacity: 0, y: -6 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0, y: -6 }}
-                                                    className="mt-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+                                                    initial={{ opacity: 0, scale: 0.8, rotate: -2 }}
+                                                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                                    exit={{ opacity: 0, scale: 0.8, rotate: 2 }}
+                                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                                    className="mt-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl px-5 py-4 flex items-center justify-between gap-4 relative overflow-hidden"
                                                 >
-                                                    <div className="flex items-center gap-2 min-w-0">
-                                                        <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                                                    {/* Hiệu ứng lấp lánh (Shine) khi coupon thành công */}
+                                                    <motion.div 
+                                                        initial={{ x: "-100%" }}
+                                                        animate={{ x: "200%" }}
+                                                        transition={{ duration: 1.2, ease: "easeInOut" }}
+                                                        className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent skew-x-[20deg]"
+                                                    />
+                                                    
+                                                    <div className="flex items-center gap-3 min-w-0 relative z-10">
+                                                        <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                                                            <CheckCircle className="w-5 h-5 text-emerald-400" />
+                                                        </div>
                                                         <div className="min-w-0">
                                                             <p className="text-emerald-400 font-black text-sm tracking-widest truncate">{appliedCoupon.coupon_code}</p>
                                                             <p className="text-emerald-500/70 text-[10px] font-bold uppercase tracking-wider">
@@ -233,10 +244,10 @@ const CartPage: React.FC = () => {
                                                     </div>
                                                     <button
                                                         onClick={handleRemoveCoupon}
-                                                        className="text-slate-500 hover:text-rose-400 transition-colors flex-shrink-0"
+                                                        className="text-slate-500 hover:text-rose-400 transition-colors flex-shrink-0 bg-slate-800 hover:bg-rose-500/10 p-2 rounded-xl relative z-10"
                                                         title="Xóa mã"
                                                     >
-                                                        <XCircle className="w-4 h-4" />
+                                                        <XCircle className="w-5 h-5" />
                                                     </button>
                                                 </motion.div>
                                             )}

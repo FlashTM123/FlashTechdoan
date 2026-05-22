@@ -113,10 +113,9 @@ export default function Home({ featured_products, sections }: any) {
                             </Link>
                         </div>
 
-                        {/* Danh sách sản phẩm Gaming (Dùng ProductCard với prop dark) */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                             {gamingLaptops.slice(0, 4).map((product: any) => (
-                                <ProductCard key={product.id} product={product} dark={true} />
+                                <ProductCard key={product.id} product={product} />
                             ))}
                         </div>
                     </div>

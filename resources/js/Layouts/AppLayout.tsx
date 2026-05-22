@@ -18,12 +18,17 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
         <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-500 overflow-x-hidden">
             {/* --- NAVBAR --- */}
             <nav className={cn(
-                "fixed top-0 left-0 right-0 z-[100] transition-all duration-500 border-b",
+                "fixed top-0 left-0 right-0 z-[100] transition-all duration-500",
                 isScrolled 
-                    ? "bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl py-3 shadow-lg border-slate-100 dark:border-slate-800" 
-                    : "bg-white/50 dark:bg-slate-900/50 backdrop-blur-md py-5 md:py-6 border-transparent"
+                    ? "py-4 pointer-events-none" 
+                    : "py-6 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border-b border-transparent"
             )}>
-                <div className="max-w-[1440px] mx-auto px-6 md:px-8 flex items-center justify-between gap-4 md:gap-12">
+                <div className={cn(
+                    "mx-auto flex items-center justify-between transition-all duration-500",
+                    isScrolled 
+                        ? "max-w-[1200px] px-6 py-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-2xl shadow-indigo-500/10 dark:shadow-indigo-900/20 border border-slate-200/50 dark:border-slate-800/80 rounded-[2rem] pointer-events-auto" 
+                        : "max-w-[1440px] px-6 md:px-8 gap-4 md:gap-12"
+                )}>
                     {/* MOBILE HAMBURGER - Chỉ hiện trên Mobile */}
                     <button 
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -207,7 +212,7 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="lg:hidden bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 overflow-hidden"
+                            className="lg:hidden bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 overflow-hidden pointer-events-auto"
                         >
                             <div className="p-6 flex flex-col gap-4">
                                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Danh mục</div>

@@ -2,7 +2,7 @@
   <img src="https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=1200&auto=format&fit=crop" alt="FlashTech Header" width="100%" style="border-radius: 24px; margin-bottom: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);" />
   
   <h1>⚡ FLASHTECH: THE NEXT-GEN TECH COMMERCE</h1>
-  <p><b>Hệ thống TMĐT Laptop & Đồ công nghệ cao cấp | Laravel 11 + React 19 + Filament V3</b></p>
+  <p><b>Hệ thống TMĐT Laptop & Đồ công nghệ cao cấp | Laravel 13 + React 19 + Filament V3</b></p>
 
   <div style="margin: 20px 0;">
     <img src="https://img.shields.io/badge/Laravel_11-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" />
@@ -50,6 +50,13 @@
 - **Instant Order Notifications**: Áp dụng hệ thống Filament Database Notification để báo động (Push Notification) ngay lập tức cho Admin khi có khách hàng đặt đơn mới mà không cần reload trang.
 - **Smart Data Formatting**: Các Widget thống kê (như Doanh thu) tự động rút gọn số tiền (tr ₫, tỷ ₫) và Việt hóa ngôn ngữ ngày tháng.
 
+### 💎 6. Premium Customer Storefront (Apple Style UX)
+- **Glassmorphism & Parallax**: Thanh điều hướng nổi (Floating Pill) tự động thu nhỏ, kết hợp Hero Section 3D với các huy hiệu bay lơ lửng.
+- **Micro-animations**: Hiệu ứng nảy (bounce), phát sáng (glow), và lóe sáng (shine) trên các nút tương tác (Thêm giỏ hàng, Chọn cấu hình, Mã giảm giá).
+- **Apple-style Product Detail**: Nút chọn cấu hình tinh tế, tích hợp Animation mượt mà và hiển thị tồn kho Real-time.
+- **Advanced Filtering**: Bộ lọc chuyên nghiệp với hiệu ứng Morphing Layout, chuyển đổi lưới hiển thị không độ trễ.
+- **Dark/Light Mode Optimized**: Hoàn thiện 100% giao diện sáng tối, đảm bảo độ tương phản hoàn hảo và trải nghiệm thị giác cao cấp nhất.
+
 ---
 
 ## 🗄️ Kiến trúc Dữ liệu (Database Architecture)
@@ -63,7 +70,7 @@ Dự án được thiết kế theo quy chuẩn chuyên nghiệp, kết hợp s�
 ## 🛠️ Tech Stack & Công nghệ
 
 ### Backend
-- **Framework**: Laravel 11 (PHP 8.3+)
+- **Framework**: Laravel 13 (PHP 8.3+)
 - **ORM**: Eloquent + Laravel MongoDB
 - **Authentication**: Laravel Sanctum
 - **Payment Gateway**: VNPay API
@@ -212,14 +219,14 @@ Response:
 ## 📅 Roadmap Phát triển
 
 - [x] **Giai đoạn 1:** Khởi tạo Core, Hybrid Database & Filament Dashboard.
-- [x] **Giai đoạn 2:** Triển khai Storefront cao cấp & Premium Filtering.
-- [x] **Giai đoạn 3:** Hợp nhất hệ thống User & Xây dựng User Profile.
-- [x] **Giai đoạn 4:** Hoàn thiện Giỏ hàng & Lịch sử đơn hàng.
-- [x] **Giai đoạn 5:** Hệ thống Đánh giá (Review) & Mã giảm giá (Coupon).
-- [x] **Giai đoạn 6:** Hoàn thiện tích hợp cổng thanh toán VNPay & MoMo.
-- [x] **Giai đoạn 7:** Phát triển module So sánh sản phẩm (Compare Products) với hỗ trợ so sánh biến thể.
-- [x] **Giai đoạn 8:** Hệ thống Báo cáo doanh thu & Phân tích dữ liệu khách hàng.
-- [x] **Giai đoạn 9:** Tối ưu hóa trải nghiệm Mobile (PWA) & Hiệu năng hệ thống.
+- [x] **Giai đoạn 2:** Triển khai Storefront cơ bản & Tích hợp User.
+- [x] **Giai đoạn 3:** Hoàn thiện Giỏ hàng, Lịch sử đơn hàng & User Profile.
+- [x] **Giai đoạn 4:** Hệ thống Đánh giá (Review) & Mã giảm giá (Coupon).
+- [x] **Giai đoạn 5:** Hoàn thiện tích hợp cổng thanh toán VNPay.
+- [x] **Giai đoạn 6:** Phát triển module So sánh sản phẩm (Compare Products).
+- [x] **Giai đoạn 7:** Hệ thống Báo cáo doanh thu & Phân tích dữ liệu khách hàng.
+- [x] **Giai đoạn 8:** **Nâng cấp Toàn diện UX/UI (Premium Redesign)** - Hoàn thiện các hiệu ứng Micro-animations & Glassmorphism.
+- [x] **Giai đoạn 9:** Tối ưu hóa hiệu năng hệ thống & Triển khai thực tế.
 
 ---
 

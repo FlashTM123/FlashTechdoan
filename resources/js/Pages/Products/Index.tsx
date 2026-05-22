@@ -126,33 +126,33 @@ export default function ProductsIndex({ products, brands, categories, filters }:
                 <div className="flex gap-8">
 
                     {/* ═══ SIDEBAR ═══ */}
-                    <aside className="hidden lg:block w-52 flex-shrink-0">
-                        <div className="sticky top-28 space-y-6">
+                    <aside className="hidden lg:block w-[240px] flex-shrink-0">
+                        <div className="sticky top-[120px] space-y-8 bg-white/50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 backdrop-blur-xl shadow-lg shadow-indigo-500/5">
 
                             {/* Search */}
                             <div className="relative group">
-                                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-indigo-500 transition-colors" />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors" />
                                 <input
                                     type="text"
                                     placeholder="Tìm sản phẩm..."
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 pl-10 pr-3.5 text-sm text-white placeholder-slate-500 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium"
                                 />
                             </div>
 
                             {/* ── Danh mục ── */}
                             <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 px-1">
-                                    Danh mục
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 mb-4 px-1 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span> Danh mục
                                 </p>
-                                <div className="space-y-px">
+                                <div className="space-y-1">
                                     {[{ name: 'Tất cả', slug: null }, ...categories].map((cat: any) => {
                                         const active = cat.slug === null ? !filters.category : filters.category === cat.slug;
                                         return (
                                             <button key={cat.slug ?? 'all'} onClick={() => go({ category: cat.slug })}
-                                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left ${
+                                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all text-left font-medium ${
                                                     active
-                                                        ? 'bg-indigo-600 text-white font-medium'
-                                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
+                                                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20 translate-x-1'
+                                                        : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white hover:shadow-sm'
                                                 }`}
                                             >
                                                 {cat.name}
@@ -167,16 +167,16 @@ export default function ProductsIndex({ products, brands, categories, filters }:
 
                             {/* ── Thương hiệu ── */}
                             <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 px-1">
-                                    Thương hiệu
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 mb-4 px-1 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-violet-500"></span> Thương hiệu
                                 </p>
-                                <div className="flex flex-wrap gap-1.5">
+                                <div className="flex flex-wrap gap-2">
                                     {brands.map((b: any) => (
                                         <button key={b.id} onClick={() => go({ brand: filters.brand === b.slug ? null : b.slug })}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
                                                 filters.brand === b.slug
-                                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                                    : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white dark:bg-transparent'
+                                                    ? 'bg-violet-600 border-violet-600 text-white shadow-md shadow-violet-600/20 scale-105'
+                                                    : 'border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:border-violet-400 dark:hover:border-violet-500 hover:text-violet-600 dark:hover:text-violet-400 bg-slate-50 dark:bg-slate-950/50 hover:bg-white dark:hover:bg-slate-800'
                                             }`}
                                         >
                                             {b.name}
@@ -190,40 +190,42 @@ export default function ProductsIndex({ products, brands, categories, filters }:
 
                             {/* ── Khoảng giá ── */}
                             <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 px-1">
-                                    Khoảng giá
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 mb-4 px-1 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Mức giá
                                 </p>
-                                <div className="space-y-px">
+                                <div className="space-y-1">
                                     {PRICE_RANGES.map(r => {
                                         const active =
                                             String(filters.min_price ?? '') === String(r.min) &&
                                             String(filters.max_price ?? '') === String(r.max);
                                         return (
                                             <button key={r.label} onClick={() => go({ min_price: r.min, max_price: r.max })}
-                                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left ${
+                                                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all text-left font-medium ${
                                                     active
-                                                        ? 'bg-indigo-600 text-white font-medium'
-                                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
+                                                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 translate-x-1'
+                                                        : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white hover:shadow-sm'
                                                 }`}
                                             >
                                                 {r.label}
+                                                {active && <Check className="w-4 h-4" />}
                                             </button>
                                         );
                                     })}
                                 </div>
 
                                 {/* Custom price */}
-                                <div className="mt-3 space-y-2">
-                                    <div className="flex gap-2">
-                                        <input type="number" placeholder="Min" value={min} onChange={e => setMin(e.target.value)}
-                                            className="w-1/2 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-indigo-500 transition-colors"
+                                <div className="mt-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800 space-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <input type="number" placeholder="Từ" value={min} onChange={e => setMin(e.target.value)}
+                                            className="w-1/2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-colors font-medium"
                                         />
-                                        <input type="number" placeholder="Max" value={max} onChange={e => setMax(e.target.value)}
-                                            className="w-1/2 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-indigo-500 transition-colors"
+                                        <span className="text-slate-400 font-bold">-</span>
+                                        <input type="number" placeholder="Đến" value={max} onChange={e => setMax(e.target.value)}
+                                            className="w-1/2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-colors font-medium"
                                         />
                                     </div>
                                     <button onClick={() => go({ min_price: min, max_price: max })}
-                                        className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white text-xs font-semibold rounded-lg transition-all">
+                                        className="w-full py-2.5 bg-slate-900 dark:bg-white hover:bg-emerald-600 dark:hover:bg-emerald-500 active:scale-[0.98] text-white dark:text-slate-900 dark:hover:text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md">
                                         Áp dụng
                                     </button>
                                 </div>

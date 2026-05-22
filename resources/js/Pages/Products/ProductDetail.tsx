@@ -165,30 +165,40 @@ export default function ProductDetail({ product }: { product: any }) {
                                         key={variant.id}
                                         onClick={() => setSelectedVariant(variant)}
                                         className={cn(
-                                            "p-5 rounded-3xl border-2 text-left transition-all duration-300 relative group",
+                                            "p-5 rounded-3xl border-2 text-left transition-all duration-300 relative group overflow-hidden",
                                             selectedVariant?.id === variant.id
-                                                ? "border-indigo-600 bg-indigo-50/30 dark:bg-indigo-900/10 shadow-xl shadow-indigo-500/10"
-                                                : "border-slate-100 dark:border-slate-800 hover:border-slate-300 bg-white dark:bg-slate-900"
+                                                ? "border-indigo-500 bg-white dark:bg-slate-900 shadow-xl shadow-indigo-500/20 ring-4 ring-indigo-500/10 dark:ring-indigo-500/20 scale-[1.02]"
+                                                : "border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 bg-slate-50/50 dark:bg-slate-950/50 hover:bg-white dark:hover:bg-slate-900"
                                         )}
                                     >
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className={cn(
-                                                "font-black text-sm uppercase tracking-wider",
-                                                selectedVariant?.id === variant.id ? "text-indigo-600 dark:text-indigo-400" : "text-slate-700 dark:text-slate-300"
-                                            )}>
-                                                {variant.variant_name}
+                                        {/* Hiệu ứng nền khi chọn */}
+                                        <div className={cn(
+                                            "absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-cyan-500/5 transition-opacity duration-300",
+                                            selectedVariant?.id === variant.id ? "opacity-100" : "opacity-0"
+                                        )} />
+                                        
+                                        <div className="relative z-10">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className={cn(
+                                                    "font-black text-sm md:text-base uppercase tracking-wider",
+                                                    selectedVariant?.id === variant.id ? "text-indigo-600 dark:text-indigo-400" : "text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white"
+                                                )}>
+                                                    {variant.variant_name}
+                                                </div>
+                                                {selectedVariant?.id === variant.id && (
+                                                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+                                                        <CheckCircle2 className="w-5 h-5 text-indigo-500" strokeWidth={3} />
+                                                    </motion.div>
+                                                )}
                                             </div>
-                                            {selectedVariant?.id === variant.id && (
-                                                <CheckCircle2 className="w-5 h-5 text-indigo-600" />
-                                            )}
-                                        </div>
-                                        <div className="text-xs text-slate-500 flex items-center gap-2 font-medium">
-                                            <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-[10px]">{variant.sku}</span>
-                                            {variant.stock > 0 ? (
-                                                <span className="text-emerald-500">Còn {variant.stock} sản phẩm</span>
-                                            ) : (
-                                                <span className="text-red-500 font-bold">Hết hàng</span>
-                                            )}
+                                            <div className="text-xs flex flex-wrap items-center gap-2 font-medium">
+                                                <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-md text-[10px] tracking-widest">{variant.sku}</span>
+                                                {variant.stock > 0 ? (
+                                                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">Còn {variant.stock} sản phẩm</span>
+                                                ) : (
+                                                    <span className="text-rose-500 dark:text-rose-400 font-bold bg-rose-50 dark:bg-rose-500/10 px-2 py-1 rounded-md">Hết hàng</span>
+                                                )}
+                                            </div>
                                         </div>
                                     </button>
                                 ))}
@@ -200,10 +210,13 @@ export default function ProductDetail({ product }: { product: any }) {
                     <div className="space-y-4">
                         <button
                             onClick={handleAddToCart}
-                            className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-6 rounded-[2rem] font-black text-lg hover:bg-indigo-600 dark:hover:bg-indigo-500 dark:hover:text-white transition-all shadow-2xl shadow-slate-300 dark:shadow-none active:scale-[0.98] flex items-center justify-center gap-3 group"
+                            className="w-full relative overflow-hidden bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-5 md:py-6 rounded-[2rem] font-black text-lg md:text-xl hover:scale-[1.02] transition-all duration-300 shadow-xl shadow-slate-900/20 dark:shadow-white/10 active:scale-[0.98] flex items-center justify-center gap-3 group"
                         >
-                            <ShoppingCart className="w-6 h-6 group-hover:animate-bounce" strokeWidth={2.5} />
-                            Thêm vào giỏ hàng
+                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <span className="relative z-10 flex items-center gap-3 group-hover:text-white transition-colors">
+                                <ShoppingCart className="w-6 h-6 group-hover:animate-bounce" strokeWidth={2.5} />
+                                Thêm vào giỏ hàng
+                            </span>
                         </button>
                         <div className="flex gap-4">
                             <CompareButton variantId={selectedVariant?.id} size="md" className="flex-1" />

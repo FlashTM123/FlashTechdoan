@@ -1,10 +1,10 @@
 import { Link } from "@inertiajs/react";
 import { motion } from "framer-motion";
-import { ShoppingCart, ArrowRight, Star, BarChart3 } from "lucide-react";
+import { ShoppingCart, ArrowRight, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CompareButton from "@/Components/CompareButton";
 
-export default function ProductCard({ product, dark = false }: { product: any, dark?: boolean }) {
+export default function ProductCard({ product }: { product: any }) {
     const cheapestVariant = product.variants?.[0];
     const discount = cheapestVariant?.old_price > cheapestVariant?.price
         ? Math.round(((cheapestVariant.old_price - cheapestVariant.price) / cheapestVariant.old_price) * 100)
@@ -12,17 +12,18 @@ export default function ProductCard({ product, dark = false }: { product: any, d
 
     return (
         <motion.div
-            whileHover={{ y: -8 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
+            whileHover={{ y: -12, scale: 1.02 }}
+            transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
             className="group relative h-full"
         >
-            <Link href={`/product/${product.id}`} className="block h-full">
-                <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 flex flex-col h-full overflow-hidden">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-[2.2rem] opacity-0 group-hover:opacity-100 transition duration-500 blur-md group-hover:duration-200"></div>
+            <Link href={`/product/${product.id}`} className="block h-full relative z-10">
+                <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm transition-all duration-500 flex flex-col h-full overflow-hidden">
                     {/* Ảnh sản phẩm */}
-                    <div className="aspect-[4/3] bg-slate-50/50 dark:bg-slate-800/30 relative overflow-hidden">
+                    <div className="aspect-[4/3] bg-gradient-to-b from-slate-50/80 to-slate-100/30 dark:from-slate-800/80 dark:to-slate-900/30 relative overflow-hidden flex items-center justify-center p-8">
                         <img
                             src={product.thumbnail_url ? (product.thumbnail_url.startsWith('http') ? product.thumbnail_url : `/storage/${product.thumbnail_url}`) : 'https://via.placeholder.com/400'}
-                            className="w-full h-full object-contain p-8 group-hover:scale-110 transition-transform duration-700 ease-out"
+                            className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] drop-shadow-xl"
                             alt={product.name}
                         />
 
