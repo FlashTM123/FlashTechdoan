@@ -13,14 +13,14 @@ class HomeController extends Controller
     {
         // Lấy các danh mục có sản phẩm, kèm theo tối đa 4 sản phẩm mỗi loại
         $categories_with_products = Category::with(['products' => function ($q) {
-            $q->where('is_active', true)->with('variants.details')->latest()->take(4);
+            $q->where('is_active', true)->with(['brand', 'category', 'variants.details'])->latest()->take(4);
         }])
         ->withCount('products') // Đếm số sản phẩm trong mỗi danh mục
             ->whereHas('products') // Chỉ lấy danh mục nào thực sự có hàng
             ->get();
 
         return inertia('Home', [
-            'featured_products' => Product::with('variants.details')->where('is_featured', true)->take(4)->get(),
+            'featured_products' => Product::with(['brand', 'category', 'variants.details'])->where('is_featured', true)->take(4)->get(),
             'sections' => $categories_with_products, // Đổi tên thành sections cho dễ hiểu
         ]);
     }
@@ -33,7 +33,8 @@ class HomeController extends Controller
             'variants.details',
             'variants.images',
             'images',
-            'category'
+            'category',
+            'brand'
         ])->findOrFail($id);
 
         return inertia('Products/ProductDetail', [
@@ -43,7 +44,7 @@ class HomeController extends Controller
     public function product(Request $request)
     {
         $query = Product::query()
-            ->with(['brand', 'variants.details', 'images'])
+            ->with(['brand', 'category', 'variants.details', 'images'])
             ->where('is_active', true);
 
         // Lọc theo Danh mục
@@ -90,7 +91,7 @@ class HomeController extends Controller
 
         $products = Product::where('name', 'LIKE', "%{$query}%")
             ->where('is_active', true)
-            ->with('variants')
+            ->with(['brand', 'category', 'variants'])
             ->take(5)
             ->get();
 

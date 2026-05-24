@@ -1,8 +1,8 @@
 import { Link, usePage, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import Footer from '@/Components/Footer';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingCart, User, Moon, Sun, ChevronDown, Loader2, Menu, X, BarChart3 } from 'lucide-react';
@@ -13,6 +13,75 @@ import { useCompare } from '@/hooks/useCompare';
 function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpen, isScrolled, searchTerm, setSearchTerm, isSearching, searchResults, showSuggestions, setShowSuggestions, auth, categories, isDropdownOpen, setIsDropdownOpen, compareCount }: any) {
     const { cart } = useCart();
     const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+    const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+    const [paletteSearch, setPaletteSearch] = useState("");
+    const [selectedIndex, setSelectedIndex] = useState(0);
+
+    const commands = useMemo(() => [
+        { id: 'home', name: 'Trang chủ', category: 'Điều hướng', icon: '🏠', action: () => router.visit('/') },
+        { id: 'products', name: 'Tất cả sản phẩm', category: 'Điều hướng', icon: '💻', action: () => router.visit('/products') },
+        { id: 'gaming', name: 'Laptop Gaming', category: 'Điều hướng', icon: '🎮', action: () => router.visit('/products?category=laptop-gaming') },
+        { id: 'cart', name: 'Giỏ hàng của bạn', category: 'Mua sắm', icon: '🛒', action: () => router.visit('/cart') },
+        { id: 'compare', name: 'So sánh sản phẩm', category: 'Mua sắm', icon: '📊', action: () => router.visit('/compare') },
+        { id: 'dashboard', name: 'Bảng điều khiển', category: 'Tài khoản', icon: '🛡️', action: () => router.visit('/dashboard') },
+        { id: 'dark_mode', name: 'Bật/Tắt chế độ tối (Dark Mode)', category: 'Hệ thống', icon: '🌓', action: () => toggleDarkMode() },
+        { id: 'support', name: 'Liên hệ hỗ trợ kỹ thuật', category: 'Trợ giúp', icon: '📞', action: () => {
+            toast.success("Liên hệ hỗ trợ", {
+                description: "Vui lòng gọi hotline 1900 1234 (Miễn phí) để được hỗ trợ lập tức.",
+            });
+        }},
+    ], [toggleDarkMode]);
+
+    const filteredCommands = useMemo(() => {
+        return commands.filter(cmd => 
+            cmd.name.toLowerCase().includes(paletteSearch.toLowerCase()) || 
+            cmd.category.toLowerCase().includes(paletteSearch.toLowerCase())
+        );
+    }, [commands, paletteSearch]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                setIsCommandPaletteOpen(prev => {
+                    if (!prev) {
+                        setPaletteSearch("");
+                        setSelectedIndex(0);
+                    }
+                    return !prev;
+                });
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    useEffect(() => {
+        if (!isCommandPaletteOpen) return;
+        
+        const handlePaletteKeys = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setSelectedIndex(prev => (prev + 1) % filteredCommands.length);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setSelectedIndex(prev => (prev - 1 + filteredCommands.length) % filteredCommands.length);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (filteredCommands[selectedIndex]) {
+                    handleExecuteCommand(filteredCommands[selectedIndex]);
+                }
+            }
+        };
+        window.addEventListener('keydown', handlePaletteKeys);
+        return () => window.removeEventListener('keydown', handlePaletteKeys);
+    }, [isCommandPaletteOpen, filteredCommands, selectedIndex]);
+
+    const handleExecuteCommand = (cmd: any) => {
+        setIsCommandPaletteOpen(false);
+        cmd.action();
+    };
 
     return (
         <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-500 overflow-x-hidden">
@@ -91,7 +160,7 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm Laptop..."
-                                className="w-full bg-slate-100 dark:bg-slate-800/50 border-2 border-transparent rounded-2xl py-2.5 pl-11 pr-4 text-xs font-semibold focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500/30 transition-all outline-none"
+                                className="w-full bg-slate-100 dark:bg-slate-800/50 border-2 border-transparent rounded-2xl py-2.5 pl-11 pr-16 text-xs font-semibold focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500/30 transition-all outline-none"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 onFocus={() => {
@@ -107,6 +176,14 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                                     }
                                 }}
                             />
+                            
+                            {/* Keyboard indicator KBD badge */}
+                            <kbd 
+                                onClick={() => setIsCommandPaletteOpen(true)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-0.5 pointer-events-auto text-[9px] font-black text-slate-400 dark:text-slate-500 bg-slate-200/50 dark:bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-300/30 dark:border-slate-700/50 uppercase tracking-widest cursor-pointer hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors"
+                            >
+                                Ctrl K
+                            </kbd>
 
                             <AnimatePresence>
                                 {showSuggestions && searchResults.length > 0 && (
@@ -242,6 +319,95 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
 
             {/* Global Toaster */}
             <Toaster position="bottom-right" richColors theme={isDarkMode ? 'dark' : 'light'} />
+
+            {/* --- COMMAND PALETTE OVERLAY --- */}
+            <AnimatePresence>
+                {isCommandPaletteOpen && (
+                    <div className="fixed inset-0 z-[200] overflow-y-auto p-4 md:p-20 flex items-start justify-center">
+                        {/* Backdrop */}
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsCommandPaletteOpen(false)}
+                            className="fixed inset-0 bg-slate-950/60 backdrop-blur-md cursor-pointer"
+                        />
+
+                        {/* Modal Box */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: -20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+                            className="relative w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col mt-10 md:mt-20"
+                        >
+                            {/* Search Header */}
+                            <div className="relative p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                                <Search className="w-5 h-5 text-slate-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Tìm hành động hoặc gõ phím tắt..."
+                                    className="w-full bg-transparent border-0 outline-none focus:ring-0 text-slate-800 dark:text-slate-100 font-medium text-sm p-0 placeholder:text-slate-400"
+                                    value={paletteSearch}
+                                    onChange={(e) => {
+                                        setPaletteSearch(e.target.value);
+                                        setSelectedIndex(0);
+                                    }}
+                                    autoFocus
+                                />
+                                <span className="text-[10px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">ESC</span>
+                            </div>
+
+                            {/* Body (Filtered Commands List) */}
+                            <div className="max-h-[300px] overflow-y-auto p-3 custom-scrollbar">
+                                {filteredCommands.length > 0 ? (
+                                    <div className="space-y-1">
+                                        {filteredCommands.map((cmd: any, idx: number) => (
+                                            <button
+                                                key={cmd.id}
+                                                onClick={() => handleExecuteCommand(cmd)}
+                                                onMouseEnter={() => setSelectedIndex(idx)}
+                                                className={cn(
+                                                    "w-full text-left p-3.5 rounded-2xl flex items-center justify-between transition-all font-medium text-xs md:text-sm group relative overflow-hidden",
+                                                    selectedIndex === idx 
+                                                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/10" 
+                                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-3 relative z-10">
+                                                    <span className={cn(
+                                                        "text-lg group-hover:scale-110 transition-transform duration-300",
+                                                        selectedIndex === idx ? "text-white" : "text-indigo-600 dark:text-indigo-400"
+                                                    )}>
+                                                        {cmd.icon}
+                                                    </span>
+                                                    <span className="font-bold">{cmd.name}</span>
+                                                </div>
+                                                <span className={cn(
+                                                    "text-[9px] font-black uppercase tracking-widest relative z-10",
+                                                    selectedIndex === idx ? "text-indigo-200" : "text-slate-400"
+                                                )}>
+                                                    {cmd.category}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-12 text-center text-slate-400 text-xs font-semibold">
+                                        Không tìm thấy lệnh hoặc chức năng phù hợp.
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Footer hints */}
+                            <div className="p-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex justify-between items-center px-6">
+                                <span className="flex items-center gap-1">↑↓ để di chuyển</span>
+                                <span className="flex items-center gap-1">ENTER để chọn</span>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

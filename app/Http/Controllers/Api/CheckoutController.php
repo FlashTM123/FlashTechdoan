@@ -164,8 +164,13 @@ class CheckoutController extends Controller
      */
     public function success(Request $request)
     {
+        $order = Order::with(['items.product', 'items.variant', 'paymentMethod', 'coupon'])
+            ->where('order_code', $request->order_code)
+            ->first();
+
         return Inertia::render('Checkout/Success', [
-            'order_code' => $request->order_code
+            'order_code' => $request->order_code,
+            'order' => $order
         ]);
     }
 
