@@ -16,6 +16,8 @@ class CategoryResource extends Resource
     protected static ?string $model = Category::class;
 
     protected static \UnitEnum|string|null $navigationGroup = 'Quản lý sản phẩm';
+    protected static ?string $modelLabel = 'Danh mục sản phẩm';
+    protected static ?string $pluralModelLabel = 'Danh sách danh mục sản phẩm';
 
     protected static ?int $navigationSort = 1;
 
@@ -65,8 +67,8 @@ class CategoryResource extends Resource
                     ->boolean(),
             ])
             ->recordActions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\EditAction::make()->label('Sửa'),
+                \Filament\Actions\DeleteAction::make()->label('Xóa'),
             ])
             ->toolbarActions([
                 \Filament\Actions\BulkActionGroup::make([

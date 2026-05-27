@@ -14,9 +14,9 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationLabel = 'Quản lý nhân viên';
-    protected static ?string $modelLabel = 'Nhân viên';
-    protected static ?string $pluralModelLabel = 'Danh sách nhân viên';
+    protected static ?string $navigationLabel = 'Quản lý người dùng';
+    protected static ?string $modelLabel = 'Người dùng';
+    protected static ?string $pluralModelLabel = 'Danh sách người dùng';
     protected static \UnitEnum|string|null $navigationGroup = 'Hệ thống';
     protected static ?int $navigationSort = 1;
 
@@ -41,12 +41,11 @@ class UserResource extends Resource
                 ->required()
                 ->unique(ignoreRecord: true),
 
-            Forms\Components\TextInput::make('password')
-                ->label('Mật khẩu')
-                ->password()
-                ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
-                ->dehydrated(fn ($state) => filled($state))
-                ->required(fn (string $operation) => $operation === 'create'),
+            Forms\Components\Select::make('department_id')
+                ->label('Phòng ban')
+                ->relationship('department', 'name')
+                ->searchable()
+                ->required(),
 
             Forms\Components\TextInput::make('employee_code')
                 ->label('Mã nhân viên')
@@ -91,8 +90,9 @@ class UserResource extends Resource
                     ->label('Mã nhân viên')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('department')
-                    ->label('Phòng ban'),
+                Tables\Columns\TextColumn::make('department.name')
+                    ->label('Phòng ban')
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('role')
                     ->label('Vai trò')
@@ -110,14 +110,20 @@ class UserResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
                     ->options([
-                        'admin' => 'Admin',
-                        'moderator' => 'Moderator',
+                        'admin' => 'Quản trị viên',
+                        'moderator' => 'Kiểm duyệt viên',
                         'employee' => 'Nhân viên',
                     ]),
             ])
             ->recordActions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\EditAction::make()->label('Sửa'),
+                \Filament\Actions\DeleteAction::make()->label('Xóa'),
+                \Filament\Actions\Action::make('resetPassword')
+                    ->label('Reset MK')
+                    ->icon('heroicon-m-arrow-path')
+                    ->action(fn(User $record) => $record->resetPassword())
+                    ->requiresConfirmation()
+                    ->successNotification(),
             ])
             ->toolbarActions([
                 \Filament\Actions\BulkActionGroup::make([

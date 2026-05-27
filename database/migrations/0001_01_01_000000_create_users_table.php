@@ -20,7 +20,6 @@ return new class extends Migration
 
 
             $table->string('employee_code')->unique()->nullable();
-            $table->string('department')->nullable();
             $table->enum('role', ['admin', 'moderator', 'employee', 'customer'])->default('customer');
             $table->boolean('is_active')->default(true);
 

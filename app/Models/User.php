@@ -6,8 +6,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use App\Models\Department;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -28,7 +30,7 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'password',
         'employee_code',
-        'department',
+        'department_id',
         'role',
         'is_active',
     ];
@@ -42,6 +44,10 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'remember_token',
     ];
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -125,5 +131,9 @@ public function processedOrders() {
 // Helper để check quyền nhanh
 public function isCustomer() { return $this->role === 'customer'; }
 
+    public function resetPassword()
+    {
+        $this->update(['password' => Hash::make('123456')]);
+    }
 
 }
