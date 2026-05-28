@@ -4,19 +4,21 @@ namespace App\Filament\Resources\Users;
 
 use App\Models\User;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Form\Get;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationLabel = 'Quản lý người dùng';
-    protected static ?string $modelLabel = 'Người dùng';
-    protected static ?string $pluralModelLabel = 'Danh sách người dùng';
+    protected static ?string $navigationLabel = 'Quản lý nhân viên';
+    protected static ?string $modelLabel = 'Nhân viên';
+    protected static ?string $pluralModelLabel = 'Danh sách nhân viên';
     protected static \UnitEnum|string|null $navigationGroup = 'Hệ thống';
     protected static ?int $navigationSort = 1;
 
@@ -45,7 +47,8 @@ class UserResource extends Resource
                 ->label('Phòng ban')
                 ->relationship('department', 'name')
                 ->searchable()
-                ->required(),
+                ->preload()
+                ->required(fn ($get): bool => $get('role') === 'employee'),
 
             Forms\Components\TextInput::make('employee_code')
                 ->label('Mã nhân viên')
@@ -54,8 +57,7 @@ class UserResource extends Resource
                 ->dehydrated()
                 ->unique(ignoreRecord: true),
 
-            Forms\Components\TextInput::make('department')
-                ->label('Phòng ban'),
+
 
             Forms\Components\Select::make('role')
                 ->label('Vai trò')
@@ -65,7 +67,16 @@ class UserResource extends Resource
                     'employee' => 'Nhân viên',
                 ])
                 ->default('employee')
-                ->required(),
+                ->required()
+                ->live()
+                ->afterStateUpdated(function (string $state, $set){
+                    $prefix = match ($state) {
+                        'admin' => 'AD',
+                        'moderator' => 'MD',
+                        default => 'NV',
+                    };
+                    $set('employee_code', $prefix . '-' . strtoupper(\Illuminate\Support\Str::random(5)));
+                }),
 
             Forms\Components\Toggle::make('is_active')
                 ->label('Kích hoạt')
@@ -123,7 +134,7 @@ class UserResource extends Resource
                     ->icon('heroicon-m-arrow-path')
                     ->action(fn(User $record) => $record->resetPassword())
                     ->requiresConfirmation()
-                    ->successNotification(),
+                    ->successNotificationTitle('Mật khẩu đã được đặt lại'),
             ])
             ->toolbarActions([
                 \Filament\Actions\BulkActionGroup::make([

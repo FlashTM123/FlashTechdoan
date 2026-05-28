@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Users\Pages;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class ListUsers extends ListRecords
 {
@@ -14,7 +16,12 @@ class ListUsers extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Thêm nhân viên'),
+                ->label('Thêm nhân viên')
+                ->icon('heroicon-o-user-plus')
+                ->mutateDataUsing(function (array $data): array {
+                    $data['password'] = Hash::make('password'); // Mật khẩu mặc định
+                    return $data;
+                }),
         ];
     }
 }

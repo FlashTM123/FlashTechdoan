@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use App\Models\Department;
+
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -114,26 +115,31 @@ class User extends Authenticatable implements FilamentUser
 
         return true;
     }
-    public function profile() {
-    return $this->hasOne(UserProfile::class);
-}
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
 
-// 2. Với tư cách là Khách hàng (Người đặt hàng)
-public function orders() {
-    return $this->hasMany(Order::class, 'user_id');
-}
+    // 2. Với tư cách là Khách hàng (Người đặt hàng)
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'user_id');
+    }
 
-// 3. Với tư cách là Nhân viên (Người duyệt đơn - từ cột processed_by_id trong orders)
-public function processedOrders() {
-    return $this->hasMany(Order::class, 'processed_by_id');
-}
+    // 3. Với tư cách là Nhân viên (Người duyệt đơn - từ cột processed_by_id trong orders)
+    public function processedOrders()
+    {
+        return $this->hasMany(Order::class, 'processed_by_id');
+    }
 
-// Helper để check quyền nhanh
-public function isCustomer() { return $this->role === 'customer'; }
+    // Helper để check quyền nhanh
+    public function isCustomer()
+    {
+        return $this->role === 'customer';
+    }
 
     public function resetPassword()
     {
         $this->update(['password' => Hash::make('123456')]);
     }
-
 }

@@ -164,7 +164,7 @@ class CheckoutController extends Controller
      */
     public function success(Request $request)
     {
-        $order = Order::with(['items.product', 'items.variant', 'paymentMethod', 'coupon'])
+        $order = Order::with(['items.product', 'items.variant', 'paymentMethod', 'coupon', 'user'])
             ->where('order_code', $request->order_code)
             ->first();
 

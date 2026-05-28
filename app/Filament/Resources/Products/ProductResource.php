@@ -22,6 +22,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\FileUpload;
 
 class ProductResource extends Resource
 {
@@ -63,7 +64,13 @@ class ProductResource extends Resource
                                     ->required(),
                             ]),
 
-                            TextInput::make('thumbnail_url')->label('Ảnh Thumbnail')->url(),
+                            FileUpload::make('thumbnail_url')
+                                ->label('Ảnh Thumbnail')
+                                ->image()
+                                ->disk('public')
+                                ->directory('products')
+                                ->preserveFilenames()
+                                ->required(),
                             RichEditor::make('description')
                                 ->label('Mô tả')
                                 ->rules([
@@ -85,13 +92,26 @@ class ProductResource extends Resource
                             Toggle::make('is_featured')->label('Nổi bật'),
                             Toggle::make('is_active')->label('Kích hoạt')->default(true),
 
+                            FileUpload::make('bulk_images')
+                                ->label('Tải lên hàng loạt ảnh (Ảnh sẽ tự động được lưu và hiển thị ở danh sách dưới sau khi bấm Lưu)')
+                                ->image()
+                                ->multiple()
+                                ->disk('public')
+                                ->directory('products')
+                                ->preserveFilenames()
+                                ->dehydrated(false)
+                                ->columnSpanFull(),
+
                             Repeater::make('images')
                                 ->relationship('images', modifyQueryUsing: fn($query) => $query->whereNull('product_variant_id'))
                                 ->label('Bộ sưu tập ảnh chung')
                                 ->schema([
-                                    TextInput::make('image_url')
-                                        ->label('Link ảnh')
-                                        ->url()
+                                    FileUpload::make('image_url')
+                                        ->label('Hình ảnh')
+                                        ->image()
+                                        ->disk('public')
+                                        ->directory('products')
+                                        ->preserveFilenames()
                                         ->required(),
                                     Toggle::make('is_primary')
                                         ->label('Ảnh chính')
@@ -99,6 +119,8 @@ class ProductResource extends Resource
                                 ])
                                 ->columns(2)
                                 ->columnSpanFull(),
+
+
                         ]),
 
                     // TAB 2: BIẾN THỂ & THÔNG SỐ RIÊNG (MySQL)
@@ -135,11 +157,13 @@ class ProductResource extends Resource
                                         ->relationship('images')
                                         ->label('Hình ảnh biến thể')
                                         ->schema([
-                                            TextInput::make('image_url')
-                                                ->label('Link ảnh')
-                                                ->url()
-                                                ->required()
-                                                ->placeholder('https://example.com/image.jpg'),
+                                            FileUpload::make('image_url')
+                                                ->label('Hình ảnh')
+                                                ->image()
+                                                ->disk('public')
+                                                ->directory('products')
+                                                ->preserveFilenames()
+                                                ->required(),
                                             Toggle::make('is_primary')
                                                 ->label('Ảnh chính')
                                                 ->default(false),
@@ -255,6 +279,7 @@ class ProductResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('thumbnail_url')
                     ->label('Ảnh')
+                    ->disk('public')
                     ->state(fn($record) => $record->thumbnail_url),
 
                 Tables\Columns\TextColumn::make('name')
@@ -283,7 +308,7 @@ class ProductResource extends Resource
             ])
             ->filters([
                 // BẠN DÁN SELECT FILTER VÀO ĐÂY NHÉ:
-                    Tables\Filters\SelectFilter::make('brand_id')
+                Tables\Filters\SelectFilter::make('brand_id')
                     ->label('Thương hiệu')
                     ->relationship('brand', 'name'),
                 Tables\Filters\SelectFilter::make('category_id')

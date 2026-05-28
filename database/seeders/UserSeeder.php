@@ -11,25 +11,25 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Tạo Admin
-        // $admin = User::create([
-        //     'name' => 'Administrator',
-        //     'email' => 'admin@flashtech.com',
-        //     'password' => Hash::make('password'),
-        //     'role' => 'admin',
-        //     'employee_code' => 'AD001',
-        //     'is_active' => true,
-        // ]);
 
-        // 2. Tạo một số nhân viên mẫu
-        User::create([
-            'name' => 'Nguyễn Văn Nhân Viên',
-            'email' => 'staff@flashtech.com',
+        $admin = User::create([
+            'name' => 'Administrator',
+            'email' => 'admin@flashtech.com',
             'password' => Hash::make('password'),
-            'role' => 'employee',
-            'employee_code' => 'NV001',
+            'role' => 'admin',
+            'employee_code' => 'AD001',
             'is_active' => true,
         ]);
+
+        // 2. Tạo một số nhân viên mẫu
+        // User::create([
+        //     'name' => 'Nguyễn Văn Nhân Viên',
+        //     'email' => 'staff@flashtech.com',
+        //     'password' => Hash::make('password'),
+        //     'role' => 'employee',
+        //     'employee_code' => 'NV001',
+        //     'is_active' => true,
+        // ]);
 
         // 3. Tạo khách hàng mẫu (Customer)
         $customersData = [

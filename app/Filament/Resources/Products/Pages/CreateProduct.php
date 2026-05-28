@@ -15,4 +15,19 @@ class CreateProduct extends CreateRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function afterCreate(): void
+    {
+        $record = $this->record;
+        $bulkImages = $this->data['bulk_images'] ?? [];
+
+        if (!empty($bulkImages)) {
+            foreach ($bulkImages as $file) {
+                $record->images()->create([
+                    'image_url' => $file,
+                    'is_primary' => false,
+                ]);
+            }
+        }
+    }
 }

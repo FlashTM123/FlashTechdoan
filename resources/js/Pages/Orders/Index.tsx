@@ -240,7 +240,9 @@ export default function OrderIndex({ orders, status }: Props) {
                                                 <div key={item.id} className="flex items-center gap-5">
                                                     <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-100 dark:bg-slate-800 rounded-2xl flex-shrink-0 overflow-hidden group-hover:scale-105 transition-transform duration-500">
                                                         <img
-                                                            src={item.product?.thumbnail_url || '/placeholder.png'}
+                                                            src={item.product?.thumbnail_url ? (item.product.thumbnail_url.startsWith('http')
+                                                                ? item.product.thumbnail_url
+                                                                : `/storage/${item.product.thumbnail_url}`) : '/placeholder.png'}
                                                             alt={item.product?.name}
                                                             className="w-full h-full object-cover"
                                                         />
@@ -273,7 +275,7 @@ export default function OrderIndex({ orders, status }: Props) {
                                     {/* Footer Actions */}
                                     <div className="p-6 md:p-8 bg-slate-50/30 dark:bg-slate-800/10 border-t border-slate-100 dark:border-slate-800/50 flex flex-wrap items-center justify-end gap-4">
                                         <Link
-                                            href={route('orders.index', { order: order.id })} // Giả sử có trang chi tiết sau này
+                                            href={route('orders.show', order.id)}
                                             className="px-6 py-3 rounded-2xl font-bold text-sm bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2 active:scale-95"
                                         >
                                             <Eye className="w-4 h-4" />

@@ -82,4 +82,23 @@ class OrderController extends Controller
             return back()->with('error', 'Có lỗi xảy ra khi hủy đơn hàng. Vui lòng thử lại sau.');
         }
     }
+
+    /**
+     * Hiển thị chi tiết đơn hàng.
+     */
+    public function show(Order $order)
+    {
+        // 1. Kiểm tra quyền sở hữu
+        if ($order->user_id !== auth()->id()) {
+            abort(403, 'Bạn không có quyền xem đơn hàng này.');
+        }
+
+        // 2. Load đầy đủ thông tin kèm quan hệ
+        $order->load(['items.product', 'items.variant', 'paymentMethod', 'coupon']);
+
+        // 3. Trả về view chi tiết
+        return Inertia::render('Orders/Show', [
+            'order' => $order,
+        ]);
+    }
 }

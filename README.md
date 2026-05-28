@@ -28,7 +28,8 @@
 
 ### 📦 2. Order Management & Tracking
 - **Order Tracking**: Khách hàng có thể theo dõi hành trình đơn hàng chi tiết qua các trạng thái: *Chờ xử lý, Đang xử lý, Đang giao, Đã giao hàng, Đã hủy*.
-- **Self-Cancel Logic**: Cho phép khách hàng tự hủy đơn khi ở trạng thái 'Chờ xử lý', tự động hoàn trả số lượng tồn kho (Stock) vào hệ thống ngay lập tức.
+- **Premium Order Details Page (Show)**: Trang chi tiết đơn hàng riêng biệt, hiển thị đầy đủ thông tin nhận hàng (tên, SĐT, địa chỉ), hóa đơn chi tiết (bao gồm giảm giá coupon), và sơ đồ tiến trình (timeline stepper) động cực đẹp.
+- **Self-Cancel Logic**: Cho phép khách hàng tự hủy đơn khi ở trạng thái 'Chờ xử lý' trực tiếp tại trang danh sách hoặc trang chi tiết đơn hàng (có SweetAlert2 xác nhận), tự động hoàn trả số lượng tồn kho (Stock) vào hệ thống ngay lập tức.
 - **Inventory Protection**: Hệ thống khóa dữ liệu (Locking) khi đặt hàng để đảm bảo không xảy ra tình trạng bán quá số lượng thực tế.
 
 ### ⭐️ 3. Review & Feedback System
@@ -56,10 +57,17 @@
 - **Apple-style Product Detail**: Nút chọn cấu hình tinh tế, tích hợp Animation mượt mà và hiển thị tồn kho Real-time.
 - **Advanced Filtering**: Bộ lọc chuyên nghiệp với hiệu ứng Morphing Layout, chuyển đổi lưới hiển thị không độ trễ.
 - **Dark/Light Mode Optimized**: Hoàn thiện 100% giao diện sáng tối, đảm bảo độ tương phản hoàn hảo và trải nghiệm thị giác cao cấp nhất.
+
 ### 🫙 7. Edit Product Detail & Product Manager
-- **Edit & Change Position Discription and Specitification**: Làm lại 2 vị trí phần mô tả và thông số chi tiết để nhìn gọn mắt hơn và thay đổi giới hạn hiển thị ở thông số kĩ thuật
-- **Change Position Old Price and Price**: Thay đổi vị trí giá bán và giá gốc, và đổi tên giá gốc thành giá chưa giảm
-- **Change Type Discription in Database**: Điểu chỉnh lại cột discription trong bảng Product sang Text thay vì VARCHAR
+- **Edit & Change Position Discription and Specitification**: Làm lại 2 vị trí phần mô tả và thông số chi tiết để nhìn gọn mắt hơn và thay đổi giới hạn hiển thị ở thông số kĩ thuật.
+- **Change Position Old Price and Price**: Thay đổi vị trí giá bán và giá gốc, và đổi tên giá gốc thành giá chưa giảm.
+- **Change Type Discription in Database**: Điểu chỉnh lại cột discription trong bảng Product sang Text thay vì VARCHAR.
+- **Filament Image Bulk Upload**: Bổ sung tính năng tải lên hàng loạt ảnh sản phẩm trong admin bằng các hook vòng đời (`afterCreate`, `afterSave`), giúp tải lên cùng lúc 10-20 ảnh mượt mà, không gặp lỗi nghẽn Livewire.
+
+### 🛡️ 8. Active Brand Constraint Enforcement
+- **Brand Status Propagation**: Tích hợp điều kiện ràng buộc trạng thái của thương hiệu trên toàn hệ thống storefront.
+- **Automatic Product Hiding**: Khi một thương hiệu bị chuyển sang trạng thái ngưng hoạt động (`is_active = false`), toàn bộ sản phẩm của thương hiệu đó sẽ tự động ẩn hoàn toàn khỏi Trang chủ, Trang danh sách sản phẩm, Trang tìm kiếm nhanh (API Search) và chặn truy cập trực tiếp trang chi tiết.
+- **Sidebar Dynamic Filter**: Bộ lọc thương hiệu ở sidebar của trang cửa hàng chỉ hiển thị các thương hiệu đang hoạt động để tối ưu trải nghiệm mua sắm.
 
 ---
 
