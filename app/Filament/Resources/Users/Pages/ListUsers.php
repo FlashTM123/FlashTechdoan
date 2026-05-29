@@ -19,7 +19,7 @@ class ListUsers extends ListRecords
                 ->label('Thêm nhân viên')
                 ->icon('heroicon-o-user-plus')
                 ->mutateDataUsing(function (array $data): array {
-                    $data['password'] = Hash::make('password'); // Mật khẩu mặc định
+                    $data['password'] = Hash::make('123456'); // Mật khẩu mặc định 123456
                     return $data;
                 }),
         ];
