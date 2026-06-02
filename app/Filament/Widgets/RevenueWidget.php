@@ -53,30 +53,39 @@ class RevenueWidget extends StatsOverviewWidget
         $days = ['Chủ nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'];
         $todayLabel = $days[today()->dayOfWeek] . ', ' . today()->format('d/m/Y');
 
-        return [
-            Stat::make('Tổng doanh thu', $formatMoney($totalRevenue))
-                ->description('Từ các đơn đã hoàn thành')
-                ->descriptionIcon('heroicon-m-banknotes')
-                ->color('success')
-                ->chart(
-                    Order::where('order_status', 'delivered')
-                        ->where('created_at', '>=', now()->subDays(7))
-                        ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
-                        ->groupBy('date')
-                        ->orderBy('date')
-                        ->pluck('total')
-                        ->toArray()
-                ),
+        $revenueChartData = Order::where('order_status', 'delivered')
+            ->where('created_at', '>=', now()->subDays(7))
+            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('total')
+            ->toArray();
 
-            Stat::make('Đơn hàng mới (24h)', $newOrders24h . ' đơn')
-                ->description($trendLabel)
-                ->descriptionIcon($trendIcon)
-                ->color($trendColor)
-                ->chart(
-                    collect(range(6, 0))->map(fn ($d) =>
-                        Order::whereDate('created_at', today()->subDays($d))->count()
-                    )->toArray()
-                ),
+        $newOrdersChartData = collect(range(6, 0))->map(fn ($d) =>
+            Order::whereDate('created_at', today()->subDays($d))->count()
+        )->toArray();
+
+        $totalRevenueStat = Stat::make('Tổng doanh thu', $formatMoney($totalRevenue))
+            ->description('Từ các đơn đã hoàn thành')
+            ->descriptionIcon('heroicon-m-banknotes')
+            ->color('success');
+
+        if (!empty($revenueChartData) && count(array_unique($revenueChartData)) > 1) {
+            $totalRevenueStat->chart($revenueChartData);
+        }
+
+        $newOrdersStat = Stat::make('Đơn hàng mới (24h)', $newOrders24h . ' đơn')
+            ->description($trendLabel)
+            ->descriptionIcon($trendIcon)
+            ->color($trendColor);
+
+        if (count(array_unique($newOrdersChartData)) > 1) {
+            $newOrdersStat->chart($newOrdersChartData);
+        }
+
+        return [
+            $totalRevenueStat,
+            $newOrdersStat,
 
             Stat::make('Đang chờ xử lý', $pendingOrders . ' đơn')
                 ->description($pendingOrders > 0 ? 'Cần được xử lý ngay' : 'Không có đơn chờ')

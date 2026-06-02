@@ -249,16 +249,23 @@ class ProductResource extends Resource
                     fn($v) =>
                     \Filament\Schemas\Components\Flex::make([
                         \Filament\Schemas\Components\Group::make([
-                            \Filament\Schemas\Components\Text::make($v->variant_name ?? '—')->weight('semibold'),
-                            \Filament\Schemas\Components\Text::make($v->sku ?? '—')->color('gray')->size('sm'),
-                        ])->grow()->gap(0),
+                            \Filament\Schemas\Components\Text::make($v->variant_name ?? '—')
+                                ->weight('bold')
+                                ->size('md'),
+                            \Filament\Schemas\Components\Text::make($v->sku ?? '—')
+                                ->color('gray')
+                                ->size('xs'),
+                        ])->grow()->gap(1),
                         \Filament\Schemas\Components\Group::make([
                             \Filament\Schemas\Components\Text::make(number_format($v->price, 0, ',', '.') . ' ₫')
-                                ->weight('bold')->color('primary'),
-                            \Filament\Schemas\Components\Text::make('Tồn: ' . $v->stock)
-                                ->size('sm')->color($v->stock > 0 ? 'success' : 'danger'),
-                        ])->grow(false)->gap(0),
-                    ])->alignCenter()->extraAttributes(['class' => 'py-3 border-b last:border-0 gap-3'])
+                                ->weight('black')
+                                ->size('lg')
+                                ->color('primary'),
+                            \Filament\Schemas\Components\Text::make($v->stock > 0 ? 'Còn ' . $v->stock . ' máy' : 'Hết hàng')
+                                ->badge()
+                                ->color($v->stock > 0 ? 'success' : 'danger'),
+                        ])->grow(false)->gap(1.5)->extraAttributes(['class' => 'text-right flex flex-col items-end']),
+                    ])->alignCenter()->extraAttributes(['class' => 'py-4 border-b last:border-0 border-slate-100/50 dark:border-slate-800/50 gap-4'])
                 )->toArray()),
 
             // MÔ TẢ
@@ -350,9 +357,10 @@ class ProductResource extends Resource
             ->actions([
                 \Filament\Actions\ViewAction::make()
                     ->slideOver()
-                    ->modalWidth(\Filament\Support\Enums\Width::FourExtraLarge),
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make()
+                    ->modalWidth(\Filament\Support\Enums\Width::FourExtraLarge)
+                    ->label('Xem chi tiết'),
+                \Filament\Actions\EditAction::make()->label('Chỉnh sửa'),
+                \Filament\Actions\DeleteAction::make()->label('Xóa')
                     ->hidden(fn() => !auth()->user()->isStaff()),
             ])
             ->bulkActions([

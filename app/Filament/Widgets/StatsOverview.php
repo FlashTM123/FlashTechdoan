@@ -32,18 +32,28 @@ class StatsOverview extends StatsOverviewWidget
             ->map(fn ($d) => Product::whereDate('created_at', '<=', today()->subDays($d))->count())
             ->toArray();
 
-        return [
-            Stat::make('Tổng đơn hàng', number_format($totalOrders))
-                ->description('Tất cả đơn đã tạo')
-                ->descriptionIcon('heroicon-m-shopping-bag')
-                ->color('primary')
-                ->chart($orderSparkline),
+        $orderStat = Stat::make('Tổng đơn hàng', number_format($totalOrders))
+            ->description('Tất cả đơn đã tạo')
+            ->descriptionIcon('heroicon-m-shopping-bag')
+            ->color('primary');
 
-            Stat::make('Tổng số sản phẩm', Product::count())
-                ->description('Tất cả cấu hình trong kho')
-                ->descriptionIcon('heroicon-m-computer-desktop')
-                ->color('success')
-                ->chart($productSparkline),
+        // Chỉ hiển thị biểu đồ nếu dữ liệu có sự biến động (tránh vẽ vạch ngang thẳng đuột xấu)
+        if (count(array_unique($orderSparkline)) > 1) {
+            $orderStat->chart($orderSparkline);
+        }
+
+        $productStat = Stat::make('Tổng số sản phẩm', Product::count())
+            ->description('Tất cả cấu hình trong kho')
+            ->descriptionIcon('heroicon-m-computer-desktop')
+            ->color('success');
+
+        if (count(array_unique($productSparkline)) > 1) {
+            $productStat->chart($productSparkline);
+        }
+
+        return [
+            $orderStat,
+            $productStat,
 
             Stat::make('Tổng khách hàng', User::where('role', 'customer')->count())
                 ->description('Tài khoản đã đăng ký')
