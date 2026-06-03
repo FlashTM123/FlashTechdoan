@@ -274,7 +274,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->brandName('FlashTech Hub')
-            ->font('Outfit')
+            ->font('Be Vietnam Pro')
             ->sidebarCollapsibleOnDesktop() 
             // ->sidebarFullyCollapsibleOnDesktop() Cach 2: Cho phép thu gọn hoàn toàn sidebar trên desktop
             ->login(\App\Filament\Pages\Auth\Login::class)

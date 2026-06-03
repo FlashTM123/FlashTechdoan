@@ -14,8 +14,8 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans],
-                display: ['Outfit', ...defaultTheme.fontFamily.sans],
+                sans: ['Be Vietnam Pro', ...defaultTheme.fontFamily.sans],
+                display: ['Be Vietnam Pro', ...defaultTheme.fontFamily.sans],
             },
             keyframes: {
                 fadeIn: {

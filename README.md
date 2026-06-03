@@ -104,39 +104,78 @@ Dự án được thiết kế theo quy chuẩn chuyên nghiệp, kết hợp s�
 
 ---
 
-## 🔧 Cài đặt & Triển khai
+## 🔧 Cài đặt & Triển khai (Sử dụng Docker & Laravel Sail)
 
-1. **Clone project & Cài đặt thư viện**:
+Dự án hiện tại được tối ưu hóa để khởi chạy trên môi trường ảo hóa Docker thông qua Laravel Sail, giúp đồng bộ môi trường hoạt động và tự động cài đặt tất cả dịch vụ chỉ với một lệnh duy nhất.
+
+### Yêu cầu hệ thống:
+- Máy tính đã cài đặt và khởi động **Docker Desktop**.
+- (Với Windows) Đã kích hoạt **WSL2** (Windows Subsystem for Linux).
+
+---
+
+### Các bước thiết lập & Khởi chạy:
+
+1. **Cài đặt thư viện**:
+   Chạy các lệnh sau tại thư mục gốc của dự án:
    ```bash
    composer install
    npm install
    ```
-2. **Cấu hình Environment**: Copy `.env.example` thành `.env` và điền:
-   ```
+
+2. **Cấu hình Environment (`.env`)**:
+   Sao chép file cấu hình `.env.example` thành `.env` và cập nhật thông số kết nối Database tương thích với Docker:
+   ```env
    DB_CONNECTION=mysql
-   DB_DATABASE=flashtech_doan
-   DB_USERNAME=root
-   
-   MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/?appName=FlashTech
-   MONGO_DB=flashtech_product
+   DB_HOST=mysql
+   DB_PORT=3306
+   DB_DATABASE=flashtechdoan
+   DB_USERNAME=sail
+   DB_PASSWORD=password
+
+   # Cấu hình user/group chạy ngầm trên Windows
+   WWWGROUP=1000
+   WWWUSER=1000
    ```
-3. **Khởi tạo dữ liệu**:
-   ```bash
-   php artisan key:generate
-   php artisan migrate --seed
-   php artisan storage:link
+
+3. **Khởi chạy Docker Containers**:
+   * **Cách 1 (Giao diện trực quan)**: Mở **Docker Desktop**, chọn dự án `flashtechdoan` và bấm nút **Play (Run)**.
+   * **Cách 2 (Sử dụng dòng lệnh)**:
+     * Trên Windows PowerShell:
+       ```powershell
+       docker compose up -d
+       ```
+     * Trên Linux / macOS hoặc Git Bash:
+       ```bash
+       bash vendor/laravel/sail/bin/sail up -d
+       ```
+
+4. **Khởi tạo dữ liệu & Storage Link**:
+   Chạy các lệnh khởi tạo hệ thống trực tiếp thông qua Docker:
+   ```powershell
+   # Tạo key ứng dụng
+   docker compose exec laravel.test php artisan key:generate
+
+   # Khởi chạy migration và nạp dữ liệu mẫu
+   docker compose exec laravel.test php artisan migrate --seed
+
+   # Liên kết thư mục lưu trữ ảnh sản phẩm
+   docker compose exec laravel.test php artisan storage:link
    ```
-4. **Chạy Project**:
+
+5. **Chạy Frontend (React/Vite)**:
+   Mở thêm một cửa sổ terminal mới trên máy Windows của bạn để chạy Hot-Reload giao diện React:
    ```bash
-   # Terminal 1 - Backend
-   php artisan serve
-   
-   # Terminal 2 - Frontend
    npm run dev
-   
-   # Terminal 3 (Optional) - Queue & Logs
-   php artisan queue:listen
    ```
+
+---
+
+### 🌐 Địa chỉ truy cập cục bộ:
+* **Trang bán hàng (React)**: [http://localhost](http://localhost) (hoặc [http://127.0.0.1](http://127.0.0.1))
+* **Trang quản trị (Filament Admin)**: [http://localhost/admin](http://localhost/admin)
+* **Quản lý Database (phpMyAdmin)**: [http://localhost:8080](http://localhost:8080)
+  * **Tài khoản đăng nhập phpMyAdmin**: `sail` / `password`
 
 ---
 
