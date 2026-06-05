@@ -170,8 +170,18 @@ class OrderResource extends Resource
                                             if ($state) {
                                                 $variant = \App\Models\ProductVariant::find($state);
                                                 if ($variant) {
-                                                    $set('unit_price', $variant->price);
+                                                    $set('unit_price', (float) $variant->price);
                                                     $set('product_id', $variant->product_id);
+
+                                                    // ⚠️ Cảnh báo nếu chọn sản phẩm hết hàng
+                                                    if ($variant->stock <= 0) {
+                                                        \Filament\Notifications\Notification::make()
+                                                            ->title('⚠️ Sản phẩm đang hết hàng!')
+                                                            ->body("Biến thể này hiện có stock = 0. Vui lòng chọn sản phẩm khác hoặc xác nhận trước khi tạo đơn.")
+                                                            ->warning()
+                                                            ->persistent()
+                                                            ->send();
+                                                    }
                                                 }
                                             }
                                         })
@@ -186,13 +196,36 @@ class OrderResource extends Resource
                                         ->minValue(1)
                                         ->required()
                                         ->reactive()
+                                        ->afterStateUpdated(function ($state, Get $get) {
+                                            $variantId = $get('product_variants_id');
+                                            if ($variantId && $state !== null) {
+                                                $variant = \App\Models\ProductVariant::find($variantId);
+                                                if ($variant && $variant->stock <= 0) {
+                                                    \Filament\Notifications\Notification::make()
+                                                        ->title('🚫 Sản phẩm đã hết hàng!')
+                                                        ->body('Sản phẩm này hiện có tồn kho = 0, không thể tạo đơn. Vui lòng chọn sản phẩm khác.')
+                                                        ->danger()
+                                                        ->persistent()
+                                                        ->send();
+                                                } elseif ($variant && (int) $state > $variant->stock) {
+                                                    \Filament\Notifications\Notification::make()
+                                                        ->title('⚠️ Vượt quá tồn kho!')
+                                                        ->body("Kho hiện chỉ còn {$variant->stock} máy. Vui lòng giảm số lượng.")
+                                                        ->warning()
+                                                        ->persistent()
+                                                        ->send();
+                                                }
+                                            }
+                                        })
                                         ->rules([
                                             fn (Get $get) => function (string $attribute, $value, $fail) use ($get) {
                                                 $variantId = $get('product_variants_id');
                                                 if ($variantId) {
                                                     $variant = \App\Models\ProductVariant::find($variantId);
-                                                    if ($variant && $value > $variant->stock) {
-                                                        $fail("Hiện còn {$variant->stock} máy.");
+                                                    if ($variant && $variant->stock <= 0) {
+                                                        $fail('Sản phẩm này đã hết hàng, không thể tạo đơn.');
+                                                    } elseif ($variant && (int) $value > $variant->stock) {
+                                                        $fail("Chỉ còn {$variant->stock} máy trong kho.");
                                                     }
                                                 }
                                             },
@@ -201,9 +234,15 @@ class OrderResource extends Resource
 
                                     TextInput::make('unit_price')
                                         ->label('Đơn giá')
-                                        ->numeric()
                                         ->prefix('₫')
                                         ->required()
+                                        ->live(onBlur: true)
+                                        ->formatStateUsing(function ($state) {
+                                            // Strip dấu chấm (nếu đã format) rồi format lại
+                                            $raw = (float) str_replace(['.', ',', ' '], ['', '.', ''], (string) $state);
+                                            return $raw > 0 ? number_format($raw, 0, ',', '.') : '';
+                                        })
+                                        ->dehydrateStateUsing(fn ($state) => (float) str_replace(['.', ',', ' '], ['', '.', ''], (string) $state))
                                         ->columnSpan(['default' => 12, 'md' => 3]),
                                 ])
                                 ->columns(12)
@@ -214,7 +253,9 @@ class OrderResource extends Resource
                                     $total = 0;
                                     foreach ($items as $item) {
                                         $quantity = intval($item['quantity'] ?? 0);
-                                        $price = floatval($item['unit_price'] ?? 0);
+                                        // Strip đấu chấm phân cách trước khi tính
+                                        $rawPrice = str_replace(['.', ' '], '', (string) ($item['unit_price'] ?? 0));
+                                        $price = (float) $rawPrice;
                                         $total += $quantity * $price;
                                     }
                                     $set('total_amount', $total);
@@ -248,7 +289,9 @@ class OrderResource extends Resource
                                     $totalQty = 0;
                                     foreach ($items as $item) {
                                         $qty = intval($item['quantity'] ?? 0);
-                                        $price = floatval($item['unit_price'] ?? 0);
+                                        // Strip đấu chấm phân cách trước khi tính
+                                        $rawPrice = str_replace(['.', ' '], '', (string) ($item['unit_price'] ?? 0));
+                                        $price = (float) $rawPrice;
                                         $total += $qty * $price;
                                         $totalQty += $qty;
                                     }

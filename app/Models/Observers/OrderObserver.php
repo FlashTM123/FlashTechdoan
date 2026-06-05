@@ -28,7 +28,7 @@ class OrderObserver
                         ->url(url("/admin/orders/{$order->id}/edit"))
                         ->button(),
                 ])
-                ->sendToDatabase($admin);
+                ->broadcast($admin);
         }
     }
 

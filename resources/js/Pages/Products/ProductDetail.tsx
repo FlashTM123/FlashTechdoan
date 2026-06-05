@@ -47,6 +47,16 @@ export default function ProductDetail({ product }: { product: any }) {
 
     const handleAddToCart = () => {
         if (!selectedVariant) return;
+        if (!auth.user) {
+            toast.error("Vui lòng đăng nhập", {
+                description: "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.",
+                action: {
+                    label: "Đăng nhập ngay",
+                    onClick: () => router.visit(route('login'))
+                }
+            });
+            return;
+        }
 
         addToCart({
             name: product.name,
