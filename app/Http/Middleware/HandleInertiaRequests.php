@@ -33,10 +33,13 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? $request->user()->load('profile') : null,
             ],
-               ...parent::share($request),
-        'categories' => Category::whereHas('products')->get(), // Chỉ lấy danh mục có sản phẩm
+            'categories' => Category::whereHas('products')->get(),
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
         ];
        
     }

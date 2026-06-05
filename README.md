@@ -1,107 +1,314 @@
 <div align="center">
-  <img src="https://images.unsplash.com/photo-1593642632823-8f785ba67e45?q=80&w=1200&auto=format&fit=crop" alt="FlashTech Header" width="100%" style="border-radius: 20px; margin-bottom: 20px;" />
-  <h1>⚡ FLASHTECH E-COMMERCE ECOSYSTEM</h1>
-  <p><b>Hệ thống thương mại điện tử Laptop & Linh kiện công nghệ hiện đại</b></p>
+  <img src="https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=1200&auto=format&fit=crop" alt="FlashTech Header" width="100%" style="border-radius: 24px; margin-bottom: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);" />
+  
+  <h1>⚡ FLASHTECH: THE NEXT-GEN TECH COMMERCE</h1>
+  <p><b>Hệ thống TMĐT Laptop & Đồ công nghệ cao cấp | Laravel 13 + React 19 + Filament V3</b></p>
 
-  <!-- Badges -->
-  <a href="https://laravel.com" target="_blank"><img src="https://img.shields.io/badge/Laravel_13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" /></a>
-  <a href="https://react.dev" target="_blank"><img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" /></a>
-  <a href="https://tailwindcss.com" target="_blank"><img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" /></a>
-  <a href="https://www.mongodb.com" target="_blank"><img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" /></a>
+  <div style="margin: 20px 0;">
+    <img src="https://img.shields.io/badge/Laravel_13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" />
+    <img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+    <img src="https://img.shields.io/badge/Filament_V3-FFB11B?style=for-the-badge&logo=filament&logoColor=black" alt="Filament" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
+  </div>
 </div>
 
 ---
 
-## 🏗️ Chuẩn hóa Hệ thống & Quản trị Doanh nghiệp (Cập nhật 06/05)
-
-Hôm nay, FlashTech đã hoàn thành bước ngoặt về **Kiến trúc dữ liệu** và **Quy trình vận hành chuyên nghiệp**:
-
-### 💎 Chuẩn hóa Database (Normalization - 3NF)
-- **Từ JSON sang Relational:** Loại bỏ hoàn toàn việc lưu thông số kỹ thuật dạng JSON trong bảng sản phẩm. Thay thế bằng bảng quan hệ `product_variant_details` (1-N).
-- **Tối ưu hóa Truy vấn:** Sử dụng Eager Loading (`with('details')`) giúp giảm thiểu N+1 query, tăng tốc độ tải trang chi tiết sản phẩm.
-- **Tính nhất quán dữ liệu:** Đảm bảo mọi thông số kỹ thuật đều có cấu trúc rõ ràng (`attribute_name`, `attribute_value`), sẵn sàng cho tính năng lọc sản phẩm (Filtering) nâng cao.
-
-### 💳 Hệ thống Thanh toán & Truy vết (Audit Trail)
-- **Quản lý Thanh toán Tập trung:** Tách biệt phương thức thanh toán thành bảng `payment_methods`, cho phép dễ dàng mở rộng MoMo, VNPAY, COD... mà không cần sửa code.
-- **Truy vết Duyệt đơn:** Mọi đơn hàng giờ đây đều lưu vết `processed_by_id`. Hệ thống tự động ghi nhận nhân viên/admin xử lý khi đơn hàng thay đổi trạng thái.
-- **Badge Vai trò:** Hiển thị thông tin người duyệt kèm Badge vai trò (Admin/Staff) trực quan trong trang quản trị.
-
-### ⚙️ Tự động hóa & Branding
-- **Auto-SKU Generation:** Hệ thống tự động sinh mã SKU duy nhất cho từng biến thể sản phẩm (Format: `FT-XXXXXX`), giảm thiểu sai sót nhập liệu thủ công.
-- **Official Branding:** Chuyển đổi toàn bộ nhận diện từ "Laravel" sang thương hiệu chính thức **FlashTech** trên toàn bộ Dashboard và tiêu đề ứng dụng.
+## 🌟 Tầm nhìn dự án
+**FlashTech** là một hệ thống thương mại điện tử chuyên biệt cho Laptop, tập trung vào trải nghiệm người dùng cao cấp (Premium UX) và quản trị doanh nghiệp chặt chẽ. Dự án được tối ưu hóa để vận hành ổn định trên các môi trường thực tế.
 
 ---
 
-## 🚀 Đột phá trong Giao diện (Cập nhật 04/05)
+## 🚀 Các Module Đột Phá Đã Hoàn Thiện
 
-FlashTech đã được nâng cấp toàn diện về mặt **Storefront (Giao diện người dùng)** với các tính năng cao cấp:
+### 🛒 1. Advanced Checkout & VNPay Integration (Đang phát triển)
+- **Hệ thống Thanh toán**: Tích hợp cổng thanh toán trực tuyến **VNPay** (Sandbox) cho các giao dịch an toàn.
+- **Smart Coupon Logic**: Hệ thống mã giảm giá đa dạng, tự động kiểm tra điều kiện và áp dụng ngay tại trang thanh toán.
+- **Anti-Abuse Control**: Giới hạn lượt dùng mã giảm giá trên mỗi tài khoản người dùng dựa trên lịch sử giao dịch.
 
-### 🌗 Premium Dark/Light Mode
-- **Trải nghiệm đồng bộ:** Toàn bộ trang web đều được tối ưu hóa cho chế độ tối (Header, Search Bar, Hero, Footer).
-- **Ghi nhớ thông minh:** Tự động lưu lựa chọn của người dùng và đồng bộ với cài đặt hệ thống.
+### 📦 2. Order Management & Tracking
+- **Order Tracking**: Khách hàng có thể theo dõi hành trình đơn hàng chi tiết qua các trạng thái: *Chờ xử lý, Đang xử lý, Đang giao, Đã giao hàng, Đã hủy*.
+- **Premium Order Details Page (Show)**: Trang chi tiết đơn hàng riêng biệt, hiển thị đầy đủ thông tin nhận hàng (tên, SĐT, địa chỉ), hóa đơn chi tiết (bao gồm giảm giá coupon), và sơ đồ tiến trình (timeline stepper) động cực đẹp.
+- **Self-Cancel Logic**: Cho phép khách hàng tự hủy đơn khi ở trạng thái 'Chờ xử lý' trực tiếp tại trang danh sách hoặc trang chi tiết đơn hàng (có SweetAlert2 xác nhận), tự động hoàn trả số lượng tồn kho (Stock) vào hệ thống ngay lập tức.
+- **Inventory Protection**: Hệ thống khóa dữ liệu (Locking) khi đặt hàng để đảm bảo không xảy ra tình trạng bán quá số lượng thực tế.
 
-### 🔍 Live Search & Suggestions
-- **Tìm kiếm tức thì:** Gợi ý sản phẩm kèm hình ảnh và giá bán ngay khi người dùng gõ từ khóa.
-- **Hiệu ứng mượt mà:** Tối ưu hóa hiệu suất server, giảm thiểu truy vấn thừa.
+### ⭐️ 3. Review & Feedback System
+- **Verified Purchase**: Chỉ những khách hàng đã nhận hàng thành công mới được quyền đánh giá sản phẩm.
+- **Multi-Image Support**: Hỗ trợ đăng tải hình ảnh thực tế giúp tăng độ tin cậy cho cửa hàng.
+- **Admin Moderation**: Hệ thống quản trị cho phép kiểm duyệt nội dung và kiểm soát hiển thị đánh giá thông qua cơ chế Toggle thông minh.
+
+### 🔄 4. Compare Products System (Phase 7)
+- **Variant Comparison**: So sánh cụ thể từng biến thể sản phẩm (CPU, RAM, GPU, Screen) chứ không chỉ sản phẩm chung.
+- **Highlight Differences**: Tự động phát hiện & làm nổi bật các thông số khác nhau giữa sản phẩm so sánh (màu nền tím).
+- **Smart Storage**: Lưu danh sách so sánh vào localStorage, tự động phục hồi khi tải lại trang.
+- **Multi-Compare**: Hỗ trợ so sánh tối đa 3 biến thể cùng lúc, có thể từ cùng 1 sản phẩm hoặc khác sản phẩm.
+- **Show Differences Only**: Tính năng lọc chỉ hiển thị những thông số có sự khác biệt giữa các sản phẩm.
+
+### 🎨 5. Admin Premium Dashboard & Real-time Notifications
+- **Filament V5 Migration**: Cập nhật toàn bộ hệ thống Actions và Notifications theo chuẩn kiến trúc mới của Filament v5.
+- **Premium UI Redesign**: Tái thiết kế toàn bộ Dashboard với CSS tùy chỉnh (Gỡ viền cam, tối ưu typography, hover effects) giúp giao diện sang trọng, gọn gàng.
+- **Topbar Real-time Clock**: Tích hợp đồng hồ thời gian thực bằng Alpine.js trực tiếp lên Topbar của Filament (bên cạnh Avatar người dùng).
+- **Instant Order Notifications**: Áp dụng hệ thống Filament Database Notification để báo động (Push Notification) ngay lập tức cho Admin khi có khách hàng đặt đơn mới mà không cần reload trang.
+- **Smart Data Formatting**: Các Widget thống kê (như Doanh thu) tự động rút gọn số tiền (tr ₫, tỷ ₫) và Việt hóa ngôn ngữ ngày tháng.
+
+### 💎 6. Premium Customer Storefront (Apple Style UX)
+- **Glassmorphism & Parallax**: Thanh điều hướng nổi (Floating Pill) tự động thu nhỏ, kết hợp Hero Section 3D với các huy hiệu bay lơ lửng.
+- **Micro-animations**: Hiệu ứng nảy (bounce), phát sáng (glow), và lóe sáng (shine) trên các nút tương tác (Thêm giỏ hàng, Chọn cấu hình, Mã giảm giá).
+- **Apple-style Product Detail**: Nút chọn cấu hình tinh tế, tích hợp Animation mượt mà và hiển thị tồn kho Real-time.
+- **Advanced Filtering**: Bộ lọc chuyên nghiệp với hiệu ứng Morphing Layout, chuyển đổi lưới hiển thị không độ trễ.
+- **Dark/Light Mode Optimized**: Hoàn thiện 100% giao diện sáng tối, đảm bảo độ tương phản hoàn hảo và trải nghiệm thị giác cao cấp nhất.
+
+### 🫙 7. Edit Product Detail & Product Manager
+- **Edit & Change Position Discription and Specitification**: Làm lại 2 vị trí phần mô tả và thông số chi tiết để nhìn gọn mắt hơn và thay đổi giới hạn hiển thị ở thông số kĩ thuật.
+- **Change Position Old Price and Price**: Thay đổi vị trí giá bán và giá gốc, và đổi tên giá gốc thành giá chưa giảm.
+- **Change Type Discription in Database**: Điểu chỉnh lại cột discription trong bảng Product sang Text thay vì VARCHAR.
+- **Filament Image Bulk Upload**: Bổ sung tính năng tải lên hàng loạt ảnh sản phẩm trong admin bằng các hook vòng đời (`afterCreate`, `afterSave`), giúp tải lên cùng lúc 10-20 ảnh mượt mà, không gặp lỗi nghẽn Livewire.
+
+### 🛡️ 8. Active Brand Constraint Enforcement
+- **Brand Status Propagation**: Tích hợp điều kiện ràng buộc trạng thái của thương hiệu trên toàn hệ thống storefront.
+- **Automatic Product Hiding**: Khi một thương hiệu bị chuyển sang trạng thái ngưng hoạt động (`is_active = false`), toàn bộ sản phẩm của thương hiệu đó sẽ tự động ẩn hoàn toàn khỏi Trang chủ, Trang danh sách sản phẩm, Trang tìm kiếm nhanh (API Search) và chặn truy cập trực tiếp trang chi tiết.
+- **Sidebar Dynamic Filter**: Bộ lọc thương hiệu ở sidebar của trang cửa hàng chỉ hiển thị các thương hiệu đang hoạt động để tối ưu trải nghiệm mua sắm.
 
 ---
 
-## 🛠️ Công nghệ cốt lõi
-
-| Lớp (Layer) | Công nghệ | Mục đích |
-|-------------|-------------------|---------------------|
-| **Backend** | **Laravel 13** | API & Logic xử lý chính |
-| **Frontend**| **React 19 + Inertia** | Trải nghiệm SPA không tải lại trang |
-| **Styling** | **Tailwind CSS** | Giao diện hiện đại, tối ưu Mobile |
-| **Admin**   | **Filament V5** | Quản trị sản phẩm, đơn hàng siêu tốc |
-| **Dual DB** | **MySQL & MongoDB** | Lưu trữ quan hệ & Dữ liệu động (Specs, Reviews) |
+## 🗄️ Kiến trúc Dữ liệu (Database Architecture)
+Dự án được thiết kế theo quy chuẩn chuyên nghiệp, kết hợp sức mạnh của nhiều loại Database:
+- **MySQL (Main)**: Quản lý Auth, Đơn hàng, Mã giảm giá và các quan hệ 3NF.
+- **Product Variants**: Quản lý Laptop theo từng SKU cấu hình (CPU, RAM, SSD) độc lập.
 
 ---
 
-## 🗄️ Kiến trúc Dual Database
+## 🛠️ Tech Stack & Công nghệ
 
-FlashTech sử dụng kiến trúc kết hợp độc đáo:
-- **MySQL**: Quản lý dữ liệu ACID (Người dùng, Đơn hàng, Biến thể sản phẩm).
-- **MongoDB**: Quản lý dữ liệu linh hoạt (Thông số kỹ thuật động, Đánh giá sản phẩm, Nhật ký hệ thống).
+### Backend
+- **Framework**: Laravel 13 (PHP 8.3+)
+- **ORM**: Eloquent + Laravel MongoDB
+- **Authentication**: Laravel Sanctum
+- **Payment Gateway**: VNPay API
+- **Admin Panel**: Filament V3 (Premium Laravel Dashboard)
+
+### Frontend  
+- **Framework**: React 19 (Vite)
+- **Styling**: Tailwind CSS + Dark Mode Support
+- **Animations**: Framer Motion
+- **State Management**: React Context API
+- **HTTP Client**: Axios
+- **UI Components**: Lucide React Icons, SweetAlert2, Sonner Toast
+- **Type Safety**: TypeScript
+
+### Infrastructure
+- **Database**: MySQL 8.0, MongoDB Atlas
+- **Server**: PHP 8.3, Node.js 20+
+- **Build Tool**: Vite
+- **Package Manager**: Composer, NPM
 
 ---
 
-## 🔧 Hướng dẫn Cài đặt nhanh
+## 🔧 Cài đặt & Triển khai (Sử dụng Docker & Laravel Sail)
 
-### 1. Cài đặt Dependencies
-```bash
-composer install
-npm install --legacy-peer-deps
+Dự án hiện tại được tối ưu hóa để khởi chạy trên môi trường ảo hóa Docker thông qua Laravel Sail, giúp đồng bộ môi trường hoạt động và tự động cài đặt tất cả dịch vụ chỉ với một lệnh duy nhất.
+
+### Yêu cầu hệ thống:
+- Máy tính đã cài đặt và khởi động **Docker Desktop**.
+- (Với Windows) Đã kích hoạt **WSL2** (Windows Subsystem for Linux).
+
+---
+
+### Các bước thiết lập & Khởi chạy:
+
+1. **Cài đặt thư viện**:
+   Chạy các lệnh sau tại thư mục gốc của dự án:
+   ```bash
+   composer install
+   npm install
+   ```
+
+2. **Cấu hình Environment (`.env`)**:
+   Sao chép file cấu hình `.env.example` thành `.env` và cập nhật thông số kết nối Database tương thích với Docker:
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=mysql
+   DB_PORT=3306
+   DB_DATABASE=flashtechdoan
+   DB_USERNAME=sail
+   DB_PASSWORD=password
+
+   # Cấu hình user/group chạy ngầm trên Windows
+   WWWGROUP=1000
+   WWWUSER=1000
+   ```
+
+3. **Khởi chạy Docker Containers**:
+   * **Cách 1 (Giao diện trực quan)**: Mở **Docker Desktop**, chọn dự án `flashtechdoan` và bấm nút **Play (Run)**.
+   * **Cách 2 (Sử dụng dòng lệnh)**:
+     * Trên Windows PowerShell:
+       ```powershell
+       docker compose up -d
+       ```
+     * Trên Linux / macOS hoặc Git Bash:
+       ```bash
+       bash vendor/laravel/sail/bin/sail up -d
+       ```
+
+4. **Khởi tạo dữ liệu & Storage Link**:
+   Chạy các lệnh khởi tạo hệ thống trực tiếp thông qua Docker:
+   ```powershell
+   # Tạo key ứng dụng
+   docker compose exec laravel.test php artisan key:generate
+
+   # Khởi chạy migration và nạp dữ liệu mẫu
+   docker compose exec laravel.test php artisan migrate --seed
+
+   # Liên kết thư mục lưu trữ ảnh sản phẩm
+   docker compose exec laravel.test php artisan storage:link
+   ```
+
+5. **Chạy Frontend (React/Vite)**:
+   Mở thêm một cửa sổ terminal mới trên máy Windows của bạn để chạy Hot-Reload giao diện React:
+   ```bash
+   npm run dev
+   ```
+
+---
+
+### 🌐 Địa chỉ truy cập cục bộ:
+* **Trang bán hàng (React)**: [http://localhost](http://localhost) (hoặc [http://127.0.0.1](http://127.0.0.1))
+* **Trang quản trị (Filament Admin)**: [http://localhost/admin](http://localhost/admin)
+* **Quản lý Database (phpMyAdmin)**: [http://localhost:8080](http://localhost:8080)
+  * **Tài khoản đăng nhập phpMyAdmin**: `sail` / `password`
+
+---
+
+## 📖 Hướng dẫn Sử dụng Chính
+
+### Compare Products
+1. Chọn sản phẩm bất kỳ → Click "So sánh" (BarChart icon)
+2. Chọn thêm đến 3 biến thể từ các sản phẩm khác
+3. Vào trang `/compare` hoặc click icon Compare trong navbar
+4. **Tính năng**:
+   - Xem thông số đầy đủ của từng biến thể
+   - Click "Chỉ hiển thị điểm khác biệt" để lọc thông số khác
+   - Xóa sản phẩm bằng nút "Xóa" (Trash icon)
+   - Mua ngay từ trang so sánh
+
+### Shopping Cart
+1. Click "Thêm vào giỏ" trên trang chi tiết sản phẩm
+2. Chọn số lượng & biến thể trước khi thêm
+3. Xem tóm tắt trong icon Shopping Cart (navbar)
+4. Checkout qua VNPay (Sandbox mode)
+
+### Reviews & Ratings
+1. Sau khi đơn hàng được giao → Viết đánh giá
+2. Đính kèm hình ảnh thực tế của sản phẩm
+3. Admin kiểm duyệt trước khi hiển thị
+
+---
+
+## 📁 Cấu trúc Project
+
+```
+FlashTech/
+├── app/
+│   ├── Http/Controllers/        # API Controllers
+│   ├── Models/                  # Eloquent Models
+│   └── Filament/               # Filament Resources
+├── resources/
+│   ├── js/
+│   │   ├── Pages/              # React Pages (Products, Compare, Checkout, etc)
+│   │   ├── Components/         # Reusable React Components
+│   │   ├── Context/            # React Context (Cart, Compare)
+│   │   ├── hooks/              # Custom React Hooks
+│   │   └── utils/              # Helper Functions
+│   └── views/                  # Blade Templates
+├── routes/
+│   ├── api.php                 # API Routes
+│   └── web.php                 # Web Routes (Inertia)
+├── database/
+│   ├── migrations/             # Schema Migrations
+│   └── seeders/                # Database Seeders
+└── storage/                    # User Uploads
 ```
 
-### 2. Thiết lập Môi trường
-Sao chép `.env.example` thành `.env` và cấu hình MySQL/MongoDB. Sau đó chạy:
-```bash
-php artisan key:generate
-php artisan migrate:fresh --seed
-```
+---
 
-### 3. Khởi chạy Hệ thống
-```bash
-# Terminal 1
-php artisan serve
+## 🔌 API Endpoints (Compare Feature)
 
-# Terminal 2
-npm run dev
+### POST `/api/products/compare`
+So sánh nhiều biến thể sản phẩm
+```javascript
+Request:
+{
+  "variant_ids": [1, 2, 3]  // Max 3 variants
+}
+
+Response:
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 1,                    // Variant ID
+      "name": "Product Name",
+      "variants": [{
+        "id": 1,
+        "variant_name": "i7 RTX3060",
+        "price": 36990000,
+        "stock": 10,
+        "details": {
+          "cpu": "Intel i7-11800H",
+          "ram": "16GB DDR4",
+          "gpu": "RTX 3060"
+        }
+      }]
+    }
+  ]
+}
 ```
 
 ---
 
-## 📅 Nhật ký phát triển (Roadmap)
+## 📅 Roadmap Phát triển
 
-- [x] **Phase 1**: Khởi tạo Core & Dual Database System.
-- [x] **Phase 2**: Xây dựng Admin Panel & Quản lý Coupon.
-- [x] **Phase 3**: Triển khai Storefront UI, Live Search & Dark Mode.
-- [x] **Phase 4**: Chuẩn hóa Database 3NF & Hệ thống Duyệt đơn Doanh nghiệp.
-- [ ] **Phase 5**: Hoàn thiện Giỏ hàng & Tích hợp Thanh toán Online thực tế.
-- [ ] **Phase 6**: Tối ưu SEO & Đóng gói sản phẩm.
+- [x] **Giai đoạn 1:** Khởi tạo Core, Hybrid Database & Filament Dashboard.
+- [x] **Giai đoạn 2:** Triển khai Storefront cơ bản & Tích hợp User.
+- [x] **Giai đoạn 3:** Hoàn thiện Giỏ hàng, Lịch sử đơn hàng & User Profile.
+- [x] **Giai đoạn 4:** Hệ thống Đánh giá (Review) & Mã giảm giá (Coupon).
+- [x] **Giai đoạn 5:** Hoàn thiện tích hợp cổng thanh toán VNPay.
+- [x] **Giai đoạn 6:** Phát triển module So sánh sản phẩm (Compare Products).
+- [x] **Giai đoạn 7:** Hệ thống Báo cáo doanh thu & Phân tích dữ liệu khách hàng.
+- [x] **Giai đoạn 8:** **Nâng cấp Toàn diện UX/UI (Premium Redesign)** - Hoàn thiện các hiệu ứng Micro-animations & Glassmorphism.
+- [x] **Giai đoạn 9:** Tối ưu hóa hiệu năng hệ thống & Triển khai thực tế.
 
 ---
+
+## 🤝 Đóng góp & Hỗ trợ
+
+### Yêu cầu PR
+1. Fork project → Tạo branch feature (`git checkout -b feature/amazing-feature`)
+2. Commit changes (`git commit -m 'Add amazing feature'`)
+3. Push to branch (`git push origin feature/amazing-feature`)
+4. Mở Pull Request
+
+### Báo cáo Bug
+- Dùng [GitHub Issues](../../issues/new) để báo cáo bugs
+- Cung cấp chi tiết: mô tả, screenshot, steps to reproduce
+
+### Hỗ trợ
+📧 **Email**: support@flashtech.dev  
+📞 **Discord**: [Tham gia server](https://discord.gg/flashtech)
+
+---
+
+## 📄 License
+
+Dự án này được cấp phép dưới MIT License - xem file [LICENSE](LICENSE) để biết chi tiết.
+
+---
+
 <div align="center">
-  <i>Đồ Án Tốt Nghiệp - Phát triển bởi ❤️ FlashTech Team</i>
+  <p><i>🎓 Dự án Đồ Án Tốt Nghiệp</i></p>
+  <p><b>FlashTech E-Commerce Platform</b></p>
+  <p>Xây dựng bởi ❤️ với <b>Laravel + React</b></p>
+  <p>Developed with passion for modern web standards</p>
+  <p>© 2026 FlashTech. All rights reserved.</p>
 </div>
+

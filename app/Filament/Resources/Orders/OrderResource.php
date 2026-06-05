@@ -93,7 +93,7 @@ class OrderResource extends Resource
                                     Forms\Components\Placeholder::make('processor_status')
                                         ->label('')
                                         ->content(fn ($record) => new \Illuminate\Support\HtmlString(
-                                            $record->processor 
+                                            $record->processor
                                             ? "<div class='flex flex-col gap-1'>
                                                 <span class='font-bold text-gray-900'>{$record->processor->name}</span>
                                                 <span class='text-[10px] px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full w-fit uppercase font-black'>{$record->processor->role}</span>
@@ -105,13 +105,13 @@ class OrderResource extends Resource
 
                             Section::make('Khách hàng')
                                 ->schema([
-                                    Forms\Components\Placeholder::make('customer_info')
+                                    Forms\Components\Placeholder::make('user_info')
                                         ->label('')
                                         ->content(fn ($record) => new \Illuminate\Support\HtmlString("
                                             <div class='text-sm'>
-                                                <p className='font-bold'>{$record->customer?->name}</p>
-                                                <p className='text-gray-500'>{$record->customer?->email}</p>
-                                                <p className='mt-2 pt-2 border-t text-gray-700'>{$record->shipping_address}</p>
+                                                <p class='font-bold'>{$record->user?->name}</p>
+                                                <p class='text-gray-500'>{$record->user?->email}</p>
+                                                <p class='mt-2 pt-2 border-t text-gray-700'>{$record->shipping_address}</p>
                                             </div>
                                         ")),
                                 ]),
@@ -201,9 +201,9 @@ class OrderResource extends Resource
                         Section::make('Khách hàng')
                             ->icon('heroicon-o-user')
                             ->schema([
-                                Text::make(fn ($record) => $record->customer?->name ?? 'Khách vãng lai')
+                                Text::make(fn ($record) => $record->user?->name ?? 'Khách vãng lai')
                                     ->weight('semibold'),
-                                Text::make(fn ($record) => $record->customer?->email ?? '—')
+                                Text::make(fn ($record) => $record->user?->email ?? '—')
                                     ->color('gray')
                                     ->size('sm'),
                             ]),
@@ -237,8 +237,8 @@ class OrderResource extends Resource
                     ->sortable()
                     ->weight('bold'),
 
-                // Nếu bạn nối với User thì dùng user.name, nếu nối Customer thì dùng customer.name
-                Tables\Columns\TextColumn::make('customer.name')
+                // Nếu bạn nối với User thì dùng user.name
+                Tables\Columns\TextColumn::make('user.name')
                     ->label('Khách hàng')
                     ->searchable(),
 
@@ -256,6 +256,7 @@ class OrderResource extends Resource
                         'delivered' => 'Đã giao hàng',
                         'cancelled' => 'Đã hủy',
                     ])
+                    ->disabled(fn ($record) => in_array($record->order_status, ['cancelled', 'delivered']))
                     ->afterStateUpdated(function ($state, $old, $record) {
                         // TỰ ĐỘNG GÁN NGƯỜI DUYỆT khi trạng thái thay đổi sang processing/shipped/delivered
                         if (in_array($state, ['processing', 'shipped', 'delivered']) && !$record->processed_by_id) {
@@ -266,6 +267,9 @@ class OrderResource extends Resource
                         if ($state === 'cancelled' && $old !== 'cancelled') {
                             self::restoreStock($record);
                         }
+
+                        // PHÁT SỰ KIỆN: Thông báo cho khách hàng khi Admin đổi trạng thái
+                        event(new \App\Events\OrderStatusUpdated($record));
                     }),
 
                 Tables\Columns\TextColumn::make('created_at')
@@ -274,7 +278,25 @@ class OrderResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                // Thêm bộ lọc nếu muốn
+                // UI 5: Filter theo trạng thái đơn hàng
+                Tables\Filters\SelectFilter::make('order_status')
+                    ->label('Trạng thái')
+                    ->options([
+                        'pending'    => '🟡 Chờ xử lý',
+                        'processing' => '🔵 Đang đóng gói',
+                        'shipped'    => '🟣 Đang vận chuyển',
+                        'delivered'  => '🟢 Đã giao hàng',
+                        'cancelled'  => '🔴 Đã hủy',
+                    ])
+                    ->placeholder('Tất cả trạng thái'),
+
+                Tables\Filters\Filter::make('today')
+                    ->label('Đặt hôm nay')
+                    ->query(fn ($query) => $query->whereDate('created_at', today())),
+
+                Tables\Filters\Filter::make('pending_only')
+                    ->label('Cần xử lý ngay')
+                    ->query(fn ($query) => $query->where('order_status', 'pending')),
             ])
             ->actions([
                 \Filament\Actions\ViewAction::make()
@@ -301,12 +323,14 @@ class OrderResource extends Resource
      */
     protected static function restoreStock(Order $order)
     {
+        // ĐẢM BẢO LOAD LẠI ITEMS
+        $order->load('items');
+
         // Duyệt qua từng món trong đơn hàng
         foreach ($order->items as $item) {
-            if ($item->product_variant_id) {
-                $variant = ProductVariant::find($item->product_variant_id);
+            if ($item->product_variants_id) {
+                $variant = \App\Models\ProductVariant::find($item->product_variants_id);
                 if ($variant) {
-                    // Cột lưu số lượng trong bảng product_variants của bạn (ví dụ: stock hoặc quantity)
                     $variant->increment('stock', $item->quantity);
                 }
             }

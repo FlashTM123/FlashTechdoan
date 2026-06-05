@@ -4,24 +4,49 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Review extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'customer_id',
+        'user_id',
         'product_id',
         'rating',
         'content',
-        'is_visible'
+        'images',
+        'is_visible',
+        'status',
     ];
 
-    public function customer()
+    protected $casts = [
+        'images' => 'array',
+        'is_visible' => 'boolean',
+        'rating' => 'integer',
+    ];
+
+    /**
+     * Get the user that owns the review.
+     */
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(User::class);
     }
-    public function product()
+
+    /**
+     * Get the product that the review belongs to.
+     */
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Scope a query to only include approved reviews.
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'approved');
     }
 }

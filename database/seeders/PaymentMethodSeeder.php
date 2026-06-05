@@ -26,5 +26,10 @@ class PaymentMethodSeeder extends Seeder
             ['code' => 'momo'],
             ['name' => 'Ví điện tử MoMo', 'status' => true]
         );
+
+        \App\Models\PaymentMethod::updateOrCreate(
+            ['code' => 'vnpay'],
+            ['name' => 'Thanh toán qua VNPAY', 'status' => true]
+        );
     }
 }

@@ -15,10 +15,12 @@ class BrandResource extends Resource
 {
     protected static ?string $model = Brand::class;
     protected static \UnitEnum|string|null $navigationGroup = 'Quản lý sản phẩm';
+    protected static ?string $modelLabel = 'Thương hiệu';
+    protected static ?string $pluralModelLabel = 'Danh sách thương hiệu';
     protected static ?int $navigationSort = 2;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-bookmark-square';
     protected static ?string $navigationLabel = 'Thương hiệu';
-    
+
 
     public static function form(Schema $schema): Schema
     {
@@ -36,10 +38,11 @@ class BrandResource extends Resource
                 ->unique(table: 'brands', column: 'slug', ignoreRecord: true)
                 ->maxLength(255),
 
-            Forms\Components\TextInput::make('logo_url')
-                ->label('Link ảnh Logo (URL)')
-                ->url()
-                ->placeholder('https://example.com/logo.png'),
+            Forms\Components\FileUpload::make('image_path')
+                ->label('Ảnh thương hiệu')
+                ->image()
+                ->directory('brands')
+                ->preserveFilenames(),
 
             Forms\Components\Toggle::make('is_active')
                 ->label('Kích hoạt')
@@ -59,16 +62,16 @@ class BrandResource extends Resource
                 Tables\Columns\TextColumn::make('slug')
                     ->label('Slug'),
 
-                Tables\Columns\ImageColumn::make('logo_url')
-                    ->label('Logo'),
+                Tables\Columns\ImageColumn::make('image_path')
+                    ->label('Ảnh'),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Trạng thái')
                     ->boolean(),
             ])
             ->recordActions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\EditAction::make()->label('Sửa'),
+                 \Filament\Actions\DeleteAction::make()->label('Xóa'),
             ])
             ->toolbarActions([
                 \Filament\Actions\BulkActionGroup::make([

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     protected $fillable = [
-        'customer_id',
+        'user_id',
         'order_code',
         'total_amount',
         'shipping_address',
@@ -29,9 +29,14 @@ class Order extends Model
 
     // ─── Relationships ───────────────────────────────────────────────
 
-    public function customer(): BelongsTo
+    /**
+     * Mối quan hệ đến User (Khách hàng đặt mua đơn hàng).
+     * Thông qua: user_id → users.id
+     * Ý nghĩa: Lấy thông tin người mua của đơn hàng này.
+     */
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function paymentMethod(): BelongsTo
@@ -39,6 +44,16 @@ class Order extends Model
         return $this->belongsTo(PaymentMethod::class);
     }
 
+    /**
+     * Mối quan hệ đến User (Nhân viên/Admin xử lý đơn hàng).
+     * Thông qua: processed_by_id → users.id (có thể NULL nếu chưa ai duyệt)
+     * Ý nghĩa: Lấy thông tin nhân viên/admin đã duyệt và xử lý đơn hàng.
+     *
+     * Cách sử dụng:
+     *   $order = Order::with('processor')->find($id);
+     *   $processor = $order->processor; // Có thể là null
+     *   $processorName = $order->processor?->name; // Nullable chaining
+     */
     public function processor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'processed_by_id');
@@ -49,6 +64,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    /**
+     * Mối quan hệ đến Coupon (Mã giảm giá).
+     * Thông qua: coupon_id → coupons.id
+     * Ý nghĩa: Lấy thông tin mã giảm giá được áp dụng cho đơn hàng.
+     */
     public function coupon(): BelongsTo
     {
         return $this->belongsTo(Coupon::class);

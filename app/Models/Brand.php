@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class Brand extends Model
 {
     protected $fillable = [
         'name',
         'slug',
-        'logo_url',
+        'image_path',
         'is_active',
     ];
 
@@ -21,6 +22,12 @@ class Brand extends Model
         static::creating(function ($brand) {
             if (empty($brand->slug)) {
                 $brand->slug = Str::slug($brand->name);
+            }
+        });
+
+        static::updating(function ($brand) {
+            if ($brand->isDirty('image_path') && $brand->getOriginal('image_path')) {
+                Storage::disk('public')->delete($brand->getOriginal('image_path'));
             }
         });
     }

@@ -12,14 +12,29 @@ class Login extends BaseLogin
         $data = $this->form->getState();
         $user = \App\Models\User::where('email', $data['email'])->first();
 
-        // Kiểm tra xem user có tồn tại và đang bị khóa hay không
+        // 1. Kiểm tra tài khoản bị khóa
         if ($user && ! $user->is_active) {
             throw ValidationException::withMessages([
-                'data.email' => 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.',
+                'data.email' => 'Tài khoản của bạn đã bị vô hiệu hóa.',
             ]);
         }
 
-        // Nếu qua được bước trên thì chạy logic login bình thường của Filament
+        // 2. Chặn khách hàng vào trang quản trị
+        if ($user && $user->role === 'customer') {
+            throw ValidationException::withMessages([
+                'data.email' => 'Tài khoản khách hàng không thể đăng nhập tại đây.',
+            ]);
+        }
+
         return parent::authenticate();
+    }
+
+    protected function getCredentialsFromFormData(array $data): array
+    {
+        return [
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'is_active' => true,
+        ];
     }
 }

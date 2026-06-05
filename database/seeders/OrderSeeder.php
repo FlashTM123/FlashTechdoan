@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Customer;
+use App\Models\User;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -14,10 +14,12 @@ class OrderSeeder extends Seeder
 {
     public function run(): void
     {
-        $customers = Customer::all();
+        // Chỉ lấy những User có role là customer để đặt hàng
+        $customers = User::where('role', 'customer')->get();
         $products = Product::all();
+        $paymentMethods = \App\Models\PaymentMethod::all();
 
-        if ($customers->isEmpty() || $products->isEmpty()) {
+        if ($customers->isEmpty() || $products->isEmpty() || $paymentMethods->isEmpty()) {
             return;
         }
 
@@ -26,22 +28,25 @@ class OrderSeeder extends Seeder
 
             // Tạo một đơn hàng mẫu
             $order = Order::create([
-                'customer_id' => $customer->id,
+                'user_id' => $customer->id,
                 'order_code' => 'FT-' . strtoupper(Str::random(8)),
                 'total_amount' => 0, // Sẽ tính toán lại sau khi tạo items
                 'shipping_address' => 'Số ' . rand(1, 100) . ' Đường ' . Str::random(5) . ', Quận ' . rand(1, 10) . ', TP. Hồ Chí Minh',
-                'payment_method' => collect(['cod', 'vnpay', 'momo'])->random(),
-                'payment_status' => collect(['pending', 'paid'])->random(),
-                'order_status' => collect(['pending', 'processing', 'shipped', 'delivered'])->random(),
+                'payment_method_id' => $paymentMethods->random()->id,
+                'payment_status' => 'pending',
+                'order_status' => 'pending', // Mặc định là chờ duyệt
+                'processed_by_id' => null,  // Chưa có người duyệt
                 'notes' => 'Ghi chú cho đơn hàng thứ ' . $index,
             ]);
 
             $totalAmount = 0;
-            // Mỗi đơn hàng có từ 1-3 sản phẩm
-            $orderProducts = $products->random(rand(1, 3));
+            // Mỗi đơn hàng có từ 1 đến tối đa 3 sản phẩm (hoặc số sản phẩm hiện có)
+            $count = min(rand(1, 3), $products->count());
+            $orderProducts = $products->random($count);
 
             foreach ($orderProducts as $product) {
-                $variant = $product->variants->random();
+                // Đảm bảo variant tồn tại
+                $variant = $product->variants->isNotEmpty() ? $product->variants->random() : null;
                 if (!$variant) continue;
 
                 $quantity = rand(1, 2);

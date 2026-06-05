@@ -6,8 +6,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use App\Models\Department;
+
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -15,7 +18,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->is_active === true;
+        return in_array($this->role, ['admin', 'moderator', 'employee']) && $this->is_active;
     }
 
     /**
@@ -28,7 +31,7 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'password',
         'employee_code',
-        'department',
+        'department_id',
         'role',
         'is_active',
     ];
@@ -42,6 +45,10 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'remember_token',
     ];
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -107,5 +114,32 @@ class User extends Authenticatable implements FilamentUser
         }
 
         return true;
+    }
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    // 2. Với tư cách là Khách hàng (Người đặt hàng)
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'user_id');
+    }
+
+    // 3. Với tư cách là Nhân viên (Người duyệt đơn - từ cột processed_by_id trong orders)
+    public function processedOrders()
+    {
+        return $this->hasMany(Order::class, 'processed_by_id');
+    }
+
+    // Helper để check quyền nhanh
+    public function isCustomer()
+    {
+        return $this->role === 'customer';
+    }
+
+    public function resetPassword()
+    {
+        $this->update(['password' => Hash::make('123456')]);
     }
 }

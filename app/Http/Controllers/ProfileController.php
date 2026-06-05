@@ -8,40 +8,91 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Hiển thị thông tin hồ sơ (chỉ xem).
+     */
+    public function show(Request $request): Response
+    {
+        $user = $request->user()->load('profile');
+        $ordersCount = $user->orders()->count();
+
+        return Inertia::render('Profile/Show', [
+            'user'         => $user,
+            'ordersCount'  => $ordersCount,
+        ]);
+    }
+
+    /**
+     * Hiển thị trang chỉnh sửa hồ sơ.
      */
     public function edit(Request $request): Response
     {
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            'user' => $request->user()->load('profile'), // Load quan hệ 1-1
         ]);
     }
 
     /**
-     * Update the user's profile information.
+     * Cập nhật thông tin hồ sơ.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        
+        // 1. Validate dữ liệu
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
+        ]);
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // 2. Cập nhật bảng users
+        $user->fill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
-        return Redirect::route('profile.edit');
+        // 3. Cập nhật bảng user_profiles
+        $profileData = [
+            'phone' => $validated['phone'],
+            'address' => $validated['address'],
+        ];
+
+        // Xử lý Upload Avatar
+        if ($request->hasFile('avatar')) {
+            // Xóa ảnh cũ nếu có
+            if ($user->profile->avatar) {
+                Storage::disk('public')->delete($user->profile->avatar);
+            }
+
+            // Lưu ảnh mới vào thư mục avatars trong disk public
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $profileData['avatar'] = $path;
+        }
+
+        $user->profile()->update($profileData);
+
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
-     * Delete the user's account.
+     * Xóa tài khoản (giữ nguyên mặc định của Breeze hoặc tùy biến sau).
      */
     public function destroy(Request $request): RedirectResponse
     {

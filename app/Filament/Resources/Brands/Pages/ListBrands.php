@@ -13,7 +13,10 @@ class ListBrands extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+            ->label('Thêm thương hiệu')
+            ->icon('heroicon-o-plus')
+            ->color('primary'),
         ];
     }
 }

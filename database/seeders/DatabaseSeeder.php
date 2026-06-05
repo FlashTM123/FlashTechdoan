@@ -14,15 +14,14 @@ class DatabaseSeeder extends Seeder
         // Tạo Brand mẫu để không bị lỗi khóa ngoại
 
 
-        // Gọi các Seeder còn lại
+        // Gọi các Seeder theo thứ tự để không lỗi khóa ngoại
         $this->call([
-            UserSeeder::class,
-            CustomerSeeder::class,
-            CategorySeeder::class,
-            BrandSeeder::class,
-            ProductSeeder::class,
+            // UserSeeder::class,
+            // CategorySeeder::class,
+            // BrandSeeder::class,
+            // ProductSeeder::class,
             ReviewSeeder::class,
-            OrderSeeder::class,
+            // OrderSeeder::class,
         ]);
     }
 }

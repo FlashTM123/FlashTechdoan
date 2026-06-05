@@ -4,10 +4,12 @@ namespace App\Filament\Resources\Users;
 
 use App\Models\User;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Form\Get;
 
 class UserResource extends Resource
 {
@@ -19,6 +21,14 @@ class UserResource extends Resource
     protected static ?string $pluralModelLabel = 'Danh sách nhân viên';
     protected static \UnitEnum|string|null $navigationGroup = 'Hệ thống';
     protected static ?int $navigationSort = 1;
+
+    /**
+     * Chỉ lấy những User KHÔNG PHẢI là customer (Admin, Moderator, Employee)
+     */
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->where('role', '!=', 'customer');
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -33,12 +43,12 @@ class UserResource extends Resource
                 ->required()
                 ->unique(ignoreRecord: true),
 
-            Forms\Components\TextInput::make('password')
-                ->label('Mật khẩu')
-                ->password()
-                ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
-                ->dehydrated(fn ($state) => filled($state))
-                ->required(fn (string $operation) => $operation === 'create'),
+            Forms\Components\Select::make('department_id')
+                ->label('Phòng ban')
+                ->relationship('department', 'name')
+                ->searchable()
+                ->preload()
+                ->required(fn ($get): bool => $get('role') === 'employee'),
 
             Forms\Components\TextInput::make('employee_code')
                 ->label('Mã nhân viên')
@@ -47,8 +57,7 @@ class UserResource extends Resource
                 ->dehydrated()
                 ->unique(ignoreRecord: true),
 
-            Forms\Components\TextInput::make('department')
-                ->label('Phòng ban'),
+
 
             Forms\Components\Select::make('role')
                 ->label('Vai trò')
@@ -58,7 +67,16 @@ class UserResource extends Resource
                     'employee' => 'Nhân viên',
                 ])
                 ->default('employee')
-                ->required(),
+                ->required()
+                ->live()
+                ->afterStateUpdated(function (string $state, $set){
+                    $prefix = match ($state) {
+                        'admin' => 'AD',
+                        'moderator' => 'MD',
+                        default => 'NV',
+                    };
+                    $set('employee_code', $prefix . '-' . strtoupper(\Illuminate\Support\Str::random(5)));
+                }),
 
             Forms\Components\Toggle::make('is_active')
                 ->label('Kích hoạt')
@@ -83,8 +101,9 @@ class UserResource extends Resource
                     ->label('Mã nhân viên')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('department')
-                    ->label('Phòng ban'),
+                Tables\Columns\TextColumn::make('department.name')
+                    ->label('Phòng ban')
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('role')
                     ->label('Vai trò')
@@ -102,14 +121,20 @@ class UserResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
                     ->options([
-                        'admin' => 'Admin',
-                        'moderator' => 'Moderator',
+                        'admin' => 'Quản trị viên',
+                        'moderator' => 'Kiểm duyệt viên',
                         'employee' => 'Nhân viên',
                     ]),
             ])
             ->recordActions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\EditAction::make()->label('Sửa'),
+                \Filament\Actions\DeleteAction::make()->label('Xóa'),
+                \Filament\Actions\Action::make('resetPassword')
+                    ->label('Reset MK')
+                    ->icon('heroicon-m-arrow-path')
+                    ->action(fn(User $record) => $record->resetPassword())
+                    ->requiresConfirmation()
+                    ->successNotificationTitle('Mật khẩu đã được đặt lại'),
             ])
             ->toolbarActions([
                 \Filament\Actions\BulkActionGroup::make([

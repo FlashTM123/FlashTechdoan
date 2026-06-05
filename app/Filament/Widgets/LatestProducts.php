@@ -9,15 +9,20 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class LatestProducts extends BaseWidget
 {
-    protected static ?string $heading = '5 Sản phẩm mới đăng gần đây';
+    protected static ?string $heading = '5 sản phẩm mới';
+    protected static ?int $sort = 50;
+
+    protected int|string|array $columnSpan = 1;
     protected ?string $pollingInterval = '30s';
 
     public function table(Table $table): Table
     {
         return $table
             ->query(
-                Product::query()->latest()->limit(5)
+                Product::query()->latest()
             )
+            ->defaultPaginationPageOption(5)
+            ->paginated([5, 10])
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên Laptop')

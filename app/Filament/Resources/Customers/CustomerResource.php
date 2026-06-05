@@ -3,23 +3,23 @@
 namespace App\Filament\Resources\Customers;
 
 use App\Filament\Resources\Customers\Pages\ListCustomers;
-use App\Models\Customer;
+use App\Models\User;
 use Filament\Forms;
-use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class CustomerResource extends Resource
 {
-    protected static ?string $model = Customer::class;
+    protected static ?string $model = User::class;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Kinh doanh';
-    protected static ?int $navigationSort = 1;
     
-
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $navigationLabel = 'Khách hàng';
 
@@ -28,8 +28,13 @@ class CustomerResource extends Resource
     protected static ?string $pluralModelLabel = 'Khách hàng';
 
     /**
-     * Không cho phép Admin tạo mới Khách hàng từ trang Admin
+     * Chỉ lấy những User có role là customer
      */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('role', 'customer');
+    }
+
     public static function canCreate(): bool
     {
         return false;
@@ -38,36 +43,39 @@ class CustomerResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Forms\Components\TextInput::make('name')
-                ->label('Tên khách hàng')
-                ->disabled() // Admin không được sửa
-                ->maxLength(255),
+            Forms\Components\Section::make('Thông tin tài khoản')
+                ->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->label('Tên khách hàng')
+                        ->disabled()
+                        ->maxLength(255),
 
-            Forms\Components\TextInput::make('email')
-                ->label('Email')
-                ->email()
-                ->disabled() // Admin không được sửa
-                ->maxLength(255),
+                    Forms\Components\TextInput::make('email')
+                        ->label('Email')
+                        ->email()
+                        ->disabled()
+                        ->maxLength(255),
+                    
+                    Forms\Components\Toggle::make('is_active')
+                        ->label('Trạng thái kích hoạt')
+                        ->default(true),
+                ])->columns(2),
 
-            Forms\Components\TextInput::make('phone')
-                ->label('Số điện thoại')
-                ->disabled() // Admin không được sửa
-                ->maxLength(20),
+            Forms\Components\Section::make('Thông tin bổ sung')
+                ->schema([
+                    Forms\Components\TextInput::make('profile.phone')
+                        ->label('Số điện thoại')
+                        ->maxLength(20),
 
-            Forms\Components\TextInput::make('address')
-                ->label('Địa chỉ')
-                ->disabled() // Admin không được sửa
-                ->maxLength(255),
+                    Forms\Components\TextInput::make('profile.address')
+                        ->label('Địa chỉ')
+                        ->maxLength(255),
 
-            Forms\Components\TextInput::make('points')
-                ->label('Điểm tích lũy')
-                ->numeric()
-                ->disabled() // Admin không được sửa
-                ->default(0),
-
-            Forms\Components\Toggle::make('is_active')
-                ->label('Trạng thái tài khoản (Kích hoạt)')
-                ->default(true), // Admin được phép sửa trạng thái
+                    Forms\Components\TextInput::make('profile.points')
+                        ->label('Điểm tích lũy')
+                        ->numeric()
+                        ->default(0),
+                ])->columns(3),
         ]);
     }
 
@@ -85,12 +93,12 @@ class CustomerResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('phone')
+                Tables\Columns\TextColumn::make('profile.phone')
                     ->label('Số điện thoại')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('points')
-                    ->label('Điểm tích lũy')
+                Tables\Columns\TextColumn::make('profile.points')
+                    ->label('Điểm')
                     ->badge()
                     ->color('success')
                     ->sortable(),
@@ -99,19 +107,22 @@ class CustomerResource extends Resource
                     ->label('Trạng thái')
                     ->boolean()
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Ngày tham gia')
+                    ->dateTime('d/m/Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Trạng thái'),
             ])
-            ->recordActions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+            ->actions([
+                // Để trống hoặc dùng ViewAction nếu cần
             ])
-            ->toolbarActions([
-                \Filament\Actions\BulkActionGroup::make([
-                    \Filament\Actions\DeleteBulkAction::make(),
-                ]),
+            ->bulkActions([
+                // Để trống
             ]);
     }
 
