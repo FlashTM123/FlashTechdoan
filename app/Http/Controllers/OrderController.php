@@ -94,7 +94,7 @@ class OrderController extends Controller
         }
 
         // 2. Load đầy đủ thông tin kèm quan hệ
-        $order->load(['items.product', 'items.variant', 'paymentMethod', 'coupon']);
+        $order->load(['items.product', 'items.variant', 'paymentMethod', 'coupon', 'user']);
 
         // 3. Trả về view chi tiết
         return Inertia::render('Orders/Show', [

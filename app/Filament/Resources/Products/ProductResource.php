@@ -70,7 +70,8 @@ class ProductResource extends Resource
                                 ->disk('public')
                                 ->directory('products')
                                 ->preserveFilenames()
-                                ->required(),
+                                ->required(fn (string $operation): bool => $operation === 'create')
+                                ->deletable(true),
                             RichEditor::make('description')
                                 ->label('Mô tả')
                                 ->rules([
@@ -93,31 +94,20 @@ class ProductResource extends Resource
                             Toggle::make('is_active')->label('Kích hoạt')->default(true),
 
                             FileUpload::make('bulk_images')
-                                ->label('Tải lên hàng loạt ảnh (Ảnh sẽ tự động được lưu và hiển thị ở danh sách dưới sau khi bấm Lưu)')
+                                ->label('Tải lên hàng loạt ảnh')
                                 ->image()
                                 ->multiple()
                                 ->disk('public')
                                 ->directory('products')
                                 ->preserveFilenames()
                                 ->dehydrated(false)
-                                ->columnSpanFull(),
-
-                            Repeater::make('images')
-                                ->relationship('images', modifyQueryUsing: fn($query) => $query->whereNull('product_variant_id'))
-                                ->label('Bộ sưu tập ảnh chung')
-                                ->schema([
-                                    FileUpload::make('image_url')
-                                        ->label('Hình ảnh')
-                                        ->image()
-                                        ->disk('public')
-                                        ->directory('products')
-                                        ->preserveFilenames()
-                                        ->required(),
-                                    Toggle::make('is_primary')
-                                        ->label('Ảnh chính')
-                                        ->default(false),
-                                ])
-                                ->columns(2)
+                                ->formatStateUsing(function ($record) {
+                                    if (!$record) return [];
+                                    return $record->images()
+                                        ->whereNull('product_variant_id')
+                                        ->pluck('image_url')
+                                        ->toArray();
+                                })
                                 ->columnSpanFull(),
 
 
@@ -128,6 +118,7 @@ class ProductResource extends Resource
                         ->schema([
                             Repeater::make('variants')
                                 ->relationship('variants')
+                                ->live()
                                 ->schema([
                                     Grid::make(2)->schema([
                                         TextInput::make('variant_name')->label('Cấu hình (VD: Core i5/8GB)')->required(),

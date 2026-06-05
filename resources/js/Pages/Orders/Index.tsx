@@ -68,8 +68,8 @@ const statusConfig: Record<string, { label: string; icon: any; color: string; bg
         color: 'text-blue-500',
         bgColor: 'bg-blue-500/10'
     },
-    shipping: {
-        label: 'Đang giao',
+    shipped: {
+        label: 'Đang vận chuyển',
         icon: Truck,
         color: 'text-indigo-500',
         bgColor: 'bg-indigo-500/10'
@@ -139,7 +139,7 @@ export default function OrderIndex({ orders, status }: Props) {
         { label: 'Tất cả', value: null },
         { label: 'Chờ xử lý', value: 'pending' },
         { label: 'Đang xử lý', value: 'processing' },
-        { label: 'Đang giao', value: 'shipping' },
+        { label: 'Đang vận chuyển', value: 'shipped' },
         { label: 'Đã giao/Hoàn thành', value: 'delivered' },
         { label: 'Đã hủy', value: 'cancelled' },
     ];
