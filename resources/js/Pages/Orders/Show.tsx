@@ -57,6 +57,10 @@ interface Order {
         discount_value: string;
         type: string;
     };
+    user?: {
+        name: string;
+        email: string;
+    };
 }
 
 interface Props {
@@ -78,26 +82,19 @@ const statusConfig: Record<string, { label: string; icon: any; color: string; bg
         bgColor: 'bg-blue-500/10',
         desc: 'Chúng tôi đang đóng gói sản phẩm của bạn để sẵn sàng giao.'
     },
-    shipping: {
+    shipped: {
         label: 'Đang giao hàng',
         icon: Truck,
         color: 'text-indigo-500',
         bgColor: 'bg-indigo-500/10',
         desc: 'Đơn hàng đang trên đường giao tới địa chỉ của bạn.'
     },
-    completed: {
+    delivered: {
         label: 'Đã hoàn thành',
         icon: CheckCircle2,
         color: 'text-emerald-500',
         bgColor: 'bg-emerald-500/10',
         desc: 'Đơn hàng đã được giao thành công và hoàn tất giao dịch.'
-    },
-    delivered: {
-        label: 'Đã giao hàng',
-        icon: CheckCircle2,
-        color: 'text-emerald-500',
-        bgColor: 'bg-emerald-500/10',
-        desc: 'Đơn hàng đã giao tới bạn.'
     },
     cancelled: {
         label: 'Đã hủy',
@@ -150,15 +147,24 @@ export default function OrderShow({ order }: Props) {
     const config = statusConfig[order.order_status] || statusConfig.pending;
     const StatusIcon = config.icon;
 
-    // Parse shipping address (assuming format matches name|phone|address)
-    const addressParts = order.shipping_address ? order.shipping_address.split('|') : [];
-    const customerName = addressParts[0] || 'Chưa cập nhật';
-    const customerPhone = addressParts[1] || 'Chưa cập nhật';
-    const customerAddress = addressParts[2] || order.shipping_address || 'Chưa cập nhật';
+    // Parse shipping address and phone number
+    const rawAddress = order.shipping_address || 'Địa chỉ chưa cập nhật';
+    let displayAddress = rawAddress;
+    let displayPhone = 'Chưa cung cấp';
+
+    const phoneMatch = rawAddress.match(/\(SĐT:\s*([^\)]+)\)/);
+    if (phoneMatch) {
+        displayPhone = phoneMatch[1].trim();
+        displayAddress = rawAddress.replace(/\(SĐT:\s*[^\)]+\)/, '').trim();
+    }
+
+    const customerName = order.user?.name || 'Khách hàng';
+    const customerPhone = displayPhone;
+    const customerAddress = displayAddress;
 
     // Steps timeline calculation
-    const steps = ['pending', 'processing', 'shipping', 'completed'];
-    const currentStepIndex = steps.indexOf(order.order_status === 'delivered' ? 'completed' : order.order_status);
+    const steps = ['pending', 'processing', 'shipped', 'delivered'];
+    const currentStepIndex = steps.indexOf(order.order_status);
     const isCancelled = order.order_status === 'cancelled';
 
     return (

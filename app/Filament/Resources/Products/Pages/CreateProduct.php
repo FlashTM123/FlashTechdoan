@@ -16,6 +16,18 @@ class CreateProduct extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 
+    protected function getCreateFormAction(): \Filament\Actions\Action
+    {
+        return parent::getCreateFormAction()
+            ->disabled(fn () => empty($this->data['variants']));
+    }
+
+    protected function getCreateAndCreateAnotherFormAction(): \Filament\Actions\Action
+    {
+        return parent::getCreateAndCreateAnotherFormAction()
+            ->disabled(fn () => empty($this->data['variants']));
+    }
+
     protected function afterCreate(): void
     {
         $record = $this->record;

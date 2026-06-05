@@ -10,6 +10,8 @@ use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -21,6 +23,8 @@ use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Image;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 
 class OrderResource extends Resource
 {
@@ -33,9 +37,256 @@ class OrderResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
+            // ------------------------------------------------------------------
+            // KHỐI 1: Giao diện tạo đơn hàng Offline (Chỉ hiển thị khi bấm Tạo mới)
+            // ------------------------------------------------------------------
+            Tabs::make('Create Order')
+                ->visible(fn (string $operation) => $operation === 'create')
+                ->tabs([
+                    Tab::make('Tạo đơn hàng bán tại quầy')
+                        ->icon('heroicon-o-shopping-bag')
+                        ->schema([
+                            Grid::make(3)->schema([
+                                Select::make('user_id')
+                                    ->relationship(
+                                        name: 'user',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn (\Illuminate\Database\Eloquent\Builder $query) => $query->where('role', 'customer'),
+                                    )
+                                    ->label('Khách hàng')
+                                    ->required()
+                                    ->searchable()
+                                    ->preload()
+                                    ->placeholder('Tìm kiếm hoặc chọn từ danh sách...')
+                                    ->createOptionForm([
+                                        Forms\Components\TextInput::make('name')
+                                            ->label('Tên khách hàng')
+                                            ->required(),
+                                        Forms\Components\TextInput::make('email')
+                                            ->label('Email')
+                                            ->email()
+                                            ->required()
+                                            ->unique('users', 'email'),
+                                        Forms\Components\TextInput::make('phone')
+                                            ->label('Số điện thoại')
+                                            ->tel()
+                                            ->nullable(),
+                                    ])
+                                    ->createOptionUsing(function (array $data): int {
+                                        $data['password'] = bcrypt(\Illuminate\Support\Str::random(12));
+                                        $data['role'] = 'customer';
+                                        $user = \App\Models\User::create($data);
+                                        return $user->id;
+                                    })
+                                    ->columnSpan(2),
+
+                                TextInput::make('order_code')
+                                    ->label('Mã đơn hàng (Tự động)')
+                                    ->default(fn () => 'ORD-OFF-' . strtoupper(uniqid()))
+                                    ->required()
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->columnSpan(1),
+                            ]),
+
+                            Grid::make(3)->schema([
+                                Select::make('payment_method_id')
+                                    ->relationship('paymentMethod', 'name')
+                                    ->label('Phương thức thanh toán')
+                                    ->required()
+                                    ->default(1)
+                                    ->columnSpan(1),
+
+                                Select::make('payment_status')
+                                    ->label('Trạng thái thanh toán')
+                                    ->options([
+                                        'pending' => 'Chờ thanh toán',
+                                        'paid' => 'Đã thanh toán',
+                                        'failed' => 'Thất bại',
+                                    ])
+                                    ->default('paid')
+                                    ->required()
+                                    ->columnSpan(1),
+
+                                Select::make('order_status')
+                                    ->label('Trạng thái đơn hàng')
+                                    ->options([
+                                        'pending' => 'Chờ xử lý',
+                                        'processing' => 'Đang đóng gói',
+                                        'shipped' => 'Đang giao hàng',
+                                        'delivered' => 'Đã giao hàng',
+                                        'cancelled' => 'Đã hủy',
+                                    ])
+                                    ->default('delivered')
+                                    ->required()
+                                    ->columnSpan(1),
+                            ]),
+
+                            TextInput::make('shipping_address')
+                                ->label('Địa chỉ giao hàng')
+                                ->default('Mua trực tiếp tại cửa hàng (Offline)')
+                                ->required(),
+
+                            Textarea::make('notes')
+                                ->label('Ghi chú của khách hàng')
+                                ->rows(2)
+                                ->nullable(),
+
+                            Forms\Components\Placeholder::make('divider_1')
+                                ->hiddenLabel()
+                                ->content(new \Illuminate\Support\HtmlString('<hr style="border: 0; border-top: 1px solid rgba(226, 232, 240, 0.6); margin: 24px 0;" />')),
+
+                            Forms\Components\Placeholder::make('items_heading')
+                                ->hiddenLabel()
+                                ->content(new \Illuminate\Support\HtmlString('
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                                        <span style="padding: 6px; border-radius: 8px; background-color: rgba(99, 102, 241, 0.1); color: rgb(99, 102, 241); display: inline-flex; align-items: center; justify-content: center;">
+                                            <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                        </span>
+                                        <h3 style="font-size: 18px; font-weight: bold; margin: 0; color: inherit;">Danh sách sản phẩm chọn mua</h3>
+                                    </div>
+                                ')),
+
+                            Repeater::make('items')
+                                ->relationship('items')
+                                ->label('')
+                                ->schema([
+                                    Select::make('product_variants_id')
+                                        ->label('Sản phẩm & Cấu hình')
+                                        ->options(function () {
+                                            return \App\Models\ProductVariant::with('product')
+                                                ->get()
+                                                ->mapWithKeys(function ($variant) {
+                                                    $name = ($variant->product?->name ?? 'Sản phẩm') . ' - ' . ($variant->variant_name ?? 'Cấu hình');
+                                                    $price = number_format($variant->price, 0, ',', '.') . ' ₫';
+                                                    $stock = $variant->stock > 0 ? " (Kho: {$variant->stock})" : ' (Hết hàng)';
+                                                    return [$variant->id => "{$name} | Giá: {$price}{$stock}"];
+                                                });
+                                        })
+                                        ->required()
+                                        ->searchable()
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, Set $set) {
+                                            if ($state) {
+                                                $variant = \App\Models\ProductVariant::find($state);
+                                                if ($variant) {
+                                                    $set('unit_price', $variant->price);
+                                                    $set('product_id', $variant->product_id);
+                                                }
+                                            }
+                                        })
+                                        ->columnSpan(['default' => 12, 'md' => 7]),
+
+                                    Forms\Components\Hidden::make('product_id'),
+
+                                    TextInput::make('quantity')
+                                        ->label('Số lượng')
+                                        ->numeric()
+                                        ->default(1)
+                                        ->minValue(1)
+                                        ->required()
+                                        ->reactive()
+                                        ->rules([
+                                            fn (Get $get) => function (string $attribute, $value, $fail) use ($get) {
+                                                $variantId = $get('product_variants_id');
+                                                if ($variantId) {
+                                                    $variant = \App\Models\ProductVariant::find($variantId);
+                                                    if ($variant && $value > $variant->stock) {
+                                                        $fail("Hiện còn {$variant->stock} máy.");
+                                                    }
+                                                }
+                                            },
+                                        ])
+                                        ->columnSpan(['default' => 12, 'md' => 2]),
+
+                                    TextInput::make('unit_price')
+                                        ->label('Đơn giá')
+                                        ->numeric()
+                                        ->prefix('₫')
+                                        ->required()
+                                        ->columnSpan(['default' => 12, 'md' => 3]),
+                                ])
+                                ->columns(12)
+                                ->required()
+                                ->reactive()
+                                ->afterStateUpdated(function (Get $get, Set $set) {
+                                    $items = $get('items') ?? [];
+                                    $total = 0;
+                                    foreach ($items as $item) {
+                                        $quantity = intval($item['quantity'] ?? 0);
+                                        $price = floatval($item['unit_price'] ?? 0);
+                                        $total += $quantity * $price;
+                                    }
+                                    $set('total_amount', $total);
+                                })
+                                ->itemLabel(fn (array $state): ?string =>
+                                    isset($state['product_variants_id'])
+                                        ? \App\Models\ProductVariant::find($state['product_variants_id'])?->variant_name
+                                        : null
+                                ),
+
+                            Forms\Components\Placeholder::make('divider_2')
+                                ->hiddenLabel()
+                                ->content(new \Illuminate\Support\HtmlString('<hr style="border: 0; border-top: 1px solid rgba(226, 232, 240, 0.6); margin: 24px 0;" />')),
+
+                            Forms\Components\Placeholder::make('invoice_heading')
+                                ->hiddenLabel()
+                                ->content(new \Illuminate\Support\HtmlString('
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                                        <span style="padding: 6px; border-radius: 8px; background-color: rgba(99, 102, 241, 0.1); color: rgb(99, 102, 241); display: inline-flex; align-items: center; justify-content: center;">
+                                            <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        </span>
+                                        <h3 style="font-size: 18px; font-weight: bold; margin: 0; color: inherit;">Hóa đơn thanh toán</h3>
+                                    </div>
+                                ')),
+
+                            Forms\Components\Placeholder::make('total_display')
+                                ->hiddenLabel()
+                                ->content(function (Get $get) {
+                                    $items = $get('items') ?? [];
+                                    $total = 0;
+                                    $totalQty = 0;
+                                    foreach ($items as $item) {
+                                        $qty = intval($item['quantity'] ?? 0);
+                                        $price = floatval($item['unit_price'] ?? 0);
+                                        $total += $qty * $price;
+                                        $totalQty += $qty;
+                                    }
+
+                                    return new \Illuminate\Support\HtmlString("
+                                        <div class='rounded-xl border border-indigo-100/50 dark:border-indigo-900/30 p-5 bg-indigo-50/30 dark:bg-indigo-950/10 max-w-xl mx-auto space-y-4'>
+                                            <div class='flex justify-between items-center text-sm text-slate-500 dark:text-slate-400'>
+                                                <span>Tổng số lượng sản phẩm:</span>
+                                                <span class='font-bold text-slate-800 dark:text-slate-200'>{$totalQty} sản phẩm</span>
+                                            </div>
+                                            <div class='border-t border-dashed border-indigo-100 dark:border-indigo-900/40 my-2'></div>
+                                            <div class='flex justify-between items-center'>
+                                                <div class='flex flex-col gap-1'>
+                                                    <span class='text-xs text-slate-400 uppercase font-black tracking-wider'>Tổng tiền phải thanh toán</span>
+                                                    <span class='text-4xl font-black text-indigo-600 dark:text-indigo-400 font-mono'>" . number_format($total, 0, ',', '.') . " ₫</span>
+                                                </div>
+                                                <div class='text-xs text-slate-400 italic text-right max-w-[200px]'>
+                                                    Vui lòng kiểm tra kỹ số lượng trước khi nhấn nút Lưu.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ");
+                                }),
+
+                            Forms\Components\Hidden::make('total_amount')
+                                ->default(0)
+                                ->required()
+                                ->dehydrated(),
+                        ])
+                ])
+                ->columnSpanFull(),
+
+            // ------------------------------------------------------------------
+            // KHỐI 2: Giao diện Xem / Duyệt đơn hàng
+            // ------------------------------------------------------------------
             Grid::make(3)
+                ->visible(fn (string $operation) => $operation !== 'create')
                 ->schema([
-                    // CỘT TRÁI: Thông tin đơn hàng
                     Grid::make(1)
                         ->schema([
                             Section::make('Mặt hàng trong đơn')
@@ -68,7 +319,7 @@ class OrderResource extends Resource
                             Section::make('Tóm tắt thanh toán')
                                 ->schema([
                                     Forms\Components\Placeholder::make('summary')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->content(fn ($record) => new \Illuminate\Support\HtmlString("
                                             <div class='space-y-2 text-sm'>
                                                 <div class='flex justify-between'>
@@ -91,7 +342,7 @@ class OrderResource extends Resource
                                 ->icon('heroicon-o-shield-check')
                                 ->schema([
                                     Forms\Components\Placeholder::make('processor_status')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->content(fn ($record) => new \Illuminate\Support\HtmlString(
                                             $record->processor
                                             ? "<div class='flex flex-col gap-1'>
@@ -106,7 +357,7 @@ class OrderResource extends Resource
                             Section::make('Khách hàng')
                                 ->schema([
                                     Forms\Components\Placeholder::make('user_info')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->content(fn ($record) => new \Illuminate\Support\HtmlString("
                                             <div class='text-sm'>
                                                 <p class='font-bold'>{$record->user?->name}</p>
@@ -256,6 +507,7 @@ class OrderResource extends Resource
                         'delivered' => 'Đã giao hàng',
                         'cancelled' => 'Đã hủy',
                     ])
+                    ->placeholder(null)
                     ->disabled(fn ($record) => in_array($record->order_status, ['cancelled', 'delivered']))
                     ->afterStateUpdated(function ($state, $old, $record) {
                         // TỰ ĐỘNG GÁN NGƯỜI DUYỆT khi trạng thái thay đổi sang processing/shipped/delivered
@@ -315,6 +567,7 @@ class OrderResource extends Resource
     {
         return [
             'index' => Pages\ListOrders::route('/'),
+
         ];
     }
 

@@ -12,6 +12,29 @@ class ListOrders extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            \Filament\Actions\CreateAction::make()
+                ->mutateFormDataUsing(function (array $data): array {
+                    $data['processed_by_id'] = auth()->id();
+                    return $data;
+                })
+                ->after(function (\App\Models\Order $record) {
+                    $record->load('items');
+
+                    $total = 0;
+                    foreach ($record->items as $item) {
+                        $total += $item->quantity * $item->unit_price;
+
+                        if ($item->product_variants_id) {
+                            $variant = \App\Models\ProductVariant::find($item->product_variants_id);
+                            if ($variant) {
+                                $variant->decrement('stock', $item->quantity);
+                            }
+                        }
+                    }
+
+                    $record->update(['total_amount' => $total]);
+                }),
+        ];
     }
 }
