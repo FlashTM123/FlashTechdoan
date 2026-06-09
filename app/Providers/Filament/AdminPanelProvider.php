@@ -6,7 +6,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
+use App\Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -26,6 +26,8 @@ use App\Filament\Widgets\RevenueWidget;
 use App\Filament\Widgets\SalesChart;
 use App\Filament\Widgets\TopSellingProducts;
 use App\Filament\Widgets\RecentOrders;
+use App\Filament\Widgets\LowStockProducts;
+use App\Filament\Widgets\OrderStatusDistribution;
 use App\Filament\Resources\Coupons\CouponResource;
 use App\Filament\Widgets\ClockWidget;
 
@@ -62,6 +64,7 @@ class AdminPanelProvider extends PanelProvider
                         position: relative !important;
                         border-radius: 1.25rem !important;
                         border: 1px solid rgba(226, 232, 240, 0.8) !important;
+                        border-bottom: none !important;
                         background: rgba(255, 255, 255, 0.7) !important;
                         backdrop-filter: blur(12px) !important;
                         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -85,6 +88,9 @@ class AdminPanelProvider extends PanelProvider
 
                     /* Bỏ viền cam mặc định */
                     .fi-wi-stats-overview-stat::before {
+                        display: none !important;
+                    }
+                    .fi-wi-stats-overview-stat::after {
                         display: none !important;
                     }
 
@@ -275,7 +281,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->brandName('FlashTech Hub')
             ->font('Be Vietnam Pro')
-            ->sidebarCollapsibleOnDesktop() 
+            ->sidebarCollapsibleOnDesktop()
             // ->sidebarFullyCollapsibleOnDesktop() Cach 2: Cho phép thu gọn hoàn toàn sidebar trên desktop
             ->login(\App\Filament\Pages\Auth\Login::class)
             ->authGuard('admin')
@@ -296,8 +302,10 @@ class AdminPanelProvider extends PanelProvider
                 StatsOverview::class,
                 RevenueWidget::class,
                 SalesChart::class,
+                OrderStatusDistribution::class,
                 ProductByCategoryChart::class,
                 TopSellingProducts::class,
+                LowStockProducts::class,
                 RecentOrders::class,
                 LatestProducts::class,
                 PendingReview::class,

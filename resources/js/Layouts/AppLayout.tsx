@@ -24,7 +24,7 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
         { id: 'gaming', name: 'Laptop Gaming', category: 'Điều hướng', icon: '🎮', action: () => router.visit('/products?category=laptop-gaming') },
         { id: 'cart', name: 'Giỏ hàng của bạn', category: 'Mua sắm', icon: '🛒', action: () => router.visit('/cart') },
         { id: 'compare', name: 'So sánh sản phẩm', category: 'Mua sắm', icon: '📊', action: () => router.visit('/compare') },
-        { id: 'dashboard', name: 'Bảng điều khiển', category: 'Tài khoản', icon: '🛡️', action: () => router.visit('/dashboard') },
+        { id: 'orders', name: 'Đơn hàng của tôi', category: 'Tài khoản', icon: '📦', action: () => router.visit('/my-orders') },
         { id: 'dark_mode', name: 'Bật/Tắt chế độ tối (Dark Mode)', category: 'Hệ thống', icon: '🌓', action: () => toggleDarkMode() },
         { id: 'support', name: 'Liên hệ hỗ trợ kỹ thuật', category: 'Trợ giúp', icon: '📞', action: () => {
             toast.success("Liên hệ hỗ trợ", {

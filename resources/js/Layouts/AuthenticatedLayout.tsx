@@ -4,12 +4,13 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
+import { PageProps } from '@/types';
 
 export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const user = usePage().props.auth.user;
+    const user = usePage<PageProps>().props.auth.user;
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -28,10 +29,10 @@ export default function Authenticated({
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
+                                    href={route('orders.index')}
+                                    active={route().current('orders.*')}
                                 >
-                                    Dashboard
+                                    Đơn hàng của tôi
                                 </NavLink>
                             </div>
                         </div>
@@ -132,10 +133,10 @@ export default function Authenticated({
                 >
                     <div className="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
+                            href={route('orders.index')}
+                            active={route().current('orders.*')}
                         >
-                            Dashboard
+                            Đơn hàng của tôi
                         </ResponsiveNavLink>
                     </div>
 
