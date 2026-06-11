@@ -167,7 +167,7 @@
                     style="<?php echo \Illuminate\Support\Arr::toCssStyles([
                         'width: 100%',
                         'height: 100%; max-height: 100%' => ! $hasMaxHeight,
-                        "max-height: {$maxHeight}" => $hasMaxHeight,
+                        ('max-height: ' . e($maxHeight)) => $hasMaxHeight,
                     ]) ?>"
                 ></canvas>
 

@@ -2273,7 +2273,7 @@
                                                             (filled($columnVisibleFrom = $column->getVisibleFrom()) ? "{$columnVisibleFrom}:fi-visible" : ''),
                                                         ])
                                                         ->style([
-                                                            ('width: ' . $columnWidth) => filled($columnWidth),
+                                                            ('width: ' . e($columnWidth)) => filled($columnWidth),
                                                         ])); ?>
 
                                             >
