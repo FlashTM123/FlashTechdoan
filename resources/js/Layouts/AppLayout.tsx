@@ -160,7 +160,7 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm Laptop..."
-                                className="w-full bg-slate-100 dark:bg-slate-800/50 border-2 border-transparent rounded-2xl py-2.5 pl-11 pr-16 text-xs font-semibold focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500/30 transition-all outline-none"
+                                className="w-full bg-slate-100 dark:bg-slate-800/50 border-2 border-transparent rounded-2xl py-2.5 pl-11 pr-16 text-xs font-semibold text-slate-850 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500/30 transition-all outline-none"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 onFocus={() => {

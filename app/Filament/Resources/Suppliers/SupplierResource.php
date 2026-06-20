@@ -12,6 +12,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
 
 class SupplierResource extends Resource
 {
@@ -26,10 +28,41 @@ class SupplierResource extends Resource
     {
         return $schema
             ->components([
-                TextInput::make('name')->label('Tên Nhà Cung Cấp')->required(),
-                TextInput::make('phone')->label('Số Điện Thoại')->tel(),
-                TextInput::make('email')->label('Email')->email(),
-                TextInput::make('address')->label('Địa Chỉ')->columnSpanFull(),
+                Section::make('🏢 Thông Tin Nhà Cung Cấp')
+                    ->description('Cập nhật các thông tin liên hệ và địa chỉ của nhà cung cấp')
+                    ->icon('heroicon-o-building-office-2')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('name')
+                                ->label('Tên Nhà Cung Cấp')
+                                ->placeholder('Ví dụ: Công ty Công nghệ FlashTech...')
+                                ->prefix('🏢')
+                                ->required(),
+
+                            TextInput::make('phone')
+                                ->label('Số Điện Thoại')
+                                ->tel()
+                                ->placeholder('Ví dụ: 0987654321...')
+                                ->prefix('📞')
+                                ->maxLength(20),
+                        ]),
+
+                        Grid::make(2)->schema([
+                            TextInput::make('email')
+                                ->label('Email Liên Hệ')
+                                ->email()
+                                ->placeholder('Ví dụ: contact@flashtech.vn...')
+                                ->prefix('✉️')
+                                ->maxLength(255),
+
+                            TextInput::make('address')
+                                ->label('Địa Chỉ Trụ Sở')
+                                ->placeholder('Ví dụ: 123 Đường Cầu Giấy, Hà Nội...')
+                                ->prefix('📍')
+                                ->maxLength(255),
+                        ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -37,10 +70,25 @@ class SupplierResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label('Tên Nhà Cung Cấp')->searchable()->sortable(),
-                TextColumn::make('phone')->label('Số Điện Thoại'),
-                TextColumn::make('email')->label('Email'),
-                TextColumn::make('created_at')->label('Ngày Tạo')->date('d/m/Y'),
+                TextColumn::make('name')
+                    ->label('Tên Nhà Cung Cấp')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold'),
+                TextColumn::make('phone')
+                    ->label('Số Điện Thoại')
+                    ->searchable()
+                    ->copyable()
+                    ->icon('heroicon-m-phone'),
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable()
+                    ->copyable()
+                    ->icon('heroicon-m-envelope'),
+                TextColumn::make('created_at')
+                    ->label('Ngày Tạo')
+                    ->date('d/m/Y')
+                    ->sortable(),
             ])
             ->actions([
                 \Filament\Actions\EditAction::make(),

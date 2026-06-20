@@ -6,10 +6,17 @@ use App\Events\OrderCreated;
 use App\Events\OrderStatusUpdated;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\UserProfile;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 
 class OrderObserver
 {
+    /**
+     * Tỉ lệ tích điểm: 1 điểm cho mỗi 10.000đ giá trị đơn hàng.
+     */
+    const POINTS_PER_VND = 100000; // 1 điểm / 100.000đ
+
     public function created(Order $order): void
     {
         Event::dispatch(new OrderCreated($order));
@@ -36,6 +43,77 @@ class OrderObserver
     {
         if ($order->isDirty('order_status')) {
             Event::dispatch(new OrderStatusUpdated($order));
+
+            // ── Cộng điểm khi đơn hàng được giao thành công ─────────────
+            if ($order->order_status === 'delivered') {
+                $this->awardLoyaltyPoints($order);
+            }
+
+            // ── Hoàn điểm nếu đơn bị hủy SAU KHI đã cộng ───────────────
+            if (in_array($order->order_status, ['cancelled', 'refunded']) &&
+                in_array($order->getOriginal('order_status'), ['delivered'])) {
+                $this->revokeLoyaltyPoints($order);
+            }
         }
+    }
+
+    /**
+     * Tính và cộng điểm vào profile người dùng.
+     * Công thức: floor(total_amount / 10.000) điểm
+     */
+    private function awardLoyaltyPoints(Order $order): void
+    {
+        $user = $order->user;
+
+        if (!$user) return;
+
+        $pointsToAdd = (int) floor((float) $order->total_amount / self::POINTS_PER_VND);
+
+        if ($pointsToAdd <= 0) return;
+
+        // Upsert profile nếu chưa có
+        $profile = UserProfile::firstOrCreate(
+            ['user_id' => $user->id],
+            ['points' => 0]
+        );
+
+        $profile->increment('points', $pointsToAdd);
+
+        Log::info("LoyaltyPoints: +{$pointsToAdd} điểm cho user #{$user->id} ({$user->name}) từ đơn #{$order->order_code}");
+
+        // Thông báo cho khách hàng
+        try {
+            \Filament\Notifications\Notification::make()
+                ->title("🎉 Bạn nhận được {$pointsToAdd} điểm!")
+                ->body("Cảm ơn bạn đã mua hàng. Đơn #{$order->order_code} đã hoàn thành.")
+                ->icon('heroicon-o-star')
+                ->color('warning')
+                ->broadcast($user);
+        } catch (\Exception $e) {
+            // Không làm crash nếu notification lỗi
+            Log::warning("LoyaltyPoints notification failed: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Thu hồi điểm nếu đơn hàng bị hủy sau khi đã giao thành công.
+     */
+    private function revokeLoyaltyPoints(Order $order): void
+    {
+        $user = $order->user;
+
+        if (!$user || !$user->profile) return;
+
+        $pointsToRevoke = (int) floor((float) $order->total_amount / self::POINTS_PER_VND);
+
+        if ($pointsToRevoke <= 0) return;
+
+        // Không để điểm xuống dưới 0
+        $currentPoints = $user->profile->points ?? 0;
+        $newPoints = max(0, $currentPoints - $pointsToRevoke);
+
+        $user->profile->update(['points' => $newPoints]);
+
+        Log::info("LoyaltyPoints: -{$pointsToRevoke} điểm thu hồi từ user #{$user->id} ({$user->name}) do hủy đơn #{$order->order_code}");
     }
 }

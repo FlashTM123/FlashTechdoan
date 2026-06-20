@@ -177,7 +177,7 @@ class CheckoutController extends Controller
     /**
      * Hiển thị trang thông báo thất bại
      */
-    public function fail(Request $request)
+    public function failed(Request $request)
     {
         return Inertia::render('Checkout/Fail', [
             'order_code' => $request->order_code

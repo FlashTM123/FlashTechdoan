@@ -38,9 +38,14 @@ export default defineConfig({
         })
     ],
 
-    // Tối ưu dev mode
+    // Tối ưu dev mode - cấu hình cho Docker
     server: {
+        host: '0.0.0.0',
+        port: 5173,
+        origin: 'http://127.0.0.1:5173',
+        cors: true,
         watch: {
+            usePolling: true,
             ignored: ['**/node_modules/**', '**/.git/**'],
         },
     },

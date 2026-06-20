@@ -11,99 +11,110 @@ interface CompareTableHeaderProps {
 export default function CompareTableHeader({ products, onRemove }: CompareTableHeaderProps) {
     return (
         <thead>
-            <tr className="border-b border-slate-700 bg-slate-900/50">
+            <tr className="border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
                 {/* Row Label Column */}
-                <th className="px-6 py-4 text-left sticky left-0 bg-slate-900 z-10 w-32 min-w-max">
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left sticky left-0 bg-slate-50 dark:bg-slate-900 z-10 w-32 min-w-max">
+                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-550 uppercase tracking-widest">
                         Thông số
                     </span>
                 </th>
 
                 {/* Product Columns */}
-                {products.map((product) => (
-                    <th key={product.id} className="px-6 py-4 text-center bg-slate-800/50 min-w-80">
-                        <div className="space-y-4">
-                            {/* Product Image */}
-                            <div className="mb-4">
-                                <img
-                                    src={product.thumbnail_url}
-                                    alt={product.name}
-                                    className="h-32 object-cover rounded-lg mx-auto w-full"
-                                />
-                            </div>
+                {products.map((product) => {
+                    const variant = product.variants?.[0];
+                    const discount = variant?.old_price > variant?.price
+                        ? getDiscountPercentage(variant.price, variant.old_price)
+                        : 0;
 
-                            {/* Product Name */}
-                            <div>
-                                <h3 className="text-sm font-bold text-white line-clamp-2 hover:text-blue-400 transition">
-                                    <Link href={route('product.show', product.id)}>
-                                        {product.name}
-                                    </Link>
-                                </h3>
-                                {product.variants[0].variant_name && (
-                                    <p className="text-xs text-slate-400 mt-1">
-                                        ({product.variants[0].variant_name})
-                                    </p>
-                                )}
-                            </div>
+                    return (
+                        <th key={product.id} className="px-6 py-6 text-center bg-white dark:bg-slate-900/20 min-w-[280px]">
+                            <div className="space-y-4">
+                                {/* Product Image */}
+                                <div className="h-32 bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-100 dark:border-slate-850 flex items-center justify-center overflow-hidden">
+                                    <img
+                                        src={product.thumbnail_url}
+                                        alt={product.name}
+                                        className="max-h-full max-w-full object-contain drop-shadow-md"
+                                    />
+                                </div>
 
-                            {/* Price Info */}
-                            <div className="space-y-1">
-                                {product.variants.length > 0 && (
-                                    <>
-                                        <div className="text-lg font-bold text-blue-400">
-                                            {formatPrice(product.variants[0].price)}
-                                        </div>
-                                        {product.variants[0].old_price > product.variants[0].price && (
-                                            <div className="flex items-center justify-center gap-2">
-                                                <span className="text-xs line-through text-slate-500">
-                                                    {formatPrice(product.variants[0].old_price)}
-                                                </span>
-                                                <span className="text-xs font-semibold text-red-500 bg-red-500/20 px-2 py-1 rounded">
-                                                    -
-                                                    {getDiscountPercentage(
-                                                        product.variants[0].price,
-                                                        product.variants[0].old_price
-                                                    )}
-                                                    %
-                                                </span>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Stock Status */}
-                            {product.variants.length > 0 && (
-                                <div className="text-xs font-medium">
-                                    {product.variants[0].stock > 0 ? (
-                                        <span className="text-green-400">✓ Còn hàng</span>
-                                    ) : (
-                                        <span className="text-red-400">✗ Hết hàng</span>
+                                {/* Product Name */}
+                                <div className="space-y-1">
+                                    <h3 className="text-xs sm:text-sm font-black text-slate-800 dark:text-white line-clamp-2 hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors leading-snug text-left">
+                                        <Link href={`/product/${product.id}`}>
+                                            {product.name}
+                                        </Link>
+                                    </h3>
+                                    {variant?.variant_name && (
+                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider text-left">
+                                            {variant.variant_name}
+                                        </p>
                                     )}
                                 </div>
-                            )}
 
-                            {/* Action Buttons */}
-                            <div className="flex gap-2 pt-2">
-                                <button
-                                    onClick={() => onRemove(product.variants[0].id)}
-                                    className="flex-1 px-3 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 rounded-lg transition flex items-center justify-center gap-2 text-sm"
-                                    title="Xóa khỏi danh sách so sánh"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Xóa</span>
-                                </button>
-                                <Link
-                                    href={route('checkout.index')}
-                                    className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center justify-center gap-2 text-sm font-medium"
-                                >
-                                    <ShoppingCart className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Mua ngay</span>
-                                </Link>
+                                {/* Price Info */}
+                                <div className="text-left space-y-1">
+                                    {variant && (
+                                        <>
+                                            <div className="text-lg font-black text-indigo-650 dark:text-indigo-400 font-display">
+                                                {formatPrice(variant.price)}
+                                            </div>
+                                            {discount > 0 && (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs line-through text-slate-400 dark:text-slate-550 font-medium">
+                                                        {formatPrice(variant.old_price)}
+                                                    </span>
+                                                    <span className="text-[9px] font-black text-rose-500 bg-rose-50 dark:bg-rose-550/10 border border-rose-100 dark:border-rose-500/20 px-2 py-0.5 rounded-lg uppercase tracking-wider">
+                                                        -{discount}%
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Stock Status */}
+                                {variant && (
+                                    <div className="text-left text-[10px] font-black uppercase tracking-wider">
+                                        {variant.stock > 0 ? (
+                                            <span className="text-emerald-600 dark:text-emerald-450">✓ Còn hàng</span>
+                                        ) : (
+                                            <span className="text-rose-500 dark:text-rose-450">✗ Hết hàng</span>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-2 pt-2">
+                                    <button
+                                        onClick={() => onRemove(variant.id)}
+                                        className="flex-1 px-3 py-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-550/20 rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 text-xs font-bold active:scale-95 shadow-sm"
+                                        title="Xóa khỏi danh sách so sánh"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                        <span>Xóa</span>
+                                    </button>
+                                    {variant.stock > 0 ? (
+                                        <Link
+                                            href="/checkout"
+                                            className="flex-1 px-3 py-2.5 bg-indigo-650 hover:bg-indigo-600 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider active:scale-95 shadow-md shadow-indigo-500/10"
+                                        >
+                                            <ShoppingCart className="w-3.5 h-3.5" />
+                                            <span>Mua</span>
+                                        </Link>
+                                    ) : (
+                                        <div
+                                            className="flex-1 px-3 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold cursor-not-allowed border border-slate-200/50 dark:border-slate-850"
+                                        >
+                                            <ShoppingCart className="w-3.5 h-3.5 opacity-50" />
+                                            <span>Hết hàng</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    </th>
-                ))}
+                        </th>
+                    );
+                })}
             </tr>
         </thead>
     );

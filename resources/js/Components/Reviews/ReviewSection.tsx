@@ -168,7 +168,7 @@ export default function ReviewSection({ productId, auth }: Props) {
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
                                     placeholder="Bạn thấy sản phẩm này thế nào? (Chất lượng, đóng gói, giao hàng...)"
-                                    className="w-full bg-slate-50 dark:bg-slate-800/50 border-2 border-transparent focus:border-indigo-500 dark:focus:border-indigo-400 rounded-3xl p-5 text-sm font-medium transition-all outline-none min-h-[150px] resize-none"
+                                    className="w-full bg-slate-50 dark:bg-slate-800/50 border-2 border-transparent focus:border-indigo-500 dark:focus:border-indigo-400 rounded-3xl p-5 text-sm font-medium text-slate-850 dark:text-white transition-all outline-none min-h-[150px] resize-none"
                                 />
                             </div>
 

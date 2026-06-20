@@ -10,6 +10,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Form\Get;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
 
 class UserResource extends Resource
 {
@@ -33,54 +35,71 @@ class UserResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Forms\Components\TextInput::make('name')
-                ->label('Tên nhân viên')
-                ->required(),
+            Section::make('👥 Thông Tin Tài Khoản Nhân Viên')
+                ->description('Quản lý thông tin định danh và gán phòng ban cho nhân sự')
+                ->icon('heroicon-o-user-circle')
+                ->schema([
+                    Grid::make(2)->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Tên nhân viên')
+                            ->placeholder('Ví dụ: Nguyễn Văn A...')
+                            ->prefix('👤')
+                            ->required(),
 
-            Forms\Components\TextInput::make('email')
-                ->label('Email')
-                ->email()
-                ->required()
-                ->unique(ignoreRecord: true),
+                        Forms\Components\TextInput::make('email')
+                            ->label('Email làm việc')
+                            ->email()
+                            ->placeholder('Ví dụ: nva@flashtech.vn...')
+                            ->prefix('✉️')
+                            ->required()
+                            ->unique(ignoreRecord: true),
+                    ]),
 
-            Forms\Components\Select::make('department_id')
-                ->label('Phòng ban')
-                ->relationship('department', 'name')
-                ->searchable()
-                ->preload()
-                ->required(fn ($get): bool => $get('role') === 'employee'),
+                    Grid::make(2)->schema([
+                        Forms\Components\Select::make('role')
+                            ->label('Vai trò / Phân quyền')
+                            ->options([
+                                'admin' => 'Admin (Quản trị tối cao)',
+                                'moderator' => 'Moderator (Kiểm duyệt viên)',
+                                'employee' => 'Employee (Nhân viên vận hành)',
+                            ])
+                            ->default('employee')
+                            ->prefix('🛡️')
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function (string $state, $set){
+                                $prefix = match ($state) {
+                                    'admin' => 'AD',
+                                    'moderator' => 'MD',
+                                    default => 'NV',
+                                };
+                                $set('employee_code', $prefix . '-' . strtoupper(\Illuminate\Support\Str::random(5)));
+                            }),
 
-            Forms\Components\TextInput::make('employee_code')
-                ->label('Mã nhân viên')
-                ->default(fn () => 'NV-' . strtoupper(\Illuminate\Support\Str::random(5)))
-                ->disabled()
-                ->dehydrated()
-                ->unique(ignoreRecord: true),
+                        Forms\Components\Select::make('department_id')
+                            ->label('Phòng ban công tác')
+                            ->relationship('department', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->prefix('🏢')
+                            ->required(fn ($get): bool => $get('role') === 'employee'),
+                    ]),
 
+                    Grid::make(2)->schema([
+                        Forms\Components\TextInput::make('employee_code')
+                            ->label('Mã nhân viên (Tự động)')
+                            ->prefix('🆔')
+                            ->default(fn () => 'NV-' . strtoupper(\Illuminate\Support\Str::random(5)))
+                            ->disabled()
+                            ->dehydrated()
+                            ->unique(ignoreRecord: true),
 
-
-            Forms\Components\Select::make('role')
-                ->label('Vai trò')
-                ->options([
-                    'admin' => 'Admin',
-                    'moderator' => 'Moderator',
-                    'employee' => 'Nhân viên',
+                        Forms\Components\Toggle::make('is_active')
+                            ->label('Kích hoạt trạng thái làm việc')
+                            ->default(true),
+                    ]),
                 ])
-                ->default('employee')
-                ->required()
-                ->live()
-                ->afterStateUpdated(function (string $state, $set){
-                    $prefix = match ($state) {
-                        'admin' => 'AD',
-                        'moderator' => 'MD',
-                        default => 'NV',
-                    };
-                    $set('employee_code', $prefix . '-' . strtoupper(\Illuminate\Support\Str::random(5)));
-                }),
-
-            Forms\Components\Toggle::make('is_active')
-                ->label('Kích hoạt')
-                ->default(true),
+                ->columnSpanFull(),
         ]);
     }
 
@@ -91,18 +110,25 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên nhân viên')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
+                    ->copyable()
+                    ->icon('heroicon-m-envelope')
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('employee_code')
                     ->label('Mã nhân viên')
+                    ->fontFamily('mono')
+                    ->copyable()
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('department.name')
                     ->label('Phòng ban')
+                    ->badge()
+                    ->color('gray')
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('role')
@@ -112,14 +138,19 @@ class UserResource extends Resource
                         'admin' => 'danger',
                         'moderator' => 'warning',
                         default => 'info',
+                    })
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'admin' => 'Quản trị viên',
+                        'moderator' => 'Kiểm duyệt viên',
+                        default => 'Nhân viên',
                     }),
 
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label('Trạng thái')
-                    ->boolean(),
+                Tables\Columns\ToggleColumn::make('is_active')
+                    ->label('Trạng thái kích hoạt'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
+                    ->label('Lọc theo vai trò')
                     ->options([
                         'admin' => 'Quản trị viên',
                         'moderator' => 'Kiểm duyệt viên',

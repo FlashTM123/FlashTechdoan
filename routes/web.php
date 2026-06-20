@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CouponController;
