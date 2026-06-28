@@ -11,6 +11,14 @@ fi
 
 cd /var/www/html
 
+# Chạy composer dump-autoload (bị skip khi build với --no-scripts)
+echo "==> Running composer dump-autoload..."
+composer dump-autoload --optimize --no-dev
+
+# Discover packages (cần sau khi composer install --no-scripts)
+echo "==> Discovering packages..."
+php artisan package:discover --ansi || true
+
 # Generate APP_KEY nếu chưa có
 if ! grep -q "^APP_KEY=base64:" .env 2>/dev/null; then
     echo "==> Generating APP_KEY..."

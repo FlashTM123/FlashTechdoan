@@ -77,12 +77,13 @@ COPY . .
 # Copy frontend assets từ stage 1
 COPY --from=frontend /app/public/build ./public/build
 
-# Cài PHP dependencies (production only, no dev)
+# Cài PHP dependencies (không chạy scripts vì cần DB — sẽ chạy trong entrypoint)
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
     --no-interaction \
-    --no-progress
+    --no-progress \
+    --no-scripts
 
 # Phân quyền storage
 RUN mkdir -p storage/framework/{sessions,views,cache} \
