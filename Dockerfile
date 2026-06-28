@@ -5,11 +5,14 @@ FROM node:20-alpine AS frontend
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --prefer-offline
+# Cài pnpm (project dùng pnpm-lock.yaml)
+RUN npm install -g pnpm
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN npm run build
+RUN pnpm run build
 
 # ─────────────────────────────────────────────────────────────
 # Stage 2: PHP production image
