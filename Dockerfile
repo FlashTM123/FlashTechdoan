@@ -33,9 +33,15 @@ RUN apk add --no-cache \
     oniguruma-dev \
     libzip-dev \
     icu-dev \
-    supervisor
+    supervisor \
+    libxml2-dev \
+    libsodium-dev \
+    linux-headers \
+    autoconf \
+    g++ \
+    make
 
-# Cài PHP extensions
+# Cài PHP extensions chuẩn
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
  && docker-php-ext-install -j$(nproc) \
     pdo_mysql \
@@ -44,7 +50,21 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     gd \
     bcmath \
     intl \
-    opcache
+    opcache \
+    fileinfo \
+    xml \
+    dom \
+    simplexml \
+    sodium \
+    pcntl \
+    exif
+
+# Cài MongoDB extension qua PECL (cần cho mongodb/laravel-mongodb)
+RUN pecl install mongodb \
+ && docker-php-ext-enable mongodb
+
+# Dọn build tools sau khi cài xong (giảm image size)
+RUN apk del autoconf g++ make linux-headers
 
 # Cài Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
