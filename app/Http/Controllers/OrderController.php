@@ -23,7 +23,7 @@ class OrderController extends Controller
                 return $query->where('order_status', $status);
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(10)
+            ->paginate(5)
             ->withQueryString();
 
         return Inertia::render('Orders/Index', [

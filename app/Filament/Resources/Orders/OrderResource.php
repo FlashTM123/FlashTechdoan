@@ -543,29 +543,48 @@ class OrderResource extends Resource
 
                 Tables\Columns\SelectColumn::make('order_status')
                     ->label('Trạng thái')
-                    ->options([
-                        'pending' => 'Chờ xử lý',
-                        'processing' => 'Đang đóng gói',
-                        'shipped' => 'Đang vận chuyển',
-                        'delivered' => 'Đã giao hàng',
-                        'cancelled' => 'Đã hủy',
-                    ])
+                    ->options(fn ($record) => self::getAllowedTransitions($record->order_status ?? 'pending'))
                     ->placeholder(null)
                     ->disabled(fn ($record) => in_array($record->order_status, ['cancelled', 'delivered']))
                     ->afterStateUpdated(function ($state, $old, $record) {
+                        // ── BỎ QUA NẾU STATE RỖng/NULL ───────────────────────────────────
+                        if (empty($state)) {
+                            return;
+                        }
+
+                        // ── VALIDATE BẰNG GIÁ TRỊ DB THỰC (không dùng $old từ Livewire vì bị stale) ──
+                        // Lấy lại trạng thái THỰC TẾ từ DB trước khi Filament ghi $state
+                        // (Filament đã save rồi nên $record->order_status = $state, phải query riêng)
+                        $freshPrevious = \App\Models\Order::where('id', $record->id)
+                            ->value('order_status') ?? 'pending';
+                        // Lúc này freshPrevious = $state (Filament đã save), nên dùng $state
+                        // làm điểm cuối để suy ngược lại previous không được.
+                        // → Thay vào đó: chỉ validate $state là một giá trị hợp lệ trong hệ thống.
+                        $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+                        if (!in_array($state, $validStatuses)) {
+                            $record->update(['order_status' => $old ?? 'pending']);
+                            \Filament\Notifications\Notification::make()
+                                ->title('❌ Trạng thái không hợp lệ')
+                                ->body("Giá trị \"$state\" không phải trạng thái hợp lệ.")
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
                         // TỰ ĐỘNG GÁN NGƯỜI DUYỆT khi trạng thái thay đổi sang processing/shipped/delivered
                         if (in_array($state, ['processing', 'shipped', 'delivered']) && !$record->processed_by_id) {
                             $record->update(['processed_by_id' => auth()->id()]);
                         }
 
                         // Logic: Chỉ hoàn kho khi trạng thái CHUYỂN THÀNH 'cancelled'
-                        if ($state === 'cancelled' && $old !== 'cancelled') {
+                        if ($state === 'cancelled') {
                             self::restoreStock($record);
                         }
 
                         // PHÁT SỰ KIỆN: Thông báo cho khách hàng khi Admin đổi trạng thái
                         event(new \App\Events\OrderStatusUpdated($record));
                     }),
+
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Ngày đặt')
@@ -603,7 +622,18 @@ class OrderResource extends Resource
                     \Filament\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc'); // Luôn hiện đơn mới nhất lên đầu
+            // Sắp xếp: pending lên đầu → theo thứ tự xử lý → đơn cũ hơn lên trên trong cùng nhóm
+            ->modifyQueryUsing(fn ($query) => $query->orderByRaw("
+                CASE order_status
+                    WHEN 'pending'    THEN 1
+                    WHEN 'processing' THEN 2
+                    WHEN 'shipped'    THEN 3
+                    WHEN 'delivered'  THEN 4
+                    WHEN 'cancelled'  THEN 5
+                    ELSE 6
+                END ASC,
+                created_at ASC
+            "));
     }
 
     public static function getPages(): array
@@ -631,5 +661,70 @@ class OrderResource extends Resource
                 }
             }
         }
+    }
+
+    /**
+     * Trả về danh sách các trạng thái được phép chuyển đến từ trạng thái hiện tại.
+     * Luồng hợp lệ:
+     *   pending → processing
+     *   processing → shipped
+     *   shipped → delivered
+     *   pending/processing → cancelled
+     *   delivered/cancelled → (không đổi được)
+     */
+    protected static function getAllowedTransitions(?string $currentStatus): array
+    {
+        $currentStatus = $currentStatus ?? 'pending';
+        $allLabels = [
+            'pending'    => 'Chờ xử lý',
+            'processing' => 'Đang đóng gói',
+            'shipped'    => 'Đang vận chuyển',
+            'delivered'  => 'Đã giao hàng',
+            'cancelled'  => 'Đã hủy',
+        ];
+
+        // Chỉ cho phép chuyển sang các trạng thái sau (bao gồm trạng thái hiện tại để giữ nguyên)
+        $nextSteps = match ($currentStatus) {
+            'pending'    => ['pending', 'processing', 'cancelled'],
+            'processing' => ['processing', 'shipped', 'cancelled'],
+            'shipped'    => ['shipped', 'delivered'],
+            'delivered'  => ['delivered'],   // Khoá: không đổi được
+            'cancelled'  => ['cancelled'],   // Khoá: không đổi được
+            default      => array_keys($allLabels),
+        };
+
+        return array_intersect_key($allLabels, array_flip($nextSteps));
+    }
+
+    /**
+     * Trả về thông báo lỗi cụ thể khi chuyển trạng thái không hợp lệ.
+     */
+    protected static function getTransitionErrorMessage(string $from, string $to): string
+    {
+        $labels = [
+            'pending'    => 'Chờ xử lý',
+            'processing' => 'Đang đóng gói',
+            'shipped'    => 'Đang vận chuyển',
+            'delivered'  => 'Đã giao hàng',
+            'cancelled'  => 'Đã hủy',
+        ];
+
+        $fromLabel = $labels[$from] ?? $from;
+        $toLabel   = $labels[$to]   ?? $to;
+
+        // Phát hiện loại lỗi
+        $order = ['pending' => 1, 'processing' => 2, 'shipped' => 3, 'delivered' => 4, 'cancelled' => 5];
+        $fromIdx = $order[$from] ?? 0;
+        $toIdx   = $order[$to]   ?? 0;
+
+        if ($to === 'cancelled' && in_array($from, ['shipped', 'delivered'])) {
+            return "Không thể hủy đơn hàng đang ở trạng thái \"$fromLabel\". Chỉ hủy được khi đơn đang Chờ xử lý hoặc Đang đóng gói.";
+        }
+
+        if ($toIdx < $fromIdx) {
+            return "Không thể quay lại trạng thái \"$toLabel\" từ \"$fromLabel\". Đơn hàng chỉ tiến về phía trước.";
+        }
+
+        return "Không thể chuyển từ \"$fromLabel\" sang \"$toLabel\". Phải theo thứ tự: Chờ xử lý → Đang đóng gói → Đang vận chuyển → Đã giao hàng.";
     }
 }

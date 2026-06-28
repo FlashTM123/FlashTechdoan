@@ -53,13 +53,12 @@ class RevenueWidget extends StatsOverviewWidget
         $days = ['Chủ nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'];
         $todayLabel = $days[today()->dayOfWeek] . ', ' . today()->format('d/m/Y');
 
-        $revenueChartData = Order::where('order_status', 'delivered')
-            ->where('created_at', '>=', now()->subDays(7))
-            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('total')
-            ->toArray();
+        // Điền đủ 7 ngày (k\u1ec3 c\u1ea3 ng\u00e0y kh\u00f4ng c\u00f3 \u0111\u01a1n \u2192 gi\u00e1 tr\u1ecb 0), tr\u00e1nh l\u1ec7ch \u0111i\u1ec3m bi\u1ec3u \u0111\u1ed3
+        $revenueChartData = collect(range(6, 0))->map(fn ($d) =>
+            (float) Order::where('order_status', 'delivered')
+                ->whereDate('created_at', today()->subDays($d))
+                ->sum('total_amount')
+        )->toArray();
 
         $newOrdersChartData = collect(range(6, 0))->map(fn ($d) =>
             Order::whereDate('created_at', today()->subDays($d))->count()

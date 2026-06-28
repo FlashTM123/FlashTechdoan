@@ -26,11 +26,13 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
         { id: 'compare', name: 'So sánh sản phẩm', category: 'Mua sắm', icon: '📊', action: () => router.visit('/compare') },
         { id: 'orders', name: 'Đơn hàng của tôi', category: 'Tài khoản', icon: '📦', action: () => router.visit('/my-orders') },
         { id: 'dark_mode', name: 'Bật/Tắt chế độ tối (Dark Mode)', category: 'Hệ thống', icon: '🌓', action: () => toggleDarkMode() },
-        { id: 'support', name: 'Liên hệ hỗ trợ kỹ thuật', category: 'Trợ giúp', icon: '📞', action: () => {
-            toast.success("Liên hệ hỗ trợ", {
-                description: "Vui lòng gọi hotline 1900 1234 (Miễn phí) để được hỗ trợ lập tức.",
-            });
-        }},
+        {
+            id: 'support', name: 'Liên hệ hỗ trợ kỹ thuật', category: 'Trợ giúp', icon: '📞', action: () => {
+                toast.success("Liên hệ hỗ trợ", {
+                    description: "Vui lòng gọi hotline 1900 1234 (Miễn phí) để được hỗ trợ lập tức.",
+                });
+            }
+        },
     ], [toggleDarkMode]);
 
     const filteredCommands = useMemo(() => {

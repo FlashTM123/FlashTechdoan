@@ -17,6 +17,69 @@ class OrderObserver
      */
     const POINTS_PER_VND = 100000; // 1 điểm / 100.000đ
 
+    /**
+     * Luồng chuyển trạng thái hợp lệ.
+     * Key = trạng thái hiện tại, value = các trạng thái cho phép chuyển đến.
+     */
+    private const ALLOWED_TRANSITIONS = [
+        'pending'    => ['pending', 'processing', 'cancelled'],
+        'processing' => ['processing', 'shipped', 'cancelled'],
+        'shipped'    => ['shipped', 'delivered'],
+        'delivered'  => ['delivered'],
+        'cancelled'  => ['cancelled'],
+    ];
+
+    private const STATUS_LABELS = [
+        'pending'    => 'Chờ xử lý',
+        'processing' => 'Đang đóng gói',
+        'shipped'    => 'Đang vận chuyển',
+        'delivered'  => 'Đã giao hàng',
+        'cancelled'  => 'Đã hủy',
+    ];
+
+    /**
+     * Validate chuyển trạng thái TRƯỚC KHI lưu vào DB.
+     * getOriginal('order_status') luôn trả về giá trị DB thực — không bị stale.
+     * Return false → Laravel hủy lệnh save().
+     */
+    public function updating(Order $order)
+    {
+        if (!$order->isDirty('order_status')) {
+            return;
+        }
+
+        $newStatus  = $order->order_status;
+        $prevStatus = $order->getOriginal('order_status') ?? 'pending';
+
+        if (empty($newStatus)) {
+            return; // Để DB constraint xử lý
+        }
+
+        $allowed = self::ALLOWED_TRANSITIONS[$prevStatus] ?? array_keys(self::STATUS_LABELS);
+
+        if (!in_array($newStatus, $allowed)) {
+            // Hoàn tác trong memory
+            $order->order_status = $prevStatus;
+
+            $prevLabel = self::STATUS_LABELS[$prevStatus] ?? $prevStatus;
+            $newLabel  = self::STATUS_LABELS[$newStatus]  ?? $newStatus;
+
+            // Gửi thông báo Filament
+            try {
+                \Filament\Notifications\Notification::make()
+                    ->title('❌ Chuyển trạng thái không hợp lệ')
+                    ->body("Không thể chuyển từ \"{$prevLabel}\" sang \"{$newLabel}\". Phải theo thứ tự: Chờ xử lý → Đang đóng gói → Đang vận chuyển → Đã giao hàng.")
+                    ->danger()
+                    ->persistent()
+                    ->send();
+            } catch (\Exception $e) {
+                Log::warning("OrderObserver: transition notification failed - " . $e->getMessage());
+            }
+
+            return false; // Hủy save
+        }
+    }
+
     public function created(Order $order): void
     {
         Event::dispatch(new OrderCreated($order));
