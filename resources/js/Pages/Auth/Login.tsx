@@ -25,6 +25,22 @@ export default function Login({ status, canResetPassword }: { status?: string; c
         post(route('login'));
     };
 
+    const getErrorConfig = (msg: string) => {
+        if (msg.includes('vô hiệu hóa') || msg.includes('bị khóa') || msg.includes('disabled')) {
+            return { bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-200 dark:border-amber-500/30', dot: 'bg-amber-500', icon: '🔒', title: 'Tài khoản bị khóa', titleColor: 'text-amber-700 dark:text-amber-400', msgColor: 'text-amber-600 dark:text-amber-400/80' };
+        }
+        if (msg.includes('nhiều lần') || msg.includes('throttle') || msg.includes('seconds') || msg.includes('Thử quá')) {
+            return { bg: 'bg-orange-50 dark:bg-orange-500/10', border: 'border-orange-200 dark:border-orange-500/30', dot: 'bg-orange-500', icon: '⏳', title: 'Quá nhiều lần thử', titleColor: 'text-orange-700 dark:text-orange-400', msgColor: 'text-orange-600 dark:text-orange-400/80' };
+        }
+        if (msg.includes('nhân viên') || msg.includes('quản trị')) {
+            return { bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/30', dot: 'bg-blue-500', icon: 'ℹ️', title: 'Sai trang đăng nhập', titleColor: 'text-blue-700 dark:text-blue-400', msgColor: 'text-blue-600 dark:text-blue-400/80' };
+        }
+        return { bg: 'bg-red-50 dark:bg-red-500/10', border: 'border-red-200 dark:border-red-500/30', dot: 'bg-red-500', icon: '!', title: 'Đăng nhập thất bại', titleColor: 'text-red-600 dark:text-red-400', msgColor: 'text-red-500 dark:text-red-400/80' };
+    };
+
+    const errorMsg = errors.email || errors.password || '';
+    const errorConfig = errorMsg ? getErrorConfig(errorMsg) : null;
+
     return (
         <div className="min-h-screen flex bg-white dark:bg-slate-950 font-sans selection:bg-indigo-500/30">
             <Head title="Đăng nhập" />
@@ -62,15 +78,15 @@ export default function Login({ status, canResetPassword }: { status?: string; c
                         </div>
                     )}
 
-                    {/* Hiển thị lỗi sai thông tin đăng nhập */}
-                    {errors.email && (
-                        <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
-                            <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <span className="text-white text-xs font-black">!</span>
+                    {/* Smart error banner */}
+                    {errorConfig && (
+                        <div className={`mb-6 p-4 ${errorConfig.bg} border ${errorConfig.border} rounded-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2`}>
+                            <div className={`w-6 h-6 rounded-full ${errorConfig.dot} flex items-center justify-center flex-shrink-0 mt-0.5 text-white text-xs font-black`}>
+                                {errorConfig.icon}
                             </div>
                             <div>
-                                <p className="text-red-600 dark:text-red-400 text-sm font-bold">Đăng nhập thất bại</p>
-                                <p className="text-red-500 dark:text-red-400/80 text-xs font-medium mt-0.5">Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại.</p>
+                                <p className={`${errorConfig.titleColor} text-sm font-bold`}>{errorConfig.title}</p>
+                                <p className={`${errorConfig.msgColor} text-xs font-medium mt-1 leading-relaxed`}>{errorMsg}</p>
                             </div>
                         </div>
                     )}
@@ -83,10 +99,11 @@ export default function Login({ status, canResetPassword }: { status?: string; c
                                 type="email"
                                 name="email"
                                 value={data.email}
-                                className="w-full"
+                                className={`w-full ${errors.email ? 'border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
                                 autoComplete="username"
                                 onChange={(e) => setData('email', e.target.value)}
                             />
+                            <InputError message={errors.email} className="mt-1 ml-1" />
                         </div>
 
                         <div className="space-y-2">
@@ -106,10 +123,11 @@ export default function Login({ status, canResetPassword }: { status?: string; c
                                 type="password"
                                 name="password"
                                 value={data.password}
-                                className="w-full"
+                                className={`w-full ${errors.password ? 'border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
                                 autoComplete="current-password"
                                 onChange={(e) => setData('password', e.target.value)}
                             />
+                            <InputError message={errors.password} className="mt-1 ml-1" />
                         </div>
 
                         <div className="flex items-center justify-between py-2">
@@ -127,7 +145,7 @@ export default function Login({ status, canResetPassword }: { status?: string; c
 
                         <PrimaryButton className="w-full h-14 group" disabled={processing}>
                             <LogIn className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" />
-                            Đăng nhập ngay
+                            {processing ? 'Đang đăng nhập...' : 'Đăng nhập ngay'}
                         </PrimaryButton>
                     </form>
 

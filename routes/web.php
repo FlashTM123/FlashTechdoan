@@ -18,6 +18,18 @@ Route::get('/compare', fn() => Inertia::render('Compare/ComparePage'))->name('co
 Route::get('/about', fn() => Inertia::render('About'))->name('about');
 Route::get('/api/search', [HomeController::class, 'apiSearch']);
 
+// Phục vụ Service Worker với header cho phép scope toàn trang
+Route::get('/build/sw.js', function () {
+    $path = public_path('build/sw.js');
+    if (!file_exists($path)) abort(404);
+    return response()->file($path, [
+        'Content-Type'           => 'application/javascript',
+        'Service-Worker-Allowed' => '/',
+        'Cache-Control'          => 'no-cache, no-store, must-revalidate',
+    ]);
+});
+
+
 // Public Reviews
 Route::get('/products/{product}/reviews', [ReviewController::class, 'index'])->name('reviews.index');
 
@@ -46,6 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/my-orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/{order}/repay', [\App\Http\Controllers\Api\CheckoutController::class, 'repay'])->name('orders.repay');
     // Reviews
     Route::post('/products/{product}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 

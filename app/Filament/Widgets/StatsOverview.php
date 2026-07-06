@@ -7,7 +7,6 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use App\Models\Product;
 use App\Models\User;
-use App\Models\Review;
 use App\Models\Order;
 
 class StatsOverview extends StatsOverviewWidget
@@ -52,19 +51,17 @@ class StatsOverview extends StatsOverviewWidget
         }
 
         return [
-            $orderStat,
-            $productStat,
+            $orderStat
+                ->url('/admin/orders'),
+
+            $productStat
+                ->url('/admin/products'),
 
             Stat::make('Tổng khách hàng', User::where('role', 'customer')->count())
                 ->description('Tài khoản đã đăng ký')
                 ->descriptionIcon('heroicon-m-user-group')
-                ->color('info'),
-
-            // BUG 1 FIX: dùng status = 'pending' thay vì is_visible = false
-            Stat::make('Đánh giá chờ duyệt', Review::where('status', 'pending')->count())
-                ->description('Chưa hiển thị công khai')
-                ->descriptionIcon('heroicon-m-chat-bubble-left-right')
-                ->color('warning'),
+                ->color('info')
+                ->url('/admin/customers'),
         ];
     }
 }

@@ -14,6 +14,8 @@ export default defineConfig({
             registerType: 'autoUpdate',
             outDir: 'public/build',
             buildBase: '/build/',
+            scope: '/',
+            base: '/',
             manifest: {
                 name: 'FlashTech E-Commerce',
                 short_name: 'FlashTech',
@@ -21,6 +23,8 @@ export default defineConfig({
                 theme_color: '#4f46e5',
                 background_color: '#ffffff',
                 display: 'standalone',
+                start_url: '/',
+                scope: '/',
                 icons: [
                     {
                         src: '/pwa-192x192.png',
@@ -34,7 +38,14 @@ export default defineConfig({
                         purpose: 'any maskable'
                     }
                 ]
-            }
+            },
+            workbox: {
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+                navigateFallback: null,
+            },
+            devOptions: {
+                enabled: false, // Tắt SW trong môi trường dev/local để tránh cache cũ
+            },
         })
     ],
 

@@ -92,7 +92,8 @@ class ProfileController extends Controller
     }
 
     /**
-     * Xóa tài khoản (giữ nguyên mặc định của Breeze hoặc tùy biến sau).
+     * Xóa tài khoản.
+     * Bị chặn nếu còn đơn hàng đang xử lý.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -101,6 +102,18 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        // ── GUARD: Không cho xóa nếu còn đơn hàng đang xử lý ──────────
+        $activeOrdersCount = $user->orders()
+            ->whereIn('order_status', ['pending', 'processing', 'shipped'])
+            ->count();
+
+        if ($activeOrdersCount > 0) {
+            return back()->withErrors([
+                'password' => "Không thể xóa tài khoản vì bạn còn {$activeOrdersCount} đơn hàng đang được xử lý. Vui lòng chờ đơn hàng hoàn tất hoặc hủy đơn trước khi xóa tài khoản.",
+            ]);
+        }
+        // ───────────────────────────────────────────────────────────────
 
         Auth::logout();
 

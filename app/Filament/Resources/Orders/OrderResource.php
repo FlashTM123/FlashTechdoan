@@ -431,7 +431,7 @@ class OrderResource extends Resource
                             ])->grow(),
                             Text::make(fn ($record) => match($record->order_status ?? 'pending') {
                                 'pending'    => 'Chờ xử lý',
-                                'processing' => 'Đang xử lý',
+                                'processing' => 'Đang đóng gói',
                                 'shipped'    => 'Đang giao',
                                 'delivered'  => 'Đã giao',
                                 'cancelled'  => 'Đã hủy',
@@ -622,7 +622,7 @@ class OrderResource extends Resource
                     \Filament\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            // Sắp xếp: pending lên đầu → theo thứ tự xử lý → đơn cũ hơn lên trên trong cùng nhóm
+            // Sắp xếp: pending lên đầu → theo thứ tự xử lý → đơn cũ nhất lên trên trong cùng nhóm
             ->modifyQueryUsing(fn ($query) => $query->orderByRaw("
                 CASE order_status
                     WHEN 'pending'    THEN 1

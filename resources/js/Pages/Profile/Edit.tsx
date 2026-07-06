@@ -7,6 +7,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { Camera, Mail, User as UserIcon, Phone, MapPin, Save, ShieldCheck } from 'lucide-react';
+import DeleteUserForm from '@/Pages/Profile/Partials/DeleteUserForm';
 
 interface ProfileProps {
     mustVerifyEmail: boolean;
@@ -237,6 +238,11 @@ export default function Edit({ mustVerifyEmail, status }: ProfileProps) {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Xóa tài khoản */}
+                <div className="mt-10 pt-8 border-t border-slate-200 dark:border-slate-800">
+                    <DeleteUserForm />
                 </div>
             </div>
         </AppLayout>

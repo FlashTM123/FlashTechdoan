@@ -21,18 +21,32 @@ class OrderPolicy
     }
 
     /**
-     * Cả 3 vai trò đều được cập nhật đơn hàng (đổi trạng thái).
+     * Admin và Moderator mới được tạo đơn hàng thủ công.
+     * Employee không tạo được đơn hàng.
      */
-    public function update(User $user, Order $order): bool
+    public function create(User $user): bool
     {
-        return $this->viewAny($user);
+        return $user->isAdmin() || $user->isModerator();
     }
 
     /**
-     * Chỉ Admin và Moderator mới được xóa đơn hàng.
+     * Cả 3 vai trò đều được cập nhật trạng thái đơn hàng.
+     */
+    public function update(User $user, Order $order): bool
+    {
+        return $user->isAdmin() || $user->isModerator() || $user->isEmployee();
+    }
+
+    /**
+     * Chỉ Admin mới được xóa đơn hàng.
      */
     public function delete(User $user, Order $order): bool
     {
-        return $user->isAdmin() || $user->isModerator();
+        return $user->isAdmin();
+    }
+
+    public function forceDelete(User $user, Order $order): bool
+    {
+        return $user->isAdmin();
     }
 }

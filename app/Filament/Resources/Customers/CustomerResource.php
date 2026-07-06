@@ -137,12 +137,47 @@ class CustomerResource extends Resource
                     ->falseLabel('Bị khóa'),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make()->label('Sửa'),
-                \Filament\Actions\DeleteAction::make()->label('Xóa'),
+                \Filament\Actions\DeleteAction::make()
+                    ->label('Xóa')
+                    ->before(function ($record, \Filament\Actions\DeleteAction $action) {
+                        $activeOrders = $record->orders()
+                            ->whereIn('order_status', ['pending', 'processing', 'shipped'])
+                            ->count();
+
+                        if ($activeOrders > 0) {
+                            \Filament\Notifications\Notification::make()
+                                ->danger()
+                                ->title('⛔ Không thể xóa tài khoản')
+                                ->body("Khách hàng **{$record->name}** còn **{$activeOrders} đơn hàng** đang được xử lý (chờ xử lý / đóng gói / vận chuyển). Vui lòng hoàn tất hoặc hủy tất cả đơn hàng trước khi xóa tài khoản.")
+                                ->persistent()
+                                ->send();
+
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
-                    \Filament\Actions\DeleteBulkAction::make(),
+                    \Filament\Actions\DeleteBulkAction::make()
+                        ->before(function (\Illuminate\Database\Eloquent\Collection $records, \Filament\Actions\DeleteBulkAction $action) {
+                            $blocked = $records->filter(function ($record) {
+                                return $record->orders()
+                                    ->whereIn('order_status', ['pending', 'processing', 'shipped'])
+                                    ->exists();
+                            });
+
+                            if ($blocked->isNotEmpty()) {
+                                $names = $blocked->pluck('name')->join(', ');
+                                \Filament\Notifications\Notification::make()
+                                    ->danger()
+                                    ->title('⛔ Không thể xóa một số tài khoản')
+                                    ->body("Các khách hàng sau vẫn còn đơn hàng đang xử lý và không thể bị xóa: **{$names}**.")
+                                    ->persistent()
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        }),
                 ]),
             ]);
     }

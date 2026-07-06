@@ -179,9 +179,79 @@ class CheckoutController extends Controller
      */
     public function failed(Request $request)
     {
+        // Load thông tin order để frontend có dữ liệu gọi repayment
+        $order = Order::where('order_code', $request->order_code)->first();
+
         return Inertia::render('Checkout/Fail', [
-            'order_code' => $request->order_code
+            'order_code' => $request->order_code,
+            'order_id' => $order?->id
         ]);
+    }
+
+    /**
+     * Tái tạo link thanh toán cho đơn hàng cũ (VNPAY/Bank Transfer)
+     */
+    public function repay(Request $request, Order $order)
+    {
+        // Kiểm tra quyền sở hữu đơn hàng
+        if ($order->user_id !== auth()->id()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Bạn không có quyền thanh toán đơn hàng này.'
+            ], 403);
+        }
+
+        // Chỉ cho phép thanh toán lại khi đơn hàng ở trạng thái chưa hoàn thành/hủy
+        if ($order->order_status === 'cancelled' || $order->order_status === 'delivered') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Đơn hàng này đã hoàn thành hoặc đã bị hủy.'
+            ], 400);
+        }
+
+        // Load phương thức thanh toán
+        $paymentMethod = $order->paymentMethod;
+        if (!$paymentMethod) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Không tìm thấy phương thức thanh toán cho đơn hàng này.'
+            ], 400);
+        }
+
+        $vnpayCodes = ['vnpay', 'bank_transfer'];
+        if (in_array($paymentMethod->code, $vnpayCodes)) {
+            // Cập nhật lại mã đơn hàng nếu cần tránh trùng TxnRef của VNPAY (VNPAY không cho thanh toán trùng mã giao dịch cũ)
+            // Ta thêm hậu tố timestamp nhỏ vào sau hoặc đổi hẳn order_code mới nếu đã quá 15 phút.
+            // Cách đơn giản nhất là cập nhật order_code mới hoặc giữ nguyên nhưng VNPAY có thể báo trùng.
+            // Để chắc chắn, ta đổi order_code mới:
+            $oldCode = $order->order_code;
+            $newCode = 'FT' . strtoupper(Str::random(10));
+            $order->update([
+                'order_code' => $newCode,
+                'payment_status' => 'pending' // Reset lại trạng thái
+            ]);
+
+            try {
+                $vnpayUrl = $this->vnpayService->createPaymentUrl($order);
+                return response()->json([
+                    'status' => 'success',
+                    'payment_url' => $vnpayUrl,
+                    'order_code' => $newCode
+                ]);
+            } catch (\Exception $e) {
+                // Phục hồi lại mã cũ nếu lỗi
+                $order->update(['order_code' => $oldCode]);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Không thể tạo link thanh toán mới. Vui lòng thử lại sau.'
+                ], 500);
+            }
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Phương thức thanh toán hiện tại không hỗ trợ cổng online.'
+        ], 400);
     }
 
     /**
