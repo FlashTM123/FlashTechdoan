@@ -541,50 +541,26 @@ class OrderResource extends Resource
                     ->money('VND')
                     ->sortable(),
 
-                Tables\Columns\SelectColumn::make('order_status')
+                // Hiện status dạng badge — không dùng SelectColumn để tránh flash bug
+                Tables\Columns\TextColumn::make('order_status')
                     ->label('Trạng thái')
-                    ->options(fn ($record) => self::getAllowedTransitions($record->order_status ?? 'pending'))
-                    ->placeholder(null)
-                    ->disabled(fn ($record) => in_array($record->order_status, ['cancelled', 'delivered']))
-                    ->afterStateUpdated(function ($state, $old, $record) {
-                        // ── BỎ QUA NẾU STATE RỖng/NULL ───────────────────────────────────
-                        if (empty($state)) {
-                            return;
-                        }
-
-                        // ── VALIDATE BẰNG GIÁ TRỊ DB THỰC (không dùng $old từ Livewire vì bị stale) ──
-                        // Lấy lại trạng thái THỰC TẾ từ DB trước khi Filament ghi $state
-                        // (Filament đã save rồi nên $record->order_status = $state, phải query riêng)
-                        $freshPrevious = \App\Models\Order::where('id', $record->id)
-                            ->value('order_status') ?? 'pending';
-                        // Lúc này freshPrevious = $state (Filament đã save), nên dùng $state
-                        // làm điểm cuối để suy ngược lại previous không được.
-                        // → Thay vào đó: chỉ validate $state là một giá trị hợp lệ trong hệ thống.
-                        $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-                        if (!in_array($state, $validStatuses)) {
-                            $record->update(['order_status' => $old ?? 'pending']);
-                            \Filament\Notifications\Notification::make()
-                                ->title('❌ Trạng thái không hợp lệ')
-                                ->body("Giá trị \"$state\" không phải trạng thái hợp lệ.")
-                                ->danger()
-                                ->send();
-                            return;
-                        }
-
-                        // TỰ ĐỘNG GÁN NGƯỜI DUYỆT khi trạng thái thay đổi sang processing/shipped/delivered
-                        if (in_array($state, ['processing', 'shipped', 'delivered']) && !$record->processed_by_id) {
-                            $record->update(['processed_by_id' => auth()->id()]);
-                        }
-
-                        // Logic: Chỉ hoàn kho khi trạng thái CHUYỂN THÀNH 'cancelled'
-                        if ($state === 'cancelled') {
-                            self::restoreStock($record);
-                        }
-
-                        // PHÁT SỰ KIỆN: Thông báo cho khách hàng khi Admin đổi trạng thái
-                        event(new \App\Events\OrderStatusUpdated($record));
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'pending'    => 'Chờ xử lý',
+                        'processing' => 'Đang đóng gói',
+                        'shipped'    => 'Đang vận chuyển',
+                        'delivered'  => 'Đã giao hàng',
+                        'cancelled'  => 'Đã hủy',
+                        default      => $state,
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending'    => 'warning',
+                        'processing' => 'info',
+                        'shipped'    => 'primary',
+                        'delivered'  => 'success',
+                        'cancelled'  => 'danger',
+                        default      => 'gray',
                     }),
-
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Ngày đặt')
@@ -613,6 +589,84 @@ class OrderResource extends Resource
                     ->query(fn ($query) => $query->where('order_status', 'pending')),
             ])
             ->actions([
+                // ── CHUYỂN TRẠNG THÁI TIẾP THEO ─────────────────────────────────────
+                \Filament\Actions\Action::make('advance')
+                    ->label(fn ($record): string => match ($record->order_status) {
+                        'pending'    => '→ Đóng gói',
+                        'processing' => '→ Giao hàng',
+                        'shipped'    => '→ Đã giao',
+                        default      => '',
+                    })
+                    ->icon(fn ($record): string => match ($record->order_status) {
+                        'pending'    => 'heroicon-m-archive-box',
+                        'processing' => 'heroicon-m-truck',
+                        'shipped'    => 'heroicon-m-check-badge',
+                        default      => 'heroicon-m-arrow-right',
+                    })
+                    ->color('success')
+                    ->button()
+                    ->hidden(fn ($record): bool => !in_array($record->order_status, ['pending', 'processing', 'shipped']))
+                    ->action(function ($record): void {
+                        $nextStatus = match ($record->order_status) {
+                            'pending'    => 'processing',
+                            'processing' => 'shipped',
+                            'shipped'    => 'delivered',
+                            default      => null,
+                        };
+
+                        if (!$nextStatus) return;
+
+                        $record->update(['order_status' => $nextStatus]);
+
+                        // Gán người duyệt
+                        if (!$record->processed_by_id) {
+                            $record->update(['processed_by_id' => auth()->id()]);
+                        }
+
+                        // Thông báo realtime
+                        event(new \App\Events\OrderStatusUpdated($record));
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('✅ Cập nhật thành công')
+                            ->body('Đơn hàng đã chuyển sang: ' . match ($nextStatus) {
+                                'processing' => 'Đang đóng gói',
+                                'shipped'    => 'Đang vận chuyển',
+                                'delivered'  => 'Đã giao hàng',
+                                default      => $nextStatus,
+                            })
+                            ->success()
+                            ->send();
+                    }),
+
+                // ── HỦY ĐƠN HÀNG (chỉ khi pending hoặc processing) ─────────────────
+                \Filament\Actions\Action::make('cancel_order')
+                    ->label('Hủy đơn')
+                    ->icon('heroicon-m-x-circle')
+                    ->color('danger')
+                    ->button()
+                    ->hidden(fn ($record): bool => !in_array($record->order_status, ['pending', 'processing']))
+                    ->requiresConfirmation()
+                    ->modalHeading('Xác nhận hủy đơn hàng')
+                    ->modalDescription(fn ($record): string => "Bạn có chắc chắn muốn hủy đơn #{$record->order_code}? Hàng sẽ được hoàn lại kho và hành động này không thể hoàn tác.")
+                    ->modalSubmitActionLabel('Đúng, hủy đơn!')
+                    ->modalCancelActionLabel('Quay lại')
+                    ->action(function ($record): void {
+                        $record->update(['order_status' => 'cancelled']);
+
+                        // Hoàn kho
+                        self::restoreStock($record);
+
+                        // Thông báo realtime
+                        event(new \App\Events\OrderStatusUpdated($record));
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('🚫 Đã hủy đơn hàng')
+                            ->body("Đơn #{$record->order_code} đã bị hủy. Hàng tồn kho đã được hoàn lại.")
+                            ->warning()
+                            ->send();
+                    }),
+
+                // ── XEM CHI TIẾT ─────────────────────────────────────────────────────
                 \Filament\Actions\ViewAction::make()
                     ->slideOver()
                     ->modalWidth(\Filament\Support\Enums\Width::FourExtraLarge),

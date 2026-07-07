@@ -28,7 +28,7 @@ const Checkout: React.FC<Props> = ({ auth, paymentMethods }) => {
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState('');
 
-    const filteredPaymentMethods = paymentMethods.filter(m => m.code !== 'momo');
+    const filteredPaymentMethods = paymentMethods.filter(m => m.code !== 'bank_transfer');
 
     const handleApplyCoupon = async () => {
         const trimmed = couponCode.trim().toUpperCase();
@@ -66,8 +66,15 @@ const Checkout: React.FC<Props> = ({ auth, paymentMethods }) => {
     const formatPrice = (v: number) => v.toLocaleString('vi-VN') + 'đ';
 
     const paymentIcons: Record<string, React.ReactNode> = {
-        vnpay: <Wallet className="w-5 h-5" />,
-        bank_transfer: <Banknote className="w-5 h-5" />,
+        vnpay: (
+            <svg viewBox="0 0 80 28" className="w-12 h-auto" xmlns="http://www.w3.org/2000/svg">
+                <rect width="80" height="28" rx="5" fill="#0068FF"/>
+                <text x="50%" y="52%" dominantBaseline="middle" textAnchor="middle"
+                    fill="white" fontSize="13" fontWeight="800" fontFamily="Arial, sans-serif"
+                    letterSpacing="0.5">VNPay</text>
+            </svg>
+        ),
+        cod: <Banknote className="w-5 h-5" />,
     };
 
     // Step indicator
@@ -222,6 +229,32 @@ const Checkout: React.FC<Props> = ({ auth, paymentMethods }) => {
                                             </button>
                                         );
                                     })}
+
+                                    {/* MoMo — Đang phát triển */}
+                                    <div
+                                        className="relative p-4 rounded-2xl border-2 text-left flex items-center gap-4 border-slate-200 dark:border-slate-700/40 bg-slate-50/20 dark:bg-slate-800/10 opacity-60 cursor-not-allowed select-none"
+                                        title="Tính năng đang phát triển"
+                                    >
+                                        {/* Badge */}
+                                        <span className="absolute top-2.5 right-3 text-[9px] font-black uppercase tracking-widest bg-amber-400/20 text-amber-500 dark:text-amber-400 border border-amber-400/30 px-2 py-0.5 rounded-full">
+                                            Đang phát triển
+                                        </span>
+
+                                        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                            {/* MoMo logo bằng SVG inline */}
+                                            <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <rect width="40" height="40" rx="10" fill="#AE2070"/>
+                                                <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold" fontFamily="Arial">MoMo</text>
+                                            </svg>
+                                        </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-black text-sm text-slate-500 dark:text-slate-400">
+                                                Ví điện tử MoMo
+                                            </p>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">MOMO</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
