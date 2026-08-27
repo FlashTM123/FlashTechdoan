@@ -101,7 +101,7 @@ unset($__defined_vars, $__key, $__value); ?>
                 'fi-scrollable' => $maxHeight || $size,
             ]); ?>"
             style="<?php echo \Illuminate\Support\Arr::toCssStyles([
-                "max-height: {$maxHeight}" => $maxHeight,
+                ('max-height: ' . e($maxHeight)) => $maxHeight,
             ]) ?>"
         >
             <?php echo e($slot); ?>

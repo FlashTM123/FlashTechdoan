@@ -40,7 +40,7 @@ unset($__defined_vars, $__key, $__value); ?>
     <?php echo e(($attributes ?? new \Illuminate\View\ComponentAttributeBag)
             ->gridColumn($columnSpan, $columnStart)
             ->class(['fi-section fi-loading-section'])
-            ->style(['height: ' . ($height ?? '8rem')])); ?>
+            ->style(['height: ' . e($height ?? '8rem')])); ?>
 
 ></div>
 <?php /**PATH /var/www/html/vendor/filament/support/resources/views/components/loading-section.blade.php ENDPATH**/ ?>

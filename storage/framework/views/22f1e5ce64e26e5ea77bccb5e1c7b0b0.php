@@ -23,8 +23,8 @@
                 ($alignment instanceof Alignment) ? "fi-align-{$alignment->value}" : $alignment,
             ])
             ->style([
-                "height: {$height}" => $height,
-                "width: {$width}" => $width,
+                ('height: ' . e($height)) => $height,
+                ('width: ' . e($width)) => $width,
             ])); ?>
 
 />

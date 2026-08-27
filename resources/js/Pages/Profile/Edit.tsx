@@ -6,7 +6,8 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
-import { User, Camera, Mail, User as UserIcon, Phone, MapPin, Save, ShieldCheck } from 'lucide-react';
+import { Camera, Mail, User as UserIcon, Phone, MapPin, Save, ShieldCheck } from 'lucide-react';
+import DeleteUserForm from '@/Pages/Profile/Partials/DeleteUserForm';
 
 interface ProfileProps {
     mustVerifyEmail: boolean;
@@ -50,19 +51,19 @@ export default function Edit({ mustVerifyEmail, status }: ProfileProps) {
         <AppLayout>
             <Head title="Hồ sơ cá nhân" />
 
-            <div className="py-12 bg-slate-950 min-h-screen">
+            <div className="py-12 bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-500">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
                     
                     {/* Header Section */}
-                    <div className="relative overflow-hidden bg-slate-900 rounded-3xl p-8 border border-slate-800 shadow-2xl">
+                    <div className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-150 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none">
                         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
                             {/* Avatar Upload */}
                             <div className="relative group">
-                                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 bg-slate-800">
+                                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-200 dark:border-indigo-600/30 bg-slate-100 dark:bg-slate-800">
                                     {preview ? (
                                         <img src={preview} alt={user.name} className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-slate-500">
+                                        <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800">
                                             <UserIcon size={48} />
                                         </div>
                                     )}
@@ -83,15 +84,15 @@ export default function Edit({ mustVerifyEmail, status }: ProfileProps) {
                             </div>
 
                             <div className="text-center md:text-left">
-                                <h1 className="text-3xl font-bold text-white mb-2">{user.name}</h1>
-                                <p className="text-slate-400 flex items-center justify-center md:justify-start gap-2">
-                                    <Mail size={16} /> {user.email}
+                                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{user.name}</h1>
+                                <p className="text-slate-500 dark:text-slate-400 flex items-center justify-center md:justify-start gap-2 font-medium">
+                                    <Mail size={16} className="text-indigo-500" /> {user.email}
                                 </p>
-                                <div className="mt-4 flex gap-3">
-                                    <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 text-xs font-bold rounded-full border border-indigo-500/20 uppercase">
+                                <div className="mt-4 flex gap-3 justify-center md:justify-start">
+                                    <span className="px-3 py-1 bg-indigo-500/10 text-indigo-650 dark:text-indigo-400 text-xs font-bold rounded-full border border-indigo-500/20 uppercase tracking-wider">
                                         {user.role}
                                     </span>
-                                    <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/20">
+                                    <span className="px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/20">
                                         {user.profile?.points || 0} Points
                                     </span>
                                 </div>
@@ -99,19 +100,19 @@ export default function Edit({ mustVerifyEmail, status }: ProfileProps) {
                         </div>
                         
                         {/* Background Decoration */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/10 blur-[100px] -mr-32 -mt-32"></div>
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 dark:bg-indigo-600/10 blur-[100px] -mr-32 -mt-32"></div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Main Form */}
                         <div className="lg:col-span-2 space-y-8">
-                            <section className="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-xl">
+                            <section className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-150 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none">
                                 <header className="mb-8">
-                                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                         <ShieldCheck className="text-indigo-500" />
                                         Thông tin cơ bản
                                     </h2>
-                                    <p className="mt-1 text-sm text-slate-400">
+                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                         Cập nhật thông tin định danh và liên lạc của bạn.
                                     </p>
                                 </header>
@@ -149,7 +150,7 @@ export default function Edit({ mustVerifyEmail, status }: ProfileProps) {
                                         <div>
                                             <InputLabel htmlFor="phone" value="Số điện thoại" />
                                             <div className="relative">
-                                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
+                                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                                                     <Phone size={16} />
                                                 </div>
                                                 <TextInput
@@ -166,12 +167,12 @@ export default function Edit({ mustVerifyEmail, status }: ProfileProps) {
                                         <div className="md:col-span-2">
                                             <InputLabel htmlFor="address" value="Địa chỉ nhận hàng" />
                                             <div className="relative">
-                                                <div className="absolute top-4 left-4 text-slate-500">
+                                                <div className="absolute top-4 left-4 text-slate-400 dark:text-slate-500">
                                                     <MapPin size={16} />
                                                 </div>
                                                 <textarea
                                                     id="address"
-                                                    className="mt-1 block w-full bg-slate-800/50 border-2 border-slate-800 rounded-2xl py-3 px-5 pl-11 text-sm font-medium text-white focus:border-indigo-500 focus:bg-slate-800 transition-all outline-none min-h-[100px]"
+                                                    className="mt-1 block w-full bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-5 pl-11 text-sm font-medium text-slate-900 dark:text-white focus:border-indigo-600 dark:focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none focus:ring-0 min-h-[100px]"
                                                     value={data.address}
                                                     onChange={(e) => setData('address', e.target.value)}
                                                     placeholder="Số nhà, tên đường, phường/xã..."
@@ -194,7 +195,7 @@ export default function Edit({ mustVerifyEmail, status }: ProfileProps) {
                                             leave="transition ease-in-out"
                                             leaveTo="opacity-0"
                                         >
-                                            <p className="text-sm text-emerald-400 font-medium">Đã lưu thành công.</p>
+                                            <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">Đã lưu thành công.</p>
                                         </Transition>
                                     </div>
                                 </form>
@@ -208,7 +209,7 @@ export default function Edit({ mustVerifyEmail, status }: ProfileProps) {
                                     <h3 className="text-lg font-bold mb-4">Hạng thành viên</h3>
                                     <div className="flex items-end gap-2 mb-6">
                                         <span className="text-4xl font-black">SILVER</span>
-                                        <span className="text-indigo-200 text-sm mb-1">Cần 500 điểm để lên GOLD</span>
+                                        <span className="text-indigo-200 text-sm mb-1 font-medium">Cần 500 điểm để lên GOLD</span>
                                     </div>
                                     <div className="w-full bg-white/20 h-2 rounded-full mb-2">
                                         <div className="bg-white h-full rounded-full" style={{ width: '45%' }}></div>
@@ -218,25 +219,30 @@ export default function Edit({ mustVerifyEmail, status }: ProfileProps) {
                                 <ShieldCheck className="absolute -bottom-8 -right-8 w-48 h-48 text-white/10 rotate-12 group-hover:rotate-0 transition-transform duration-500" />
                             </div>
 
-                            <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800">
-                                <h3 className="text-white font-bold mb-4">Thông tin tài khoản</h3>
+                            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-150 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none">
+                                <h3 className="text-slate-900 dark:text-white font-bold mb-4">Thông tin tài khoản</h3>
                                 <div className="space-y-4">
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-slate-400">ID người dùng</span>
-                                        <span className="text-slate-200 font-mono">#{user.id.toString().padStart(5, '0')}</span>
+                                        <span className="text-slate-500 dark:text-slate-400">ID người dùng</span>
+                                        <span className="text-slate-800 dark:text-slate-200 font-mono font-bold">#{user.id.toString().padStart(5, '0')}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-slate-400">Ngày tham gia</span>
-                                        <span className="text-slate-200">{new Date(user.created_at).toLocaleDateString('vi-VN')}</span>
+                                        <span className="text-slate-500 dark:text-slate-400">Ngày tham gia</span>
+                                        <span className="text-slate-800 dark:text-slate-200 font-bold">{new Date(user.created_at).toLocaleDateString('vi-VN')}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-slate-400">Trạng thái</span>
-                                        <span className="text-emerald-400 font-bold">Hoạt động</span>
+                                        <span className="text-slate-500 dark:text-slate-400">Trạng thái</span>
+                                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">Hoạt động</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Xóa tài khoản */}
+                <div className="mt-10 pt-8 border-t border-slate-200 dark:border-slate-800">
+                    <DeleteUserForm />
                 </div>
             </div>
         </AppLayout>

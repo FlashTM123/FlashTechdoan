@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Customers\Pages;
 
 use App\Filament\Resources\Customers\CustomerResource;
-use Filament\Actions\CreateAction;
+use App\Filament\Resources\Customers\Widgets\CustomerStatsWidget;
 use Filament\Resources\Pages\ListRecords;
 
 class ListCustomers extends ListRecords
@@ -13,5 +13,12 @@ class ListCustomers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            CustomerStatsWidget::class,
+        ];
     }
 }

@@ -2,23 +2,20 @@ import React, { useState } from 'react';
 import { useCart } from '../Context/CartContext';
 import AppLayout from '@/Layouts/AppLayout';
 import { Head, router } from '@inertiajs/react';
-import { CreditCard, MapPin, Phone, MessageSquare, ShieldCheck, ArrowRight, Wallet, Banknote, ShoppingBag, Tag, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import {
+    CreditCard, MapPin, Phone, MessageSquare, ShieldCheck, ArrowRight,
+    Wallet, Banknote, ShoppingBag, Tag, CheckCircle, XCircle, Loader2,
+    Truck, Lock, Gift, ChevronRight
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
-interface PaymentMethod {
-    id: number;
-    name: string;
-    code: string;
-}
-
-interface Props {
-    auth: any;
-    paymentMethods: PaymentMethod[];
-}
+interface PaymentMethod { id: number; name: string; code: string; }
+interface Props { auth: any; paymentMethods: PaymentMethod[]; }
 
 const Checkout: React.FC<Props> = ({ auth, paymentMethods }) => {
     const { cart, totalPrice, finalTotal, appliedCoupon, setAppliedCoupon, setCart } = useCart();
+
     const [formData, setFormData] = useState({
         shipping_address: auth.user.profile?.address || '',
         phone: auth.user.profile?.phone || '',
@@ -27,391 +24,408 @@ const Checkout: React.FC<Props> = ({ auth, paymentMethods }) => {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    // ─── Coupon UI State (local only) ───────────────────────────────
     const [couponCode, setCouponCode] = useState('');
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState('');
 
+    const filteredPaymentMethods = paymentMethods.filter(m => m.code !== 'bank_transfer');
+
     const handleApplyCoupon = async () => {
         const trimmed = couponCode.trim().toUpperCase();
         if (!trimmed) return;
-        setCouponLoading(true);
-        setCouponError('');
-        setAppliedCoupon(null);
+        setCouponLoading(true); setCouponError(''); setAppliedCoupon(null);
         try {
-            const response = await axios.post(route('coupon.apply'), {
-                code: trimmed,
-                order_total: totalPrice,
-            });
-            if (response.data.status === 'success') {
-                setAppliedCoupon(response.data);
-                setCouponCode('');
-            }
+            const res = await axios.post(route('coupon.apply'), { code: trimmed, order_total: totalPrice });
+            if (res.data.status === 'success') { setAppliedCoupon(res.data); setCouponCode(''); }
         } catch (err: any) {
-            const msg =
-                err?.response?.data?.message ||
-                err?.response?.data?.errors?.code?.[0] ||
-                'Có lỗi xảy ra, vui lòng thử lại.';
-            setCouponError(msg);
-        } finally {
-            setCouponLoading(false);
-        }
+            setCouponError(err?.response?.data?.message || err?.response?.data?.errors?.code?.[0] || 'Có lỗi xảy ra.');
+        } finally { setCouponLoading(false); }
     };
 
-    const handleRemoveCoupon = () => {
-        setAppliedCoupon(null);
-        setCouponError('');
-        setCouponCode('');
-    };
+    const handleRemoveCoupon = () => { setAppliedCoupon(null); setCouponError(''); setCouponCode(''); };
 
     const handlePlaceOrder = async () => {
-        if (!formData.payment_method_id) {
-            setError('Vui lòng chọn phương thức thanh toán.');
-            return;
-        }
-        if (!formData.shipping_address || !formData.phone) {
-            setError('Vui lòng điền đầy đủ thông tin giao hàng.');
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
+        if (!formData.payment_method_id) { setError('Vui lòng chọn phương thức thanh toán.'); return; }
+        if (!formData.shipping_address || !formData.phone) { setError('Vui lòng điền đầy đủ thông tin giao hàng.'); return; }
+        setLoading(true); setError(null);
         try {
-            const response = await axios.post('/checkout', {
+            const res = await axios.post('/checkout', {
                 ...formData,
-                items: cart.map((item: any) => ({
-                    variant_id: item.variant_id,
-                    quantity: item.quantity,
-                })),
+                items: cart.map((item: any) => ({ variant_id: item.variant_id, quantity: item.quantity })),
                 coupon_code: appliedCoupon?.coupon_code ?? null,
             });
-
-            if (response.data.status === 'success') {
-                // Xóa giỏ hàng và coupon ở Frontend
-                setCart([]);
-                setAppliedCoupon(null);
-                localStorage.removeItem('flash_cart');
-
-                if (response.data.payment_url) {
-                    window.location.href = response.data.payment_url;
-                } else {
-                    router.visit('/checkout/success?order_code=' + response.data.order_code);
-                }
+            if (res.data.status === 'success') {
+                setCart([]); setAppliedCoupon(null); localStorage.removeItem('flash_cart');
+                if (res.data.payment_url) window.location.href = res.data.payment_url;
+                else router.visit('/checkout/success?order_code=' + res.data.order_code);
             }
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng.');
-        } finally {
-            setLoading(false);
-        }
+        } catch (err: any) { setError(err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng.'); }
+        finally { setLoading(false); }
     };
+
+    const formatPrice = (v: number) => v.toLocaleString('vi-VN') + 'đ';
+
+    const paymentIcons: Record<string, React.ReactNode> = {
+        vnpay: (
+            <svg viewBox="0 0 80 28" className="w-12 h-auto" xmlns="http://www.w3.org/2000/svg">
+                <rect width="80" height="28" rx="5" fill="#0068FF"/>
+                <text x="50%" y="52%" dominantBaseline="middle" textAnchor="middle"
+                    fill="white" fontSize="13" fontWeight="800" fontFamily="Arial, sans-serif"
+                    letterSpacing="0.5">VNPay</text>
+            </svg>
+        ),
+        cod: <Banknote className="w-5 h-5" />,
+    };
+
+    // Step indicator
+    const steps = ['Giỏ hàng', 'Thanh toán', 'Xác nhận'];
 
     return (
         <AppLayout>
             <Head title="Thanh toán - FlashTech" />
 
-            <div className="min-h-screen py-12 bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
-                <div className="max-w-7xl mx-auto px-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center gap-4 mb-12"
-                    >
-                        <h1 className="text-5xl font-black text-slate-900 dark:text-white font-display tracking-tight">Thanh toán <span className="text-indigo-600">.</span></h1>
-                    </motion.div>
+            <div className="min-h-screen py-6 md:py-10">
+                {/* ── Breadcrumb steps ───────────────────────────────────── */}
+                <div className="flex items-center gap-2 mb-10 text-xs font-bold">
+                    {steps.map((step, i) => (
+                        <React.Fragment key={step}>
+                            <span className={i === 1 ? 'text-indigo-500' : 'text-slate-400 dark:text-slate-600'}>
+                                {step}
+                            </span>
+                            {i < steps.length - 1 && <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-700" />}
+                        </React.Fragment>
+                    ))}
+                </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-                        {/* CỘT TRÁI: THÔNG TIN */}
-                        <div className="lg:col-span-2 space-y-8">
-                            {/* THÔNG TIN NHẬN HÀNG */}
-                            <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none"
-                            >
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                                        <MapPin className="w-6 h-6" />
+                {/* ── Title ─────────────────────────────────────────────── */}
+                <div className="mb-8">
+                    <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                        Thanh toán <span className="text-indigo-500">.</span>
+                    </h1>
+                    <p className="text-slate-400 text-sm mt-1">Điền thông tin để hoàn tất đơn hàng của bạn</p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_440px] gap-8 items-start">
+
+                    {/* ── LEFT: Forms ────────────────────────────────────── */}
+                    <div className="space-y-6">
+
+                        {/* Shipping info */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden"
+                        >
+                            {/* Section header */}
+                            <div className="px-7 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                                <div className="w-9 h-9 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-500">
+                                    <MapPin className="w-4.5 h-4.5" />
+                                </div>
+                                <div>
+                                    <h2 className="text-base font-black text-slate-900 dark:text-white">Thông tin giao hàng</h2>
+                                    <p className="text-[11px] text-slate-400 font-medium">Địa chỉ nhận hàng và liên lạc</p>
+                                </div>
+                            </div>
+
+                            <div className="p-7 space-y-5">
+                                {/* Address */}
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                                        Địa chỉ nhận hàng <span className="text-rose-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <input
+                                            type="text"
+                                            value={formData.shipping_address}
+                                            onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
+                                            placeholder="Số nhà, tên đường, phường/xã, quận/huyện..."
+                                            className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-2xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-medium"
+                                        />
                                     </div>
-                                    <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 font-display">Thông tin nhận hàng</h2>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2 md:col-span-2">
-                                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-4">Địa chỉ giao hàng</label>
-                                        <div className="relative group">
-                                            <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                                            <input
-                                                type="text"
-                                                value={formData.shipping_address}
-                                                onChange={(e) => setFormData({...formData, shipping_address: e.target.value})}
-                                                className="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 dark:text-white transition-all font-medium"
-                                                placeholder="Số nhà, tên đường, phường/xã..."
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-4">Số điện thoại</label>
-                                        <div className="relative group">
-                                            <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                                            <input
-                                                type="text"
-                                                value={formData.phone}
-                                                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                                className="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 dark:text-white transition-all font-medium"
-                                                placeholder="09xx xxx xxx"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2 md:col-span-2">
-                                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-4">Ghi chú đơn hàng</label>
-                                        <div className="relative group">
-                                            <MessageSquare className="absolute left-5 top-5 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                                            <textarea
-                                                value={formData.notes}
-                                                onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                                                className="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 dark:text-white transition-all font-medium min-h-[120px]"
-                                                placeholder="Yêu cầu đặc biệt về đơn hàng..."
-                                            />
-                                        </div>
+                                {/* Phone */}
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                                        Số điện thoại <span className="text-rose-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <input
+                                            type="tel"
+                                            value={formData.phone}
+                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                            placeholder="09xx xxx xxx"
+                                            className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-2xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-medium"
+                                        />
                                     </div>
                                 </div>
-                            </motion.div>
 
-                            {/* PHƯƠNG THỨC THANH TOÁN */}
-                            <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.1 }}
-                                className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none"
-                            >
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                                        <CreditCard className="w-6 h-6" />
+                                {/* Notes */}
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                                        Ghi chú vận chuyển <span className="text-slate-400">(tuỳ chọn)</span>
+                                    </label>
+                                    <div className="relative">
+                                        <MessageSquare className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+                                        <textarea
+                                            value={formData.notes}
+                                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                            placeholder="Lời nhắn cho nhân viên giao nhận hoặc cấu hình riêng..."
+                                            rows={3}
+                                            className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-2xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-medium resize-none"
+                                        />
                                     </div>
-                                    <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 font-display">Phương thức thanh toán</h2>
                                 </div>
+                            </div>
+                        </motion.div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {paymentMethods.map((method) => (
-                                        <div
-                                            key={method.id}
-                                            onClick={() => setFormData({...formData, payment_method_id: method.id.toString()})}
-                                            className={`relative p-6 rounded-3xl border-2 cursor-pointer transition-all duration-300 group ${
-                                                formData.payment_method_id === method.id.toString()
-                                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
-                                                : 'border-slate-100 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/30'
-                                            }`}
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-                                                    formData.payment_method_id === method.id.toString()
-                                                    ? 'bg-indigo-500 text-white'
-                                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                        {/* Payment methods */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.08 }}
+                            className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden"
+                        >
+                            <div className="px-7 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                                <div className="w-9 h-9 bg-violet-50 dark:bg-violet-500/10 rounded-xl flex items-center justify-center text-violet-500">
+                                    <CreditCard className="w-4.5 h-4.5" />
+                                </div>
+                                <div>
+                                    <h2 className="text-base font-black text-slate-900 dark:text-white">Phương thức thanh toán</h2>
+                                    <p className="text-[11px] text-slate-400 font-medium">Chọn hình thức thanh toán phù hợp</p>
+                                </div>
+                            </div>
+
+                            <div className="p-7">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {filteredPaymentMethods.map((method) => {
+                                        const isSelected = formData.payment_method_id === method.id.toString();
+                                        return (
+                                            <button
+                                                key={method.id}
+                                                onClick={() => setFormData({ ...formData, payment_method_id: method.id.toString() })}
+                                                className={`relative p-4 rounded-2xl border-2 text-left transition-all duration-200 flex items-center gap-4 ${
+                                                    isSelected
+                                                        ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10 shadow-md shadow-indigo-500/10 ring-4 ring-indigo-500/5'
+                                                        : 'border-slate-200 dark:border-slate-700/60 bg-slate-50/30 dark:bg-slate-800/20 hover:border-indigo-300 dark:hover:border-slate-600'
+                                                }`}
+                                            >
+                                                <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
+                                                    isSelected ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
                                                 }`}>
-                                                    {method.code === 'vnpay' ? <Wallet className="w-6 h-6" /> : <Banknote className="w-6 h-6" />}
+                                                    {paymentIcons[method.code] || <Banknote className="w-5 h-5" />}
                                                 </div>
-                                                <div>
-                                                    <h3 className={`font-black tracking-tight ${
-                                                        formData.payment_method_id === method.id.toString() ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'
-                                                    }`}>{method.name}</h3>
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{method.code}</p>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={`font-black text-sm transition-colors ${isSelected ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                                                        {method.name}
+                                                    </p>
+                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{method.code}</p>
                                                 </div>
-                                            </div>
-                                            {formData.payment_method_id === method.id.toString() && (
-                                                <div className="absolute top-4 right-4">
-                                                    <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
-                                                        <ShieldCheck className="w-4 h-4 text-white" />
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </motion.div>
-                        </div>
+                                                {isSelected && (
+                                                    <CheckCircle className="w-5 h-5 text-indigo-500 fill-indigo-500 text-white flex-shrink-0" strokeWidth={2.5} />
+                                                )}
+                                            </button>
+                                        );
+                                    })}
 
-                        {/* CỘT PHẢI: TÓM TẮT ĐƠN HÀNG */}
-                        <div className="space-y-8 sticky top-32">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="bg-slate-900 p-10 rounded-[3rem] text-white shadow-2xl shadow-indigo-900/40 border border-indigo-500/20"
-                            >
-                                <h2 className="text-2xl font-black mb-8 font-display tracking-tight flex items-center gap-3">
-                                    <ShoppingBag className="w-6 h-6 text-indigo-400" />
-                                    Tóm tắt đơn hàng
-                                </h2>
-
-                                <div className="space-y-6 max-h-[300px] overflow-y-auto pr-4 mb-10 custom-scrollbar">
-                                    {cart.map((item) => (
-                                        <div key={item.variant_id} className="flex gap-4">
-                                            <div className="w-16 h-16 bg-slate-800 rounded-2xl p-2 flex-shrink-0">
-                                                <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="text-sm font-bold truncate">{item.name}</h4>
-                                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{item.variant_name}</p>
-                                                <div className="flex justify-between items-center mt-1">
-                                                    <span className="text-xs text-indigo-400 font-black">x{item.quantity}</span>
-                                                    <span className="text-sm font-black">{(item.price * item.quantity).toLocaleString()}đ</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="space-y-4 mb-10 pt-6 border-t border-slate-800">
-                                    <div className="flex justify-between text-slate-400 font-bold text-sm">
-                                        <span className="uppercase tracking-widest">Tạm tính</span>
-                                        <span className="text-white">{totalPrice.toLocaleString()}đ</span>
-                                    </div>
-                                    <div className="flex justify-between text-slate-400 font-bold text-sm border-b border-slate-800 pb-5">
-                                        <span className="uppercase tracking-widest">Vận chuyển</span>
-                                        <span className="text-emerald-400 uppercase tracking-widest text-[10px]">Miễn phí</span>
-                                    </div>
-
-                                    {/* ─── Mã giảm giá ─── */}
-                                    <div className="pt-2 pb-4 border-b border-slate-800">
-                                        <span className="uppercase tracking-widest text-slate-400 font-bold text-xs mb-3 flex items-center gap-2">
-                                            <Tag className="w-3.5 h-3.5" />
-                                            Mã giảm giá
+                                    {/* MoMo — Đang phát triển */}
+                                    <div
+                                        className="relative p-4 rounded-2xl border-2 text-left flex items-center gap-4 border-slate-200 dark:border-slate-700/40 bg-slate-50/20 dark:bg-slate-800/10 opacity-60 cursor-not-allowed select-none"
+                                        title="Tính năng đang phát triển"
+                                    >
+                                        {/* Badge */}
+                                        <span className="absolute top-2.5 right-3 text-[9px] font-black uppercase tracking-widest bg-amber-400/20 text-amber-500 dark:text-amber-400 border border-amber-400/30 px-2 py-0.5 rounded-full">
+                                            Đang phát triển
                                         </span>
 
-                                        {/* Input nhập mã (khi chưa có coupon) */}
-                                        {!appliedCoupon && (
-                                            <div className="flex gap-2 mt-3">
-                                                <input
-                                                    type="text"
-                                                    value={couponCode}
-                                                    onChange={(e) => {
-                                                        setCouponCode(e.target.value.toUpperCase());
-                                                        setCouponError('');
-                                                    }}
-                                                    onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
-                                                    placeholder="FLASHTECH2026..."
-                                                    disabled={couponLoading}
-                                                    className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-medium uppercase disabled:opacity-50"
-                                                />
-                                                <button
-                                                    onClick={handleApplyCoupon}
-                                                    disabled={couponLoading || !couponCode.trim()}
-                                                    className="bg-slate-800 hover:bg-slate-700 text-indigo-400 hover:text-indigo-300 border border-slate-700/50 hover:border-slate-600 px-5 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                                >
-                                                    {couponLoading ? (
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                    ) : (
-                                                        'Áp dụng'
-                                                    )}
-                                                </button>
-                                            </div>
-                                        )}
+                                        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                            {/* MoMo logo bằng SVG inline */}
+                                            <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <rect width="40" height="40" rx="10" fill="#AE2070"/>
+                                                <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold" fontFamily="Arial">MoMo</text>
+                                            </svg>
+                                        </div>
 
-                                        {/* Thông báo lỗi */}
-                                        <AnimatePresence>
-                                            {couponError && (
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: -6 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0, y: -6 }}
-                                                    className="mt-3 flex items-start gap-2 text-rose-400 text-xs font-semibold"
-                                                >
-                                                    <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                                                    <span>{couponError}</span>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-black text-sm text-slate-500 dark:text-slate-400">
+                                                Ví điện tử MoMo
+                                            </p>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">MOMO</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
 
-                                        {/* Badge mã đã áp dụng */}
-                                        <AnimatePresence>
-                                            {appliedCoupon && (
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: -6 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0, y: -6 }}
-                                                    className="mt-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-4 py-3 flex items-center justify-between gap-3"
-                                                >
-                                                    <div className="flex items-center gap-2 min-w-0">
-                                                        <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                                                        <div className="min-w-0">
-                                                            <p className="text-emerald-400 font-black text-sm tracking-widest truncate">{appliedCoupon.coupon_code}</p>
-                                                            <p className="text-emerald-500/70 text-[10px] font-bold uppercase tracking-wider">
-                                                                {appliedCoupon.type === 'percent'
-                                                                    ? `Giảm ${appliedCoupon.value}%`
-                                                                    : `Giảm ${Number(appliedCoupon.value).toLocaleString()}đ`}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <button
-                                                        onClick={handleRemoveCoupon}
-                                                        className="text-slate-500 hover:text-rose-400 transition-colors flex-shrink-0"
-                                                        title="Xóa mã"
-                                                    >
-                                                        <XCircle className="w-4 h-4" />
-                                                    </button>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
+                    {/* ── RIGHT: Order Summary ──────────────────────────── */}
+                    <div className="sticky top-24 space-y-4">
+                        <motion.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.12 }}
+                            className="bg-slate-900 dark:bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden shadow-2xl shadow-slate-950/20"
+                        >
+                            {/* Header */}
+                            <div className="px-6 py-5 border-b border-slate-800 flex items-center gap-3">
+                                <div className="w-9 h-9 bg-indigo-500/15 rounded-xl flex items-center justify-center">
+                                    <ShoppingBag className="w-4.5 h-4.5 text-indigo-400" />
+                                </div>
+                                <h2 className="text-base font-black text-white">Tóm tắt đơn hàng</h2>
+                            </div>
+
+                            {/* Cart items */}
+                            <div className="p-6 space-y-3 max-h-[240px] overflow-y-auto scrollbar-thin border-b border-slate-800">
+                                {cart.map((item) => (
+                                    <div key={item.variant_id} className="flex items-center gap-3">
+                                        <div className="w-12 h-12 bg-slate-800 rounded-xl flex-shrink-0 flex items-center justify-center p-1.5 border border-slate-700">
+                                            <img src={item.image} alt={item.name} className="max-w-full max-h-full object-contain" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-white font-bold text-xs truncate">{item.name}</p>
+                                            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mt-0.5 truncate">{item.variant_name}</p>
+                                        </div>
+                                        <div className="text-right flex-shrink-0 pl-2">
+                                            <p className="text-indigo-400 font-black text-xs tabular-nums">{formatPrice(item.price * item.quantity)}</p>
+                                            <p className="text-slate-600 text-[10px] mt-0.5">x{item.quantity}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="p-6 space-y-4">
+                                {/* Subtotal + shipping */}
+                                <div className="space-y-2.5">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-400">Tạm tính</span>
+                                        <span className="text-white font-bold tabular-nums">{formatPrice(totalPrice)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-400">Vận chuyển</span>
+                                        <span className="text-emerald-400 font-black text-xs uppercase tracking-wider">Miễn phí</span>
+                                    </div>
+                                </div>
+
+                                {/* Coupon */}
+                                <div className="pt-3 border-t border-slate-800">
+                                    <div className="flex items-center gap-2 mb-2.5">
+                                        <Gift className="w-3.5 h-3.5 text-indigo-400" />
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mã giảm giá</span>
                                     </div>
 
-                                    {/* Dòng giảm giá */}
-                                    <AnimatePresence>
-                                        {appliedCoupon && (
-                                            <motion.div
-                                                initial={{ opacity: 0, height: 0 }}
-                                                animate={{ opacity: 1, height: 'auto' }}
-                                                exit={{ opacity: 0, height: 0 }}
-                                                className="flex justify-between text-sm font-bold overflow-hidden"
+                                    {!appliedCoupon && (
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={couponCode}
+                                                onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(''); }}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
+                                                placeholder="MÃ GIẢM GIÁ..."
+                                                disabled={couponLoading}
+                                                className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 text-[11px] font-semibold uppercase transition-all disabled:opacity-50"
+                                            />
+                                            <button
+                                                onClick={handleApplyCoupon}
+                                                disabled={couponLoading || !couponCode.trim()}
+                                                className="bg-slate-700 hover:bg-slate-600 text-indigo-400 px-4 py-2.5 rounded-xl font-black text-[11px] transition-all active:scale-95 disabled:opacity-40 flex items-center"
                                             >
-                                                <span className="text-slate-400 uppercase tracking-widest">Giảm giá</span>
-                                                <span className="text-emerald-400">- {appliedCoupon.discount_amount.toLocaleString()}đ</span>
+                                                {couponLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Áp dụng'}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    <AnimatePresence>
+                                        {couponError && (
+                                            <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                                                className="mt-2 flex items-center gap-1.5 text-rose-400 text-[11px] font-bold">
+                                                <XCircle className="w-3.5 h-3.5" /> {couponError}
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
 
-                                    <div className="flex justify-between text-3xl font-black font-display pt-4">
-                                        <span>Tổng số</span>
-                                        <motion.span
-                                            key={finalTotal}
-                                            initial={{ scale: 1.1, color: '#34d399' }}
-                                            animate={{ scale: 1, color: '#818cf8' }}
-                                            transition={{ duration: 0.4 }}
-                                            className="text-indigo-400"
-                                        >
-                                            {finalTotal.toLocaleString()}đ
-                                        </motion.span>
-                                    </div>
+                                    <AnimatePresence>
+                                        {appliedCoupon && (
+                                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                                                className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-4 py-2.5">
+                                                <div className="flex items-center gap-2">
+                                                    <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                                                    <div>
+                                                        <p className="text-emerald-400 font-black text-xs">{appliedCoupon.coupon_code}</p>
+                                                        <p className="text-emerald-500/60 text-[9px] font-bold uppercase">
+                                                            {appliedCoupon.type === 'percent' ? `Giảm ${appliedCoupon.value}%` : `Giảm ${Number(appliedCoupon.value).toLocaleString()}đ`}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button onClick={handleRemoveCoupon} className="text-slate-500 hover:text-rose-400 transition-colors">
+                                                    <XCircle className="w-3.5 h-3.5" />
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    <AnimatePresence>
+                                        {appliedCoupon && (
+                                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                                                className="flex justify-between text-sm font-bold mt-2.5 overflow-hidden">
+                                                <span className="text-slate-400">Giảm giá</span>
+                                                <span className="text-emerald-400">-{formatPrice(appliedCoupon.discount_amount)}</span>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
 
-                                {error && (
-                                    <div className="mb-6 p-4 bg-rose-500/20 border border-rose-500/50 text-rose-400 rounded-2xl text-xs font-bold text-center">
-                                        {error}
-                                    </div>
-                                )}
+                                {/* Total */}
+                                <div className="flex justify-between items-center pt-3 border-t border-slate-800">
+                                    <span className="text-slate-300 font-bold text-sm">Tổng thanh toán</span>
+                                    <motion.span key={finalTotal} initial={{ scale: 1.08, color: '#34d399' }} animate={{ scale: 1, color: '#818cf8' }} transition={{ duration: 0.3 }}
+                                        className="text-2xl font-black tabular-nums">
+                                        {formatPrice(finalTotal)}
+                                    </motion.span>
+                                </div>
 
+                                {/* Error */}
+                                <AnimatePresence>
+                                    {error && (
+                                        <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                                            className="flex items-center gap-2 p-3 bg-rose-500/10 border border-rose-500/25 rounded-xl text-rose-400 text-xs font-bold">
+                                            <XCircle className="w-4 h-4 flex-shrink-0" /> {error}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                {/* Place order CTA */}
                                 <button
                                     onClick={handlePlaceOrder}
                                     disabled={loading || cart.length === 0}
-                                    className="w-full py-5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 text-white transition-all duration-300 rounded-[2rem] font-black text-lg shadow-xl shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-3 group"
+                                    className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 transition-all shadow-xl shadow-indigo-500/20 hover:scale-[1.01] active:scale-[0.98] disabled:scale-100 disabled:shadow-none group"
                                 >
                                     {loading ? (
-                                        <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
                                     ) : (
                                         <>
+                                            <Lock className="w-4 h-4" />
                                             Xác nhận đặt hàng
-                                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                         </>
                                     )}
                                 </button>
 
-                                <div className="flex items-center justify-center gap-2 mt-8 text-slate-500">
-                                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Thanh toán bảo mật 100%</span>
+                                <div className="flex items-center justify-center gap-2 text-slate-600">
+                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest">Thanh toán bảo mật 100%</span>
                                 </div>
-                            </motion.div>
+                            </div>
+                        </motion.div>
+
+                        {/* Payment trust logos placeholder */}
+                        <div className="flex items-center justify-center gap-4 px-4 py-3 bg-white dark:bg-slate-900/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+                            <Truck className="w-4 h-4 text-slate-400" />
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Giao hàng toàn quốc</span>
+                            <span className="w-px h-4 bg-slate-200 dark:bg-slate-800" />
+                            <ShieldCheck className="w-4 h-4 text-slate-400" />
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Bảo mật SSL</span>
                         </div>
                     </div>
                 </div>

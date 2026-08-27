@@ -14,6 +14,7 @@ class ListOrders extends ListRecords
     {
         return [
             \Filament\Actions\CreateAction::make()
+                ->label('Tạo đơn hàng')
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['processed_by_id'] = auth()->id();
                     return $data;

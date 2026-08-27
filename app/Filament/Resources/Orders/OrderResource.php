@@ -170,8 +170,18 @@ class OrderResource extends Resource
                                             if ($state) {
                                                 $variant = \App\Models\ProductVariant::find($state);
                                                 if ($variant) {
-                                                    $set('unit_price', $variant->price);
+                                                    $set('unit_price', (float) $variant->price);
                                                     $set('product_id', $variant->product_id);
+
+                                                    // ⚠️ Cảnh báo nếu chọn sản phẩm hết hàng
+                                                    if ($variant->stock <= 0) {
+                                                        \Filament\Notifications\Notification::make()
+                                                            ->title('⚠️ Sản phẩm đang hết hàng!')
+                                                            ->body("Biến thể này hiện có stock = 0. Vui lòng chọn sản phẩm khác hoặc xác nhận trước khi tạo đơn.")
+                                                            ->warning()
+                                                            ->persistent()
+                                                            ->send();
+                                                    }
                                                 }
                                             }
                                         })
@@ -186,13 +196,36 @@ class OrderResource extends Resource
                                         ->minValue(1)
                                         ->required()
                                         ->reactive()
+                                        ->afterStateUpdated(function ($state, Get $get) {
+                                            $variantId = $get('product_variants_id');
+                                            if ($variantId && $state !== null) {
+                                                $variant = \App\Models\ProductVariant::find($variantId);
+                                                if ($variant && $variant->stock <= 0) {
+                                                    \Filament\Notifications\Notification::make()
+                                                        ->title('🚫 Sản phẩm đã hết hàng!')
+                                                        ->body('Sản phẩm này hiện có tồn kho = 0, không thể tạo đơn. Vui lòng chọn sản phẩm khác.')
+                                                        ->danger()
+                                                        ->persistent()
+                                                        ->send();
+                                                } elseif ($variant && (int) $state > $variant->stock) {
+                                                    \Filament\Notifications\Notification::make()
+                                                        ->title('⚠️ Vượt quá tồn kho!')
+                                                        ->body("Kho hiện chỉ còn {$variant->stock} máy. Vui lòng giảm số lượng.")
+                                                        ->warning()
+                                                        ->persistent()
+                                                        ->send();
+                                                }
+                                            }
+                                        })
                                         ->rules([
                                             fn (Get $get) => function (string $attribute, $value, $fail) use ($get) {
                                                 $variantId = $get('product_variants_id');
                                                 if ($variantId) {
                                                     $variant = \App\Models\ProductVariant::find($variantId);
-                                                    if ($variant && $value > $variant->stock) {
-                                                        $fail("Hiện còn {$variant->stock} máy.");
+                                                    if ($variant && $variant->stock <= 0) {
+                                                        $fail('Sản phẩm này đã hết hàng, không thể tạo đơn.');
+                                                    } elseif ($variant && (int) $value > $variant->stock) {
+                                                        $fail("Chỉ còn {$variant->stock} máy trong kho.");
                                                     }
                                                 }
                                             },
@@ -201,9 +234,15 @@ class OrderResource extends Resource
 
                                     TextInput::make('unit_price')
                                         ->label('Đơn giá')
-                                        ->numeric()
                                         ->prefix('₫')
                                         ->required()
+                                        ->live(onBlur: true)
+                                        ->formatStateUsing(function ($state) {
+                                            // Strip dấu chấm (nếu đã format) rồi format lại
+                                            $raw = (float) str_replace(['.', ',', ' '], ['', '.', ''], (string) $state);
+                                            return $raw > 0 ? number_format($raw, 0, ',', '.') : '';
+                                        })
+                                        ->dehydrateStateUsing(fn ($state) => (float) str_replace(['.', ',', ' '], ['', '.', ''], (string) $state))
                                         ->columnSpan(['default' => 12, 'md' => 3]),
                                 ])
                                 ->columns(12)
@@ -214,7 +253,9 @@ class OrderResource extends Resource
                                     $total = 0;
                                     foreach ($items as $item) {
                                         $quantity = intval($item['quantity'] ?? 0);
-                                        $price = floatval($item['unit_price'] ?? 0);
+                                        // Strip đấu chấm phân cách trước khi tính
+                                        $rawPrice = str_replace(['.', ' '], '', (string) ($item['unit_price'] ?? 0));
+                                        $price = (float) $rawPrice;
                                         $total += $quantity * $price;
                                     }
                                     $set('total_amount', $total);
@@ -248,7 +289,9 @@ class OrderResource extends Resource
                                     $totalQty = 0;
                                     foreach ($items as $item) {
                                         $qty = intval($item['quantity'] ?? 0);
-                                        $price = floatval($item['unit_price'] ?? 0);
+                                        // Strip đấu chấm phân cách trước khi tính
+                                        $rawPrice = str_replace(['.', ' '], '', (string) ($item['unit_price'] ?? 0));
+                                        $price = (float) $rawPrice;
                                         $total += $qty * $price;
                                         $totalQty += $qty;
                                     }
@@ -388,7 +431,7 @@ class OrderResource extends Resource
                             ])->grow(),
                             Text::make(fn ($record) => match($record->order_status ?? 'pending') {
                                 'pending'    => 'Chờ xử lý',
-                                'processing' => 'Đang xử lý',
+                                'processing' => 'Đang đóng gói',
                                 'shipped'    => 'Đang giao',
                                 'delivered'  => 'Đã giao',
                                 'cancelled'  => 'Đã hủy',
@@ -498,30 +541,25 @@ class OrderResource extends Resource
                     ->money('VND')
                     ->sortable(),
 
-                Tables\Columns\SelectColumn::make('order_status')
+                // Hiện status dạng badge — không dùng SelectColumn để tránh flash bug
+                Tables\Columns\TextColumn::make('order_status')
                     ->label('Trạng thái')
-                    ->options([
-                        'pending' => 'Chờ xử lý',
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'pending'    => 'Chờ xử lý',
                         'processing' => 'Đang đóng gói',
-                        'shipped' => 'Đang vận chuyển',
-                        'delivered' => 'Đã giao hàng',
-                        'cancelled' => 'Đã hủy',
-                    ])
-                    ->placeholder(null)
-                    ->disabled(fn ($record) => in_array($record->order_status, ['cancelled', 'delivered']))
-                    ->afterStateUpdated(function ($state, $old, $record) {
-                        // TỰ ĐỘNG GÁN NGƯỜI DUYỆT khi trạng thái thay đổi sang processing/shipped/delivered
-                        if (in_array($state, ['processing', 'shipped', 'delivered']) && !$record->processed_by_id) {
-                            $record->update(['processed_by_id' => auth()->id()]);
-                        }
-
-                        // Logic: Chỉ hoàn kho khi trạng thái CHUYỂN THÀNH 'cancelled'
-                        if ($state === 'cancelled' && $old !== 'cancelled') {
-                            self::restoreStock($record);
-                        }
-
-                        // PHÁT SỰ KIỆN: Thông báo cho khách hàng khi Admin đổi trạng thái
-                        event(new \App\Events\OrderStatusUpdated($record));
+                        'shipped'    => 'Đang vận chuyển',
+                        'delivered'  => 'Đã giao hàng',
+                        'cancelled'  => 'Đã hủy',
+                        default      => $state,
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending'    => 'warning',
+                        'processing' => 'info',
+                        'shipped'    => 'primary',
+                        'delivered'  => 'success',
+                        'cancelled'  => 'danger',
+                        default      => 'gray',
                     }),
 
                 Tables\Columns\TextColumn::make('created_at')
@@ -551,6 +589,84 @@ class OrderResource extends Resource
                     ->query(fn ($query) => $query->where('order_status', 'pending')),
             ])
             ->actions([
+                // ── CHUYỂN TRẠNG THÁI TIẾP THEO ─────────────────────────────────────
+                \Filament\Actions\Action::make('advance')
+                    ->label(fn ($record): string => match ($record->order_status) {
+                        'pending'    => '→ Đóng gói',
+                        'processing' => '→ Giao hàng',
+                        'shipped'    => '→ Đã giao',
+                        default      => '',
+                    })
+                    ->icon(fn ($record): string => match ($record->order_status) {
+                        'pending'    => 'heroicon-m-archive-box',
+                        'processing' => 'heroicon-m-truck',
+                        'shipped'    => 'heroicon-m-check-badge',
+                        default      => 'heroicon-m-arrow-right',
+                    })
+                    ->color('success')
+                    ->button()
+                    ->hidden(fn ($record): bool => !in_array($record->order_status, ['pending', 'processing', 'shipped']))
+                    ->action(function ($record): void {
+                        $nextStatus = match ($record->order_status) {
+                            'pending'    => 'processing',
+                            'processing' => 'shipped',
+                            'shipped'    => 'delivered',
+                            default      => null,
+                        };
+
+                        if (!$nextStatus) return;
+
+                        $record->update(['order_status' => $nextStatus]);
+
+                        // Gán người duyệt
+                        if (!$record->processed_by_id) {
+                            $record->update(['processed_by_id' => auth()->id()]);
+                        }
+
+                        // Thông báo realtime
+                        event(new \App\Events\OrderStatusUpdated($record));
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('✅ Cập nhật thành công')
+                            ->body('Đơn hàng đã chuyển sang: ' . match ($nextStatus) {
+                                'processing' => 'Đang đóng gói',
+                                'shipped'    => 'Đang vận chuyển',
+                                'delivered'  => 'Đã giao hàng',
+                                default      => $nextStatus,
+                            })
+                            ->success()
+                            ->send();
+                    }),
+
+                // ── HỦY ĐƠN HÀNG (chỉ khi pending hoặc processing) ─────────────────
+                \Filament\Actions\Action::make('cancel_order')
+                    ->label('Hủy đơn')
+                    ->icon('heroicon-m-x-circle')
+                    ->color('danger')
+                    ->button()
+                    ->hidden(fn ($record): bool => !in_array($record->order_status, ['pending', 'processing']))
+                    ->requiresConfirmation()
+                    ->modalHeading('Xác nhận hủy đơn hàng')
+                    ->modalDescription(fn ($record): string => "Bạn có chắc chắn muốn hủy đơn #{$record->order_code}? Hàng sẽ được hoàn lại kho và hành động này không thể hoàn tác.")
+                    ->modalSubmitActionLabel('Đúng, hủy đơn!')
+                    ->modalCancelActionLabel('Quay lại')
+                    ->action(function ($record): void {
+                        $record->update(['order_status' => 'cancelled']);
+
+                        // Hoàn kho
+                        self::restoreStock($record);
+
+                        // Thông báo realtime
+                        event(new \App\Events\OrderStatusUpdated($record));
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('🚫 Đã hủy đơn hàng')
+                            ->body("Đơn #{$record->order_code} đã bị hủy. Hàng tồn kho đã được hoàn lại.")
+                            ->warning()
+                            ->send();
+                    }),
+
+                // ── XEM CHI TIẾT ─────────────────────────────────────────────────────
                 \Filament\Actions\ViewAction::make()
                     ->slideOver()
                     ->modalWidth(\Filament\Support\Enums\Width::FourExtraLarge),
@@ -560,7 +676,18 @@ class OrderResource extends Resource
                     \Filament\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc'); // Luôn hiện đơn mới nhất lên đầu
+            // Sắp xếp: pending lên đầu → theo thứ tự xử lý → đơn cũ nhất lên trên trong cùng nhóm
+            ->modifyQueryUsing(fn ($query) => $query->orderByRaw("
+                CASE order_status
+                    WHEN 'pending'    THEN 1
+                    WHEN 'processing' THEN 2
+                    WHEN 'shipped'    THEN 3
+                    WHEN 'delivered'  THEN 4
+                    WHEN 'cancelled'  THEN 5
+                    ELSE 6
+                END ASC,
+                created_at ASC
+            "));
     }
 
     public static function getPages(): array
@@ -588,5 +715,70 @@ class OrderResource extends Resource
                 }
             }
         }
+    }
+
+    /**
+     * Trả về danh sách các trạng thái được phép chuyển đến từ trạng thái hiện tại.
+     * Luồng hợp lệ:
+     *   pending → processing
+     *   processing → shipped
+     *   shipped → delivered
+     *   pending/processing → cancelled
+     *   delivered/cancelled → (không đổi được)
+     */
+    protected static function getAllowedTransitions(?string $currentStatus): array
+    {
+        $currentStatus = $currentStatus ?? 'pending';
+        $allLabels = [
+            'pending'    => 'Chờ xử lý',
+            'processing' => 'Đang đóng gói',
+            'shipped'    => 'Đang vận chuyển',
+            'delivered'  => 'Đã giao hàng',
+            'cancelled'  => 'Đã hủy',
+        ];
+
+        // Chỉ cho phép chuyển sang các trạng thái sau (bao gồm trạng thái hiện tại để giữ nguyên)
+        $nextSteps = match ($currentStatus) {
+            'pending'    => ['pending', 'processing', 'cancelled'],
+            'processing' => ['processing', 'shipped', 'cancelled'],
+            'shipped'    => ['shipped', 'delivered'],
+            'delivered'  => ['delivered'],   // Khoá: không đổi được
+            'cancelled'  => ['cancelled'],   // Khoá: không đổi được
+            default      => array_keys($allLabels),
+        };
+
+        return array_intersect_key($allLabels, array_flip($nextSteps));
+    }
+
+    /**
+     * Trả về thông báo lỗi cụ thể khi chuyển trạng thái không hợp lệ.
+     */
+    protected static function getTransitionErrorMessage(string $from, string $to): string
+    {
+        $labels = [
+            'pending'    => 'Chờ xử lý',
+            'processing' => 'Đang đóng gói',
+            'shipped'    => 'Đang vận chuyển',
+            'delivered'  => 'Đã giao hàng',
+            'cancelled'  => 'Đã hủy',
+        ];
+
+        $fromLabel = $labels[$from] ?? $from;
+        $toLabel   = $labels[$to]   ?? $to;
+
+        // Phát hiện loại lỗi
+        $order = ['pending' => 1, 'processing' => 2, 'shipped' => 3, 'delivered' => 4, 'cancelled' => 5];
+        $fromIdx = $order[$from] ?? 0;
+        $toIdx   = $order[$to]   ?? 0;
+
+        if ($to === 'cancelled' && in_array($from, ['shipped', 'delivered'])) {
+            return "Không thể hủy đơn hàng đang ở trạng thái \"$fromLabel\". Chỉ hủy được khi đơn đang Chờ xử lý hoặc Đang đóng gói.";
+        }
+
+        if ($toIdx < $fromIdx) {
+            return "Không thể quay lại trạng thái \"$toLabel\" từ \"$fromLabel\". Đơn hàng chỉ tiến về phía trước.";
+        }
+
+        return "Không thể chuyển từ \"$fromLabel\" sang \"$toLabel\". Phải theo thứ tự: Chờ xử lý → Đang đóng gói → Đang vận chuyển → Đã giao hàng.";
     }
 }

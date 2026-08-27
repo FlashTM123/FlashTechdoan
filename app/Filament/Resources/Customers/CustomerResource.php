@@ -43,37 +43,48 @@ class CustomerResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Forms\Components\Section::make('Thông tin tài khoản')
+            Forms\Components\Section::make('👤 Thông Tin Tài Khoản')
+                ->description('Thông tin định danh cơ bản của khách hàng')
+                ->icon('heroicon-o-user')
                 ->schema([
                     Forms\Components\TextInput::make('name')
                         ->label('Tên khách hàng')
+                        ->prefix('👤')
                         ->disabled()
                         ->maxLength(255),
 
                     Forms\Components\TextInput::make('email')
-                        ->label('Email')
+                        ->label('Email đăng ký')
                         ->email()
+                        ->prefix('✉️')
                         ->disabled()
                         ->maxLength(255),
                     
                     Forms\Components\Toggle::make('is_active')
-                        ->label('Trạng thái kích hoạt')
+                        ->label('Trạng thái kích hoạt tài khoản')
                         ->default(true),
                 ])->columns(2),
 
-            Forms\Components\Section::make('Thông tin bổ sung')
+            Forms\Components\Section::make('ℹ️ Thông Tin Bổ Sung')
+                ->description('Chi tiết số điện thoại liên lạc, địa chỉ giao nhận hàng và điểm thưởng tích luỹ')
+                ->icon('heroicon-o-information-circle')
                 ->schema([
                     Forms\Components\TextInput::make('profile.phone')
                         ->label('Số điện thoại')
+                        ->placeholder('Nhập số điện thoại liên hệ...')
+                        ->prefix('📞')
                         ->maxLength(20),
 
                     Forms\Components\TextInput::make('profile.address')
-                        ->label('Địa chỉ')
+                        ->label('Địa chỉ giao hàng')
+                        ->placeholder('Nhập địa chỉ chi tiết...')
+                        ->prefix('📍')
                         ->maxLength(255),
 
                     Forms\Components\TextInput::make('profile.points')
                         ->label('Điểm tích lũy')
                         ->numeric()
+                        ->prefix('🏆')
                         ->default(0),
                 ])->columns(3),
         ]);
@@ -86,26 +97,31 @@ class CustomerResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên khách hàng')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
+                    ->copyable()
+                    ->icon('heroicon-m-envelope')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('profile.phone')
                     ->label('Số điện thoại')
+                    ->copyable()
+                    ->icon('heroicon-m-phone')
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('profile.points')
-                    ->label('Điểm')
+                    ->label('Điểm tích luỹ')
                     ->badge()
                     ->color('success')
+                    ->icon('heroicon-m-trophy')
                     ->sortable(),
 
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label('Trạng thái')
-                    ->boolean()
+                Tables\Columns\ToggleColumn::make('is_active')
+                    ->label('Trạng thái kích hoạt')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
@@ -116,13 +132,53 @@ class CustomerResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Trạng thái'),
+                    ->label('Trạng thái hoạt động')
+                    ->trueLabel('Đang hoạt động')
+                    ->falseLabel('Bị khóa'),
             ])
             ->actions([
-                // Để trống hoặc dùng ViewAction nếu cần
+                \Filament\Actions\DeleteAction::make()
+                    ->label('Xóa')
+                    ->before(function ($record, \Filament\Actions\DeleteAction $action) {
+                        $activeOrders = $record->orders()
+                            ->whereIn('order_status', ['pending', 'processing', 'shipped'])
+                            ->count();
+
+                        if ($activeOrders > 0) {
+                            \Filament\Notifications\Notification::make()
+                                ->danger()
+                                ->title('⛔ Không thể xóa tài khoản')
+                                ->body("Khách hàng **{$record->name}** còn **{$activeOrders} đơn hàng** đang được xử lý (chờ xử lý / đóng gói / vận chuyển). Vui lòng hoàn tất hoặc hủy tất cả đơn hàng trước khi xóa tài khoản.")
+                                ->persistent()
+                                ->send();
+
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->bulkActions([
-                // Để trống
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make()
+                        ->before(function (\Illuminate\Database\Eloquent\Collection $records, \Filament\Actions\DeleteBulkAction $action) {
+                            $blocked = $records->filter(function ($record) {
+                                return $record->orders()
+                                    ->whereIn('order_status', ['pending', 'processing', 'shipped'])
+                                    ->exists();
+                            });
+
+                            if ($blocked->isNotEmpty()) {
+                                $names = $blocked->pluck('name')->join(', ');
+                                \Filament\Notifications\Notification::make()
+                                    ->danger()
+                                    ->title('⛔ Không thể xóa một số tài khoản')
+                                    ->body("Các khách hàng sau vẫn còn đơn hàng đang xử lý và không thể bị xóa: **{$names}**.")
+                                    ->persistent()
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        }),
+                ]),
             ]);
     }
 

@@ -25,18 +25,32 @@ class DepartmentResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Forms\Components\TextInput::make('name')
-                ->label('Tên phòng ban')
-                ->required()
-                ->maxLength(255),
-            Forms\Components\TextInput::make('code')
-                ->label('Mã phòng ban')
-                ->required()
-                ->maxLength(50)
-                ->unique(ignoreRecord: true),
-            Forms\Components\Textarea::make('description')
-                ->label('Mô tả')
-                ->columnSpan('full'),
+            \Filament\Schemas\Components\Section::make('🏢 Thông Tin Phòng Ban')
+                ->description('Khai báo phòng ban mới và mô tả chức năng hoạt động chính')
+                ->icon('heroicon-o-building-office')
+                ->schema([
+                    \Filament\Schemas\Components\Grid::make(2)->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Tên phòng ban')
+                            ->placeholder('Ví dụ: Phòng Kỹ thuật, Phòng Kinh doanh...')
+                            ->prefix('🏢')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('code')
+                            ->label('Mã phòng ban')
+                            ->placeholder('Ví dụ: KT, KD...')
+                            ->prefix('🆔')
+                            ->required()
+                            ->maxLength(50)
+                            ->unique(ignoreRecord: true),
+                    ]),
+                    Forms\Components\Textarea::make('description')
+                        ->label('Mô tả chức năng')
+                        ->placeholder('Nhập mô tả chi tiết nhiệm vụ của phòng ban...')
+                        ->rows(3)
+                        ->columnSpan('full'),
+                ])
+                ->columnSpanFull(),
         ]);
     }
 
@@ -47,9 +61,12 @@ class DepartmentResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên phòng ban')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
                 Tables\Columns\TextColumn::make('code')
                     ->label('Mã phòng ban')
+                    ->fontFamily('mono')
+                    ->copyable()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('description')

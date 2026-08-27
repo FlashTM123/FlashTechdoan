@@ -12,6 +12,7 @@ class PendingReview extends BaseWidget
 {
     protected static ?string $heading = 'Đánh giá chờ duyệt';
     protected static ?int $sort = 60;
+    protected static bool $isDiscovered = false; // Ẩn khỏi dashboard
 
     protected int|string|array $columnSpan = 1;
     protected ?string $pollingInterval = '30s';

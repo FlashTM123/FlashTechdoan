@@ -19,9 +19,12 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::table('product_variants', function (Blueprint $table) {
-            $table->dropColumn('specifications');
-        });
+        // Guard: cột `specifications` chỉ tồn tại trên DB cũ, không có trong môi trường test (RefreshDatabase)
+        if (Schema::hasColumn('product_variants', 'specifications')) {
+            Schema::table('product_variants', function (Blueprint $table) {
+                $table->dropColumn('specifications');
+            });
+        }
     }
 
     /**

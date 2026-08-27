@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
@@ -15,12 +16,15 @@ import {
     ShoppingBag,
     Tag,
     Receipt,
-    Trash2
+    Trash2,
+    RefreshCcw,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
+import axios from 'axios';
 
 interface OrderItem {
     id: number;
@@ -51,6 +55,7 @@ interface Order {
     items: OrderItem[];
     payment_method: {
         name: string;
+        code?: string;
     };
     coupon?: {
         code: string;
@@ -76,7 +81,7 @@ const statusConfig: Record<string, { label: string; icon: any; color: string; bg
         desc: 'Đơn hàng của bạn đã được tiếp nhận và đang chờ duyệt.'
     },
     processing: {
-        label: 'Đang xử lý',
+        label: 'Đang đóng gói',
         icon: Package,
         color: 'text-blue-500',
         bgColor: 'bg-blue-500/10',
@@ -111,6 +116,7 @@ const formatVND = (amount: string | number) => {
 
 export default function OrderShow({ order }: Props) {
     const { flash } = usePage().props as any;
+    const [repayLoading, setRepayLoading] = useState(false);
 
     useEffect(() => {
         if (flash?.success) {
@@ -120,6 +126,27 @@ export default function OrderShow({ order }: Props) {
             toast.error(flash.error);
         }
     }, [flash]);
+
+    const handleRepayOrder = async () => {
+        try {
+            setRepayLoading(true);
+            const response = await axios.post(`/orders/${order.id}/repay`);
+            if (response.data.status === 'success' && response.data.payment_url) {
+                toast.success('Đang chuyển hướng sang cổng thanh toán...');
+                window.location.href = response.data.payment_url;
+            } else {
+                toast.error('Không tìm thấy link thanh toán mới.');
+            }
+        } catch (error: any) {
+            console.error('Lỗi thanh toán lại:', error);
+            toast.error(
+                error.response?.data?.message || 
+                'Có lỗi xảy ra khi tạo link thanh toán.'
+            );
+        } finally {
+            setRepayLoading(false);
+        }
+    };
 
     const handleCancelOrder = () => {
         Swal.fire({
@@ -422,6 +449,24 @@ export default function OrderShow({ order }: Props) {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Thanh toán lại nếu chưa thanh toán và đơn chưa hủy/hoàn thành */}
+                        {order.payment_status !== 'paid' && 
+                         order.order_status !== 'cancelled' && 
+                         order.order_status !== 'delivered' && (
+                            <button
+                                onClick={handleRepayOrder}
+                                disabled={repayLoading}
+                                className="w-full py-4 rounded-3xl font-black text-sm bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-all flex items-center justify-center gap-2 active:scale-95 shadow-md disabled:opacity-50"
+                            >
+                                {repayLoading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <RefreshCcw className="w-4 h-4" />
+                                )}
+                                {repayLoading ? 'Đang tạo liên kết...' : 'Thanh toán ngay'}
+                            </button>
+                        )}
 
                         {/* Order Cancellation (Only if pending) */}
                         {order.order_status === 'pending' && (

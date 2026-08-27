@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
@@ -12,12 +13,15 @@ import {
     CreditCard,
     ArrowLeft,
     Eye,
-    Trash2
+    Trash2,
+    RefreshCcw,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
+import axios from 'axios';
 
 interface OrderItem {
     id: number;
@@ -42,6 +46,7 @@ interface Order {
     payment_status: string;
     payment_method: {
         name: string;
+        code?: string;
     };
     created_at: string;
     items: OrderItem[];
@@ -63,7 +68,7 @@ const statusConfig: Record<string, { label: string; icon: any; color: string; bg
         bgColor: 'bg-amber-500/10'
     },
     processing: {
-        label: 'Đang xử lý',
+        label: 'Đang đóng gói',
         icon: Package,
         color: 'text-blue-500',
         bgColor: 'bg-blue-500/10'
@@ -101,6 +106,8 @@ const formatVND = (amount: string | number) => {
 export default function OrderIndex({ orders, status }: Props) {
     const { flash } = usePage().props as any;
 
+    const [repayLoading, setRepayLoading] = useState<Record<number, boolean>>({});
+
     useEffect(() => {
         if (flash?.success) {
             toast.success(flash.success);
@@ -109,6 +116,27 @@ export default function OrderIndex({ orders, status }: Props) {
             toast.error(flash.error);
         }
     }, [flash]);
+
+    const handleRepayOrder = async (orderId: number) => {
+        try {
+            setRepayLoading(prev => ({ ...prev, [orderId]: true }));
+            const response = await axios.post(`/orders/${orderId}/repay`);
+            if (response.data.status === 'success' && response.data.payment_url) {
+                toast.success('Đang chuyển hướng sang cổng thanh toán...');
+                window.location.href = response.data.payment_url;
+            } else {
+                toast.error('Không tìm thấy link thanh toán mới.');
+            }
+        } catch (error: any) {
+            console.error('Lỗi thanh toán lại:', error);
+            toast.error(
+                error.response?.data?.message || 
+                'Có lỗi xảy ra khi tạo link thanh toán.'
+            );
+        } finally {
+            setRepayLoading(prev => ({ ...prev, [orderId]: false }));
+        }
+    };
 
     const handleCancelOrder = (orderId: number, orderCode: string) => {
         Swal.fire({
@@ -138,7 +166,7 @@ export default function OrderIndex({ orders, status }: Props) {
     const filterOptions = [
         { label: 'Tất cả', value: null },
         { label: 'Chờ xử lý', value: 'pending' },
-        { label: 'Đang xử lý', value: 'processing' },
+        { label: 'Đang đóng gói', value: 'processing' },
         { label: 'Đang vận chuyển', value: 'shipped' },
         { label: 'Đã giao/Hoàn thành', value: 'delivered' },
         { label: 'Đã hủy', value: 'cancelled' },
@@ -274,6 +302,22 @@ export default function OrderIndex({ orders, status }: Props) {
 
                                     {/* Footer Actions */}
                                     <div className="p-6 md:p-8 bg-slate-50/30 dark:bg-slate-800/10 border-t border-slate-100 dark:border-slate-800/50 flex flex-wrap items-center justify-end gap-4">
+                                        {order.payment_status !== 'paid' && 
+                                         order.order_status !== 'cancelled' && 
+                                         order.order_status !== 'delivered' && (
+                                            <button
+                                                onClick={() => handleRepayOrder(order.id)}
+                                                disabled={repayLoading[order.id]}
+                                                className="px-6 py-3 rounded-2xl font-bold text-sm bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
+                                            >
+                                                {repayLoading[order.id] ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    <RefreshCcw className="w-4 h-4" />
+                                                )}
+                                                {repayLoading[order.id] ? 'Đang tạo liên kết...' : 'Thanh toán ngay'}
+                                            </button>
+                                        )}
                                         <Link
                                             href={route('orders.show', order.id)}
                                             className="px-6 py-3 rounded-2xl font-bold text-sm bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2 active:scale-95"

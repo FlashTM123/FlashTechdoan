@@ -7,9 +7,10 @@ use App\Models\User;
 
 class CouponPolicy
 {
+    /** Admin + Moderator xem được mã giảm giá */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isModerator() || $user->isEmployee();
+        return $user->isAdmin() || $user->isModerator();
     }
 
     public function view(User $user, Coupon $coupon): bool
@@ -17,6 +18,7 @@ class CouponPolicy
         return $this->viewAny($user);
     }
 
+    /** Admin + Moderator tạo/sửa mã giảm giá */
     public function create(User $user): bool
     {
         return $user->isAdmin() || $user->isModerator();
@@ -27,8 +29,14 @@ class CouponPolicy
         return $user->isAdmin() || $user->isModerator();
     }
 
+    /** Chỉ Admin mới được xóa mã giảm giá */
     public function delete(User $user, Coupon $coupon): bool
     {
-        return $user->isAdmin() || $user->isModerator();
+        return $user->isAdmin();
+    }
+
+    public function forceDelete(User $user, Coupon $coupon): bool
+    {
+        return $user->isAdmin();
     }
 }

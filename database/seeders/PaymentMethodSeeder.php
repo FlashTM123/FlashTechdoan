@@ -24,7 +24,7 @@ class PaymentMethodSeeder extends Seeder
 
         \App\Models\PaymentMethod::updateOrCreate(
             ['code' => 'momo'],
-            ['name' => 'Ví điện tử MoMo', 'status' => true]
+            ['name' => 'Ví điện tử MoMo', 'status' => false]
         );
 
         \App\Models\PaymentMethod::updateOrCreate(

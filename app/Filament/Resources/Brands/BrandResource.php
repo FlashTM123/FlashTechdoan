@@ -25,28 +25,41 @@ class BrandResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Forms\Components\TextInput::make('name')
-                ->label('Tên thương hiệu')
-                ->required()
-                ->maxLength(255)
-                ->live(debounce: 500)
-                ->afterStateUpdated(fn ($set, ?string $state) => $set('slug', Str::slug($state))),
+            \Filament\Schemas\Components\Section::make('🏷️ Thương Hiệu Sản Phẩm')
+                ->description('Quản lý thông tin và logo hãng sản xuất liên kết')
+                ->icon('heroicon-o-bookmark-square')
+                ->schema([
+                    \Filament\Schemas\Components\Grid::make(2)->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Tên thương hiệu')
+                            ->placeholder('Ví dụ: Dell, Asus, Apple, HP...')
+                            ->prefix('🏷️')
+                            ->required()
+                            ->maxLength(255)
+                            ->live(debounce: 500)
+                            ->afterStateUpdated(fn ($set, ?string $state) => $set('slug', Str::slug($state))),
 
-            Forms\Components\TextInput::make('slug')
-                ->label('Slug (Đường dẫn)')
-                ->required()
-                ->unique(table: 'brands', column: 'slug', ignoreRecord: true)
-                ->maxLength(255),
+                        Forms\Components\TextInput::make('slug')
+                            ->label('Slug (Đường dẫn tự động)')
+                            ->placeholder('slug-tu-dong-tao')
+                            ->prefix('🔗')
+                            ->required()
+                            ->unique(table: 'brands', column: 'slug', ignoreRecord: true)
+                            ->maxLength(255),
+                    ]),
 
-            Forms\Components\FileUpload::make('image_path')
-                ->label('Ảnh thương hiệu')
-                ->image()
-                ->directory('brands')
-                ->preserveFilenames(),
+                    Forms\Components\FileUpload::make('image_path')
+                        ->label('Logo thương hiệu')
+                        ->image()
+                        ->directory('brands')
+                        ->preserveFilenames()
+                        ->columnSpanFull(),
 
-            Forms\Components\Toggle::make('is_active')
-                ->label('Kích hoạt')
-                ->default(true),
+                    Forms\Components\Toggle::make('is_active')
+                        ->label('Kích hoạt hiển thị thương hiệu này')
+                        ->default(true),
+                ])
+                ->columnSpanFull(),
         ]);
     }
 
@@ -57,17 +70,21 @@ class BrandResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên thương hiệu')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('slug')
-                    ->label('Slug'),
+                    ->label('Slug')
+                    ->fontFamily('mono')
+                    ->sortable(),
 
                 Tables\Columns\ImageColumn::make('image_path')
-                    ->label('Ảnh'),
+                    ->label('Logo')
+                    ->circular(),
 
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label('Trạng thái')
-                    ->boolean(),
+                Tables\Columns\ToggleColumn::make('is_active')
+                    ->label('Trạng thái kích hoạt')
+                    ->sortable(),
             ])
             ->recordActions([
                 \Filament\Actions\EditAction::make()->label('Sửa'),

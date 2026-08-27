@@ -24,18 +24,20 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
         { id: 'gaming', name: 'Laptop Gaming', category: 'Điều hướng', icon: '🎮', action: () => router.visit('/products?category=laptop-gaming') },
         { id: 'cart', name: 'Giỏ hàng của bạn', category: 'Mua sắm', icon: '🛒', action: () => router.visit('/cart') },
         { id: 'compare', name: 'So sánh sản phẩm', category: 'Mua sắm', icon: '📊', action: () => router.visit('/compare') },
-        { id: 'dashboard', name: 'Bảng điều khiển', category: 'Tài khoản', icon: '🛡️', action: () => router.visit('/dashboard') },
+        { id: 'orders', name: 'Đơn hàng của tôi', category: 'Tài khoản', icon: '📦', action: () => router.visit('/my-orders') },
         { id: 'dark_mode', name: 'Bật/Tắt chế độ tối (Dark Mode)', category: 'Hệ thống', icon: '🌓', action: () => toggleDarkMode() },
-        { id: 'support', name: 'Liên hệ hỗ trợ kỹ thuật', category: 'Trợ giúp', icon: '📞', action: () => {
-            toast.success("Liên hệ hỗ trợ", {
-                description: "Vui lòng gọi hotline 1900 1234 (Miễn phí) để được hỗ trợ lập tức.",
-            });
-        }},
+        {
+            id: 'support', name: 'Liên hệ hỗ trợ kỹ thuật', category: 'Trợ giúp', icon: '📞', action: () => {
+                toast.success("Liên hệ hỗ trợ", {
+                    description: "Vui lòng gọi hotline 1900 1234 (Miễn phí) để được hỗ trợ lập tức.",
+                });
+            }
+        },
     ], [toggleDarkMode]);
 
     const filteredCommands = useMemo(() => {
-        return commands.filter(cmd => 
-            cmd.name.toLowerCase().includes(paletteSearch.toLowerCase()) || 
+        return commands.filter(cmd =>
+            cmd.name.toLowerCase().includes(paletteSearch.toLowerCase()) ||
             cmd.category.toLowerCase().includes(paletteSearch.toLowerCase())
         );
     }, [commands, paletteSearch]);
@@ -59,7 +61,7 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
 
     useEffect(() => {
         if (!isCommandPaletteOpen) return;
-        
+
         const handlePaletteKeys = (e: KeyboardEvent) => {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
@@ -88,18 +90,18 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
             {/* --- NAVBAR --- */}
             <nav className={cn(
                 "fixed top-0 left-0 right-0 z-[100] transition-all duration-500",
-                isScrolled 
-                    ? "py-4 pointer-events-none" 
+                isScrolled
+                    ? "py-4 pointer-events-none"
                     : "py-6 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border-b border-transparent"
             )}>
                 <div className={cn(
                     "mx-auto flex items-center justify-between transition-all duration-500",
-                    isScrolled 
-                        ? "max-w-[1200px] px-6 py-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-2xl shadow-indigo-500/10 dark:shadow-indigo-900/20 border border-slate-200/50 dark:border-slate-800/80 rounded-[2rem] pointer-events-auto" 
+                    isScrolled
+                        ? "max-w-[1200px] px-6 py-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-2xl shadow-indigo-500/10 dark:shadow-indigo-900/20 border border-slate-200/50 dark:border-slate-800/80 rounded-[2rem] pointer-events-auto"
                         : "max-w-[1440px] px-6 md:px-8 gap-4 md:gap-12"
                 )}>
                     {/* MOBILE HAMBURGER - Chỉ hiện trên Mobile */}
-                    <button 
+                    <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         className="lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
                     >
@@ -128,7 +130,7 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
 
                             <AnimatePresence>
                                 {isDropdownOpen && (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: 10 }}
@@ -160,7 +162,7 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm Laptop..."
-                                className="w-full bg-slate-100 dark:bg-slate-800/50 border-2 border-transparent rounded-2xl py-2.5 pl-11 pr-16 text-xs font-semibold focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500/30 transition-all outline-none"
+                                className="w-full bg-slate-100 dark:bg-slate-800/50 border-2 border-transparent rounded-2xl py-2.5 pl-11 pr-16 text-xs font-semibold text-slate-850 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500/30 transition-all outline-none"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 onFocus={() => {
@@ -176,9 +178,9 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                                     }
                                 }}
                             />
-                            
+
                             {/* Keyboard indicator KBD badge */}
-                            <kbd 
+                            <kbd
                                 onClick={() => setIsCommandPaletteOpen(true)}
                                 className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-0.5 pointer-events-auto text-[9px] font-black text-slate-400 dark:text-slate-500 bg-slate-200/50 dark:bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-300/30 dark:border-slate-700/50 uppercase tracking-widest cursor-pointer hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors"
                             >
@@ -199,7 +201,7 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                                             </div>
                                             {searchResults.map((item: any) => {
                                                 const price = item.variants?.[0]?.price || 0;
-                                                const imageUrl = item.thumbnail_url 
+                                                const imageUrl = item.thumbnail_url
                                                     ? (item.thumbnail_url.startsWith('http') ? item.thumbnail_url : `/storage/${item.thumbnail_url}`)
                                                     : 'https://via.placeholder.com/150';
 
@@ -265,17 +267,17 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                             <UserDropdown user={auth.user} />
                         ) : (
                             <div className="flex items-center gap-2 pl-2">
-                                <Link 
-                                    href={route('login')} 
+                                <Link
+                                    href={route('login')}
                                     className="hidden md:block px-5 py-2.5 text-slate-600 dark:text-slate-400 font-bold text-[11px] uppercase tracking-widest hover:text-indigo-600 transition-colors"
                                 >
-                                    Login
+                                    Đăng nhập
                                 </Link>
-                                <Link 
-                                    href={route('register')} 
+                                <Link
+                                    href={route('register')}
                                     className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-xl text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-slate-200 dark:shadow-none"
                                 >
-                                    Join
+                                    Đăng ký
                                 </Link>
                             </div>
                         )}
@@ -325,7 +327,7 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                 {isCommandPaletteOpen && (
                     <div className="fixed inset-0 z-[200] overflow-y-auto p-4 md:p-20 flex items-start justify-center">
                         {/* Backdrop */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -369,8 +371,8 @@ function LayoutContent({ children, isDarkMode, toggleDarkMode, isMobileMenuOpen,
                                                 onMouseEnter={() => setSelectedIndex(idx)}
                                                 className={cn(
                                                     "w-full text-left p-3.5 rounded-2xl flex items-center justify-between transition-all font-medium text-xs md:text-sm group relative overflow-hidden",
-                                                    selectedIndex === idx 
-                                                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/10" 
+                                                    selectedIndex === idx
+                                                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/10"
                                                         : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40"
                                                 )}
                                             >
